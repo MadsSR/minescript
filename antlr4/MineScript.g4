@@ -1,4 +1,4 @@
-grammar MineScriptV4;
+grammar MineScript;
 
 // Ignore comments that start with '#'
 COMMENT: '#' ~[\r\n]* -> skip;
