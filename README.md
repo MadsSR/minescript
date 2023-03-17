@@ -1,3 +1,3 @@
 # MineScript
 
-![Creeper awww man](https://www.giantbomb.com/a/uploads/scale_medium/3/34651/3407207-creepycreep.png)
+![Creeper awww man](https://static.wikia.nocookie.net/minecraft_gamepedia/images/c/cd/Wither_Skeleton.png/revision/latest?cb=20191229162539)
