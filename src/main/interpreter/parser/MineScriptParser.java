@@ -1,16 +1,16 @@
-// Generated from MineScript.g4 by ANTLR 4.12.0
+// Generated from java-escape by ANTLR 4.11.1
+package src.main.interpreter.parser;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.misc.*;
 import org.antlr.v4.runtime.tree.*;
+import src.main.interpreter.visitor.MineScriptVisitor;
+
 import java.util.List;
-import java.util.Iterator;
-import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast", "CheckReturnValue"})
 public class MineScriptParser extends Parser {
-	static { RuntimeMetaData.checkVersion("4.12.0", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.11.1", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
@@ -85,7 +85,7 @@ public class MineScriptParser extends Parser {
 	}
 
 	@Override
-	public String getGrammarFileName() { return "MineScript.g4"; }
+	public String getGrammarFileName() { return "java-escape"; }
 
 	@Override
 	public String[] getRuleNames() { return ruleNames; }
@@ -112,12 +112,9 @@ public class MineScriptParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_program; }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).enterProgram(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).exitProgram(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MineScriptVisitor) return ((MineScriptVisitor<? extends T>)visitor).visitProgram(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -157,12 +154,9 @@ public class MineScriptParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_statements; }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).enterStatements(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).exitStatements(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MineScriptVisitor ) return ((MineScriptVisitor<? extends T>)visitor).visitStatements(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -176,7 +170,7 @@ public class MineScriptParser extends Parser {
 			setState(18);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 545460950284L) != 0)) {
+			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 545460950284L) != 0) {
 				{
 				{
 				setState(15);
@@ -220,12 +214,9 @@ public class MineScriptParser extends Parser {
 		public TerminalNode NEWLINE() { return getToken(MineScriptParser.NEWLINE, 0); }
 		public ExprContext(StatementContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).enterExpr(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).exitExpr(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MineScriptVisitor ) return ((MineScriptVisitor<? extends T>)visitor).visitExpr(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
@@ -237,12 +228,9 @@ public class MineScriptParser extends Parser {
 		public TerminalNode NEWLINE() { return getToken(MineScriptParser.NEWLINE, 0); }
 		public AssignContext(StatementContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).enterAssign(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).exitAssign(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MineScriptVisitor ) return ((MineScriptVisitor<? extends T>)visitor).visitAssign(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
@@ -256,12 +244,9 @@ public class MineScriptParser extends Parser {
 		public TerminalNode NEWLINE() { return getToken(MineScriptParser.NEWLINE, 0); }
 		public RepeatContext(StatementContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).enterRepeat(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).exitRepeat(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MineScriptVisitor ) return ((MineScriptVisitor<? extends T>)visitor).visitRepeat(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
@@ -275,12 +260,9 @@ public class MineScriptParser extends Parser {
 		public TerminalNode NEWLINE() { return getToken(MineScriptParser.NEWLINE, 0); }
 		public WhileContext(StatementContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).enterWhile(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).exitWhile(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MineScriptVisitor ) return ((MineScriptVisitor<? extends T>)visitor).visitWhile(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
@@ -288,12 +270,9 @@ public class MineScriptParser extends Parser {
 		public TerminalNode NEWLINE() { return getToken(MineScriptParser.NEWLINE, 0); }
 		public NewlineContext(StatementContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).enterNewline(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).exitNewline(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MineScriptVisitor ) return ((MineScriptVisitor<? extends T>)visitor).visitNewline(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
@@ -313,12 +292,9 @@ public class MineScriptParser extends Parser {
 		public TerminalNode NEWLINE() { return getToken(MineScriptParser.NEWLINE, 0); }
 		public IfContext(StatementContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).enterIf(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).exitIf(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MineScriptVisitor ) return ((MineScriptVisitor<? extends T>)visitor).visitIf(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
@@ -345,12 +321,9 @@ public class MineScriptParser extends Parser {
 		}
 		public FuncDeclContext(StatementContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).enterFuncDecl(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).exitFuncDecl(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MineScriptVisitor ) return ((MineScriptVisitor<? extends T>)visitor).visitFuncDecl(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -522,7 +495,7 @@ public class MineScriptParser extends Parser {
 				setState(89);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-				while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 545460958476L) != 0)) {
+				while (((_la) & ~0x3f) == 0 && ((1L << _la) & 545460958476L) != 0) {
 					{
 					setState(87);
 					_errHandler.sync(this);
@@ -613,12 +586,9 @@ public class MineScriptParser extends Parser {
 		}
 		public IsIsNotContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).enterIsIsNot(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).exitIsIsNot(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MineScriptVisitor ) return ((MineScriptVisitor<? extends T>)visitor).visitIsIsNot(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
@@ -631,12 +601,9 @@ public class MineScriptParser extends Parser {
 		}
 		public OrContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).enterOr(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).exitOr(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MineScriptVisitor ) return ((MineScriptVisitor<? extends T>)visitor).visitOr(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
@@ -649,12 +616,9 @@ public class MineScriptParser extends Parser {
 		}
 		public AddSubContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).enterAddSub(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).exitAddSub(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MineScriptVisitor ) return ((MineScriptVisitor<? extends T>)visitor).visitAddSub(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
@@ -667,12 +631,9 @@ public class MineScriptParser extends Parser {
 		}
 		public CompContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).enterComp(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).exitComp(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MineScriptVisitor ) return ((MineScriptVisitor<? extends T>)visitor).visitComp(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
@@ -683,12 +644,9 @@ public class MineScriptParser extends Parser {
 		}
 		public FuncCallContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).enterFuncCall(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).exitFuncCall(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MineScriptVisitor ) return ((MineScriptVisitor<? extends T>)visitor).visitFuncCall(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
@@ -698,12 +656,9 @@ public class MineScriptParser extends Parser {
 		}
 		public NegContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).enterNeg(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).exitNeg(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MineScriptVisitor ) return ((MineScriptVisitor<? extends T>)visitor).visitNeg(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
@@ -711,12 +666,9 @@ public class MineScriptParser extends Parser {
 		public TerminalNode NUMBER() { return getToken(MineScriptParser.NUMBER, 0); }
 		public NumberContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).enterNumber(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).exitNumber(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MineScriptVisitor ) return ((MineScriptVisitor<? extends T>)visitor).visitNumber(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
@@ -724,12 +676,9 @@ public class MineScriptParser extends Parser {
 		public TerminalNode BOOL() { return getToken(MineScriptParser.BOOL, 0); }
 		public BoolContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).enterBool(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).exitBool(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MineScriptVisitor ) return ((MineScriptVisitor<? extends T>)visitor).visitBool(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
@@ -742,12 +691,9 @@ public class MineScriptParser extends Parser {
 		}
 		public MultDivModContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).enterMultDivMod(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).exitMultDivMod(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MineScriptVisitor ) return ((MineScriptVisitor<? extends T>)visitor).visitMultDivMod(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
@@ -760,12 +706,9 @@ public class MineScriptParser extends Parser {
 		}
 		public AndContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).enterAnd(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).exitAnd(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MineScriptVisitor ) return ((MineScriptVisitor<? extends T>)visitor).visitAnd(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
@@ -773,12 +716,9 @@ public class MineScriptParser extends Parser {
 		public TerminalNode BLOCK() { return getToken(MineScriptParser.BLOCK, 0); }
 		public BlockContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).enterBlock(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).exitBlock(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MineScriptVisitor ) return ((MineScriptVisitor<? extends T>)visitor).visitBlock(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
@@ -791,12 +731,9 @@ public class MineScriptParser extends Parser {
 		}
 		public PowContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).enterPow(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).exitPow(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MineScriptVisitor ) return ((MineScriptVisitor<? extends T>)visitor).visitPow(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
@@ -804,12 +741,9 @@ public class MineScriptParser extends Parser {
 		public TerminalNode RELDIR() { return getToken(MineScriptParser.RELDIR, 0); }
 		public RelDirContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).enterRelDir(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).exitRelDir(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MineScriptVisitor ) return ((MineScriptVisitor<? extends T>)visitor).visitRelDir(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
@@ -819,12 +753,9 @@ public class MineScriptParser extends Parser {
 		}
 		public NotExprContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).enterNotExpr(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).exitNotExpr(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MineScriptVisitor ) return ((MineScriptVisitor<? extends T>)visitor).visitNotExpr(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
@@ -832,12 +763,9 @@ public class MineScriptParser extends Parser {
 		public TerminalNode ID() { return getToken(MineScriptParser.ID, 0); }
 		public IdContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).enterId(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).exitId(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MineScriptVisitor ) return ((MineScriptVisitor<? extends T>)visitor).visitId(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
@@ -847,12 +775,9 @@ public class MineScriptParser extends Parser {
 		}
 		public ParenExprContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).enterParenExpr(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).exitParenExpr(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MineScriptVisitor ) return ((MineScriptVisitor<? extends T>)visitor).visitParenExpr(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
@@ -860,12 +785,9 @@ public class MineScriptParser extends Parser {
 		public TerminalNode ABSDIR() { return getToken(MineScriptParser.ABSDIR, 0); }
 		public AbsDirContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).enterAbsDir(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).exitAbsDir(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MineScriptVisitor ) return ((MineScriptVisitor<? extends T>)visitor).visitAbsDir(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -901,7 +823,7 @@ public class MineScriptParser extends Parser {
 				setState(101);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 270583037960L) != 0)) {
+				if (((_la) & ~0x3f) == 0 && ((1L << _la) & 270583037960L) != 0) {
 					{
 					setState(100);
 					actual_parameters();
@@ -1034,7 +956,7 @@ public class MineScriptParser extends Parser {
 						if (!(precpred(_ctx, 12))) throw new FailedPredicateException(this, "precpred(_ctx, 12)");
 						setState(124);
 						_la = _input.LA(1);
-						if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & 1835008L) != 0)) ) {
+						if ( !(((_la) & ~0x3f) == 0 && ((1L << _la) & 1835008L) != 0) ) {
 						_errHandler.recoverInline(this);
 						}
 						else {
@@ -1074,7 +996,7 @@ public class MineScriptParser extends Parser {
 						if (!(precpred(_ctx, 10))) throw new FailedPredicateException(this, "precpred(_ctx, 10)");
 						setState(130);
 						_la = _input.LA(1);
-						if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & 62914560L) != 0)) ) {
+						if ( !(((_la) & ~0x3f) == 0 && ((1L << _la) & 62914560L) != 0) ) {
 						_errHandler.recoverInline(this);
 						}
 						else {
@@ -1161,12 +1083,9 @@ public class MineScriptParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_formal_paramaters; }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).enterFormal_paramaters(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).exitFormal_paramaters(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MineScriptVisitor ) return ((MineScriptVisitor<? extends T>)visitor).visitFormal_paramaters(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -1221,12 +1140,9 @@ public class MineScriptParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_actual_parameters; }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).enterActual_parameters(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MineScriptListener ) ((MineScriptListener)listener).exitActual_parameters(this);
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MineScriptVisitor ) return ((MineScriptVisitor<? extends T>)visitor).visitActual_parameters(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
