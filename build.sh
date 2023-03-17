@@ -1,0 +1,1 @@
+javac src/main/interpreter/*/MineScript*.java Interpreter.java
