@@ -1,5 +1,4 @@
-// Generated from java-escape by ANTLR 4.11.1
-package src.main.interpreter.visitor;
+package src.main.interpreter.visitor;// Generated from MineScript.g4 by ANTLR 4.12.0
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 import src.main.interpreter.parser.MineScriptParser;
 
@@ -65,6 +64,13 @@ public interface MineScriptVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitFuncDecl(MineScriptParser.FuncDeclContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Return}
+	 * labeled alternative in {@link MineScriptParser#statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitReturn(MineScriptParser.ReturnContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code Newline}
 	 * labeled alternative in {@link MineScriptParser#statement}.

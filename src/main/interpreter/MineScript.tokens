@@ -37,11 +37,11 @@ BLOCK=36
 ID=37
 NEWLINE=38
 WS=39
-'='=1
-'if'=2
-'('=3
-')'=4
-'do'=5
+'do'=1
+'='=2
+'if'=3
+'('=4
+')'=5
 'else'=6
 'endif'=7
 'while'=8
@@ -49,8 +49,8 @@ WS=39
 'repeat'=10
 'endrepeat'=11
 'define'=12
-'return'=13
-'enddefine'=14
+'enddefine'=13
+'return'=14
 '-'=15
 'not'=16
 '^'=17
