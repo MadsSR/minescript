@@ -11,8 +11,16 @@ public class SymbolTable {
     private Map<String, Symbol> hashTable = new HashMap<>();
     private ArrayList<ArrayList<Symbol>> scopeDisplay = new ArrayList();
 
+    public SymbolTable() {
+        scopeDisplay.add(new ArrayList());
+    }
+
     public void enterScope() {
         depth++;
+
+        if (scopeDisplay.size() <= depth)
+            scopeDisplay.add(new ArrayList());
+
         scopeDisplay.get(depth).clear();
     }
 
@@ -29,16 +37,22 @@ public class SymbolTable {
 
     public void enterSymbol(String name, Type type, Object value) throws Exception {
         Symbol oldSym = retrieveSymbol(name);
-        /*if (oldSym != null && oldSym.depth == depth) {
-            throw new Exception("Symbol already exists");
-        }*/
+//        if (oldSym != null && oldSym.depth == depth) {
+//            throw new Exception("Symbol already exists");
+//        }
         Symbol newSym = new Symbol(name, type);
 
         // Add to scope display
         //newSym.level = scopeDisplay.get(depth);
         newSym.depth = depth;
         newSym.value = value;
+
+        if (scopeDisplay.get(depth).contains(oldSym)) {
+            scopeDisplay.get(depth).remove(oldSym);
+        }
         scopeDisplay.get(depth).add(newSym);
+
+
 
         // Add to hash table
         if (oldSym == null) {
@@ -49,19 +63,21 @@ public class SymbolTable {
             add(name, newSym);
         }
         newSym.var = oldSym;
-        int hej =0;
     }
 
     public Symbol retrieveSymbol(String name) {
         return hashTable.get(name);
+    }
+    public Object retrieveSymbolValue(Symbol symbol) {
+        return symbol.value;
     }
 
     private void delete(String name) {
         hashTable.remove(name);
     }
 
-    private void add(String name, Symbol value) {
-        hashTable.put(name, value);
+    private void add(String name, Symbol symbol) {
+        hashTable.put(name, symbol);
     }
 
     private class Symbol {
