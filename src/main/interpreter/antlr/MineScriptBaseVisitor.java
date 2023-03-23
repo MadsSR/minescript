@@ -1,7 +1,6 @@
-// Generated from java-escape by ANTLR 4.11.1
-package src.main.interpreter.visitor;
+package src.main.interpreter.antlr;
+// Generated from MineScript.g4 by ANTLR 4.12.0
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
-import src.main.interpreter.parser.MineScriptParser;
 
 /**
  * This class provides an empty implementation of {@link MineScriptVisitor},
@@ -69,6 +68,13 @@ public class MineScriptBaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	@Override public T visitFuncDecl(MineScriptParser.FuncDeclContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitReturn(MineScriptParser.ReturnContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
