@@ -1,6 +1,7 @@
-package src.main.interpreter.visitor;// Generated from MineScript.g4 by ANTLR 4.12.0
+package src.main.interpreter.antlr;
+
+// Generated from MineScript.g4 by ANTLR 4.12.0
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
-import src.main.interpreter.parser.MineScriptParser;
 
 /**
  * This interface defines a complete generic visitor for a parse tree produced

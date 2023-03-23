@@ -1,11 +1,14 @@
-package src.main.interpreter.parser;// Generated from MineScript.g4 by ANTLR 4.12.0
+package src.main.interpreter.antlr;
+
+// Generated from MineScript.g4 by ANTLR 4.12.0
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.misc.*;
 import org.antlr.v4.runtime.tree.*;
-import src.main.interpreter.visitor.MineScriptVisitor;
-
 import java.util.List;
+import java.util.Iterator;
+import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast", "CheckReturnValue"})
 public class MineScriptParser extends Parser {
@@ -115,7 +118,7 @@ public class MineScriptParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_program; }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MineScriptVisitor) return ((MineScriptVisitor<? extends T>)visitor).visitProgram(this);
+			if ( visitor instanceof MineScriptVisitor ) return ((MineScriptVisitor<? extends T>)visitor).visitProgram(this);
 			else return visitor.visitChildren(this);
 		}
 	}

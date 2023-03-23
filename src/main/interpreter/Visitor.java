@@ -1,7 +1,6 @@
-package src.main.interpreter.visitor;
+package src.main.interpreter;
 
-import src.main.interpreter.SymbolTable;
-import src.main.interpreter.parser.MineScriptParser;
+import src.main.interpreter.antlr.*;
 
 public class Visitor extends MineScriptBaseVisitor<Object> {
     private final SymbolTable symbolTable = new SymbolTable();
@@ -18,7 +17,7 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
             System.out.println(e.getMessage());
         }
 
-        return value;
+        return null;
     }
 
     @Override

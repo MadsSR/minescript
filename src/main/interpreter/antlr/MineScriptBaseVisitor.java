@@ -1,6 +1,6 @@
-package src.main.interpreter.visitor;// Generated from MineScript.g4 by ANTLR 4.12.0
+package src.main.interpreter.antlr;
+// Generated from MineScript.g4 by ANTLR 4.12.0
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
-import src.main.interpreter.parser.MineScriptParser;
 
 /**
  * This class provides an empty implementation of {@link MineScriptVisitor},
