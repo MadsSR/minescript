@@ -6,14 +6,33 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class VisitorTest {
     private final Visitor visitor = new Visitor();
 
+
+    @ParameterizedTest
+    @ValueSource(ints = {-1000, -10, 0, 10, 1000})
+    void visitAssignReturnsCorrectNumbers(int value) {
+        visitor.visitAssign((MineScriptParser.AssignContext)getStmtTreeFromString("x = " + value + "\n"));
+        Assertions.assertEquals(value, visitor.visitId((MineScriptParser.IdContext)getExprTreeFromString("x")));
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void visitAssignReturnsCorrectBools(boolean value) {
+        visitor.visitAssign((MineScriptParser.AssignContext)getStmtTreeFromString("x = "+ value +"\n"));
+        Assertions.assertEquals(value, visitor.visitId((MineScriptParser.IdContext)getExprTreeFromString("x")));
+    }
+
     @Test
-    void visitAssign() {
-        visitor.visitAssign((MineScriptParser.AssignContext)getStmtTreeFromString("x = 5\n"));
-        Assertions.assertEquals(5, visitor.visitId((MineScriptParser.IdContext)getExprTreeFromString("x")));
+    @Disabled
+    void visitAssignTest() {
+       Assertions.assertThrows(NullPointerException.class, () -> {
+           visitor.visitAssign((MineScriptParser.AssignContext)getStmtTreeFromString("x = \"hej\"\n"));
+       });
     }
 
     @Test
