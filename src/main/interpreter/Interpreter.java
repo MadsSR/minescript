@@ -1,8 +1,8 @@
-package src.main.interpreter;
+package interpreter;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
-import src.main.interpreter.antlr.*;
+import interpreter.antlr.*;
 
 public class Interpreter {
     public static void main(String[] args) throws Exception {

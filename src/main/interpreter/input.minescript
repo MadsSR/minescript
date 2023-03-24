@@ -1,10 +1,13 @@
 Step(20)
-ronaldo = 20
+ronaldo = 23
 
-while (ronaldo < 22) do
-    ronaldo = ronaldo + 1
-    ben = 20
-endwhile
+if(ronaldo < 22) do
+    ben = 2
+else if (ronaldo < 23) do
+    ben = 3
+else do
+    ben = 4
+endif
 
 ben = ronaldo
 

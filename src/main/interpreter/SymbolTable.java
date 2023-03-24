@@ -1,4 +1,4 @@
-package src.main.interpreter;
+package interpreter;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;

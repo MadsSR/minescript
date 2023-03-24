@@ -1,0 +1,22 @@
+plugins {
+    id 'java'
+}
+
+group 'org.minescript'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+sourceSets {
+    main.java.srcDirs = ['src/main']
+    test.java.srcDirs = ['src/test']
+}
+dependencies {
+    implementation 'org.antlr:antlr4-runtime:4.12.0'
+    compileOnly 'org.junit.jupiter:junit-jupiter:5.9.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
+}
+
+println providers.gradleProperty('org.gradle.warning.mode').get()
