@@ -157,4 +157,12 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
 
         return (int) Math.pow(left, right);
     }
+
+    @Override
+    public Object visitAnd(MineScriptParser.AndContext ctx) {
+        var left = (boolean) visit(ctx.expression(0));
+        var right = (boolean) visit(ctx.expression(1));
+
+        return left && right;
+    }
 }

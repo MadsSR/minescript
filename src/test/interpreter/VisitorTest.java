@@ -115,8 +115,12 @@ class VisitorTest {
     }
 
     @Test
-    void visitIsIsNot() {
+    void visitIsIsNotTestsIf5is5ExpectsTrue() {
         Assertions.assertEquals(true, visitor.visitIsIsNot((MineScriptParser.IsIsNotContext) getExprTreeFromString("5 is 5")));
+    }
+
+    @Test
+    void visitIsIsNotTestsIf5isNot5ExpectsFalse() {
         Assertions.assertEquals(false, visitor.visitIsIsNot((MineScriptParser.IsIsNotContext) getExprTreeFromString("5 is not 5")));
     }
 
@@ -199,6 +203,18 @@ class VisitorTest {
     @Test
     void visitNegStringThrowsException() {
         Assertions.assertThrows(RuntimeException.class, () -> visitor.visitNeg((MineScriptParser.NegContext) getExprTreeFromString("-unknown")));
+    }
+
+    @Test
+    void visitAndComparesTwoTruesExpectsTrue() {
+        Assertions.assertEquals(true, visitor.visitAnd((MineScriptParser.AndContext) getExprTreeFromString("true and true")));
+    }
+
+    @Test
+    void visitAndComparesFalseOutcomesExpectsFalse() {
+        Assertions.assertEquals(false, visitor.visitAnd((MineScriptParser.AndContext) getExprTreeFromString("true and false")));
+        Assertions.assertEquals(false, visitor.visitAnd((MineScriptParser.AndContext) getExprTreeFromString("false and true")));
+        Assertions.assertEquals(false, visitor.visitAnd((MineScriptParser.AndContext) getExprTreeFromString("false and false")));
     }
 
     private MineScriptParser.ExpressionContext getExprTreeFromString(String input) {
