@@ -26,9 +26,11 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
 
     @Override
     public Object visitWhile(MineScriptParser.WhileContext ctx) {
+        symbolTable.enterScope();
         while (parser.getBoolean(visit(ctx.expression()))) {
             visit(ctx.statements());
         }
+        symbolTable.exitScope();
 
         return null;
     }
