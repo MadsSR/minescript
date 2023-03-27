@@ -4,29 +4,25 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 
 public class SymbolTable {
-    private int depth = 0;
     private final Map<String, Symbol> hashTable = new HashMap<>();
-    private final ArrayList<ArrayList<Symbol>> scopeDisplay = new ArrayList<>();
+    private final Stack<ArrayList<String>> scopeStack = new Stack<>();
 
     public SymbolTable() {
-        scopeDisplay.add(new ArrayList<>());
+        scopeStack.push(new ArrayList<>());
     }
 
     public void enterScope() {
-        depth++;
-
-        if (scopeDisplay.size() <= depth)
-            scopeDisplay.add(new ArrayList<>());
+        scopeStack.push(new ArrayList<>());
     }
 
     public void exitScope() {
-        for (Symbol symbol : scopeDisplay.get(depth)) {
-            delete(symbol.name);
+        for (String symbolName : scopeStack.peek()) {
+            delete(symbolName);
         }
-        scopeDisplay.get(depth).clear();
-        depth--;
+        scopeStack.pop();
     }
 
     public void enterSymbol(String name, Type type, Object value) {
@@ -36,7 +32,7 @@ public class SymbolTable {
             delete(newSymbol.name);
         }
         else {
-            scopeDisplay.get(depth).add(newSymbol);
+            scopeStack.peek().add(newSymbol.name);
         }
         add(newSymbol);
     }
