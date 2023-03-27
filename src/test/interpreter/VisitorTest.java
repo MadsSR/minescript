@@ -97,7 +97,7 @@ class VisitorTest {
     @Test
     void visitNegExpr() {
         Assertions.assertEquals(-10, visitor.visitNeg((MineScriptParser.NegContext) getExprTreeFromString("-(5 + 5)")));
-        Assertions.assertEquals(-2, visitor.visitNeg((MineScriptParser.NegContext) getExprTreeFromString("-(5 / 5)")));
+        Assertions.assertEquals(-1, visitor.visitNeg((MineScriptParser.NegContext) getExprTreeFromString("-(5 / 5)")));
     }
 
     @Test
