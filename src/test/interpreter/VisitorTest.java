@@ -33,7 +33,17 @@ class VisitorTest {
     }
 
     @Test
-    void visitComp() {
+    void visitCompComparesIntValuesAndReturnsBooleanExpectsTrue() {
+        //Initial tests for greater than and greater than or equal
+        Assertions.assertEquals(true, visitor.visitComp((MineScriptParser.CompContext)getExprTreeFromString("5 > 4")));
+        Assertions.assertEquals(true, visitor.visitComp((MineScriptParser.CompContext)getExprTreeFromString("5 >= 4")));
+    }
+
+    @Test
+    void visitCompComparesIntValuesAndReturnsBooleanExpectsFalse() {
+        //Initial tests for less than and less than or equal
+        Assertions.assertEquals(false, visitor.visitComp((MineScriptParser.CompContext)getExprTreeFromString("5 < 4")));
+        Assertions.assertEquals(false, visitor.visitComp((MineScriptParser.CompContext)getExprTreeFromString("5 <= 4")));
     }
 
     @Test
