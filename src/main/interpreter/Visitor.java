@@ -7,6 +7,14 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
     private final ExpressionParser parser = new ExpressionParser();
 
     @Override
+    public Object visitStatements(MineScriptParser.StatementsContext ctx) {
+        for (MineScriptParser.StatementContext statement : ctx.statement()) {
+            visit(statement);
+        }
+
+        return null;
+    }
+    @Override
     public Object visitAssign(MineScriptParser.AssignContext ctx) {
         String id = ctx.ID().getText();
         var value = visit(ctx.expression());
