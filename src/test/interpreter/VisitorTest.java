@@ -50,6 +50,12 @@ class VisitorTest {
     void visitNumber() {
     }
 
+    @Test
+    void visitParenExpr() {
+        String input = "(10-3)\n";
+        Assertions.assertEquals(7, visitor.visitParenExpr((MineScriptParser.ParenExprContext)getExprTreeFromString(input)));
+    }
+
     private MineScriptParser.ExpressionContext getExprTreeFromString(String input) {
         var lexer = new MineScriptLexer(CharStreams.fromString(input));
         var parser = new MineScriptParser(new CommonTokenStream(lexer));
