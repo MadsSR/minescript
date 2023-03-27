@@ -69,13 +69,11 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
     public Object visitBool(MineScriptParser.BoolContext ctx) {
         if (ctx.getText().equals("true") || ctx.getText().equals("false")) {
             return Boolean.parseBoolean(ctx.getText());
-        }
-        else {
+        } else {
             throw new RuntimeException("Boolean value must be true or false");
         }
         //return Boolean.parseBoolean(ctx.getText());*/
     }
-
 
 
     @Override
@@ -169,5 +167,13 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
         }
 
         return (int) Math.pow(left, right);
+    }
+
+    @Override
+    public Object visitOr(MineScriptParser.OrContext ctx) {
+        var left = (boolean) visit(ctx.expression(0));
+        var right = (boolean) visit(ctx.expression(1));
+
+        return left || right;
     }
 }

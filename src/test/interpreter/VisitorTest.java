@@ -200,6 +200,19 @@ class VisitorTest {
     void visitNegStringThrowsException() {
         Assertions.assertThrows(RuntimeException.class, () -> visitor.visitNeg((MineScriptParser.NegContext) getExprTreeFromString("-unknown")));
     }
+    @Test
+    void visitOrTrueOrFalseExpectsTrue() {
+        Assertions.assertEquals(true, visitor.visitOr((MineScriptParser.OrContext) getExprTreeFromString("true or false")));
+    }
+    @Test
+    void visitOrTrueOrTrueExpectsTrue() {
+        Assertions.assertEquals(true, visitor.visitOr((MineScriptParser.OrContext) getExprTreeFromString("true or true")));
+    }
+    @Test
+    void visitOrFalseOrFalseExpectsFalse() {
+        Assertions.assertEquals(false, visitor.visitOr((MineScriptParser.OrContext) getExprTreeFromString("false or false")));
+    }
+
 
     private MineScriptParser.ExpressionContext getExprTreeFromString(String input) {
         var lexer = new MineScriptLexer(CharStreams.fromString(input));
