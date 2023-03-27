@@ -29,15 +29,13 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
     public Object visitIf(MineScriptParser.IfContext ctx) {
         if (parser.getBoolean(visit(ctx.expression(0)))) {
             visit(ctx.statements(0));
-        }
-        else if (ctx.expression().size() > 1) {
-            for(int i = 1; i < ctx.expression().size(); i++) {
+        } else if (ctx.expression().size() > 1) {
+            for (int i = 1; i < ctx.expression().size(); i++) {
                 if (parser.getBoolean(visit(ctx.expression(i)))) {
                     visit(ctx.statements(i));
                 }
             }
-        }
-        else if (ctx.statements().size() > ctx.expression().size()) {
+        } else if (ctx.statements().size() > ctx.expression().size()) {
             visit(ctx.statements(ctx.statements().size() - 1));
         }
 
@@ -59,9 +57,18 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
     }
 
     @Override
+    //Boolean visitor for boolean values
     public Object visitBool(MineScriptParser.BoolContext ctx) {
-        return Boolean.parseBoolean(ctx.getText());
+        if (ctx.getText().equals("true") || ctx.getText().equals("false")) {
+            return Boolean.parseBoolean(ctx.getText());
+        }
+        else {
+            throw new RuntimeException("Boolean value must be true or false");
+        }
+        //return Boolean.parseBoolean(ctx.getText());*/
     }
+
+
 
     @Override
     public Object visitComp(MineScriptParser.CompContext ctx) {
@@ -78,6 +85,18 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
             };
         }
         throw new RuntimeException("cannot compare " + left.getClass() + " and " + right.getClass());
+    }
+
+    @Override
+    public Object visitIsIsNot(MineScriptParser.IsIsNotContext ctx) {
+        Object left = visit(ctx.expression(0));
+        Object right = visit(ctx.expression(1));
+
+        return switch (ctx.op.getText()) {
+            case "is" -> left == right;
+            case "is not" -> left != right;
+            default -> throw new RuntimeException("Unknown operator: " + ctx.op.getText());
+        };
     }
 
     @Override
@@ -101,5 +120,36 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
     @Override
     public Object visitNumber(MineScriptParser.NumberContext ctx) {
         return Integer.parseInt(ctx.getText());
+    }
+
+
+    @Override
+    public Object visitMultDivMod(MineScriptParser.MultDivModContext ctx) {
+        var left = (int) visit(ctx.expression(0));
+        var right = (int) visit(ctx.expression(1));
+
+        return switch (ctx.op.getText()) {
+            case "*" -> left * right;
+            case "/" -> left / right;
+            case "%" -> left % right;
+            default -> throw new RuntimeException("Unknown operator: " + ctx.op.getText());
+        };
+    }
+
+    @Override
+    public Object visitPow(MineScriptParser.PowContext ctx) {
+        var left = (int) visit(ctx.expression(0));
+        var right = (int) visit(ctx.expression(1));
+
+        if (right < 0) {
+            throw new RuntimeException("Cannot raise to negative power");
+        }
+
+        return (int) Math.pow(left, right);
+    }
+
+    @Override
+    public Object visitNeg(MineScriptParser.NegContext ctx) {
+        return -(int) visit(ctx.expression());
     }
 }
