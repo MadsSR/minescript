@@ -170,6 +170,13 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
     }
 
     @Override
+    public Object visitAnd(MineScriptParser.AndContext ctx) {
+        var left = (boolean) visit(ctx.expression(0));
+        var right = (boolean) visit(ctx.expression(1));
+
+        return left && right;
+    
+    @Override
     public Object visitOr(MineScriptParser.OrContext ctx) {
         var left = (boolean) visit(ctx.expression(0));
         var right = (boolean) visit(ctx.expression(1));
