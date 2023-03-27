@@ -28,11 +28,10 @@ class VisitorTest {
     }
 
     @Test
-    @Disabled
-    void visitAssignTest() {
-       Assertions.assertThrows(NullPointerException.class, () -> {
-           visitor.visitAssign((MineScriptParser.AssignContext)getStmtTreeFromString("x = \"hej\"\n"));
-       });
+    void visitAssignInvalidAssignThrowsException() {
+        System.setErr(null);
+        Assertions.assertThrows(NullPointerException.class, () ->
+            visitor.visitAssign((MineScriptParser.AssignContext)getStmtTreeFromString("x = \"hej\"\n")));
     }
 
     @Test
