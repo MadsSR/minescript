@@ -86,6 +86,18 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
     }
 
     @Override
+    public Object visitIsIsNot(MineScriptParser.IsIsNotContext ctx) {
+        Object left = visit(ctx.expression(0));
+        Object right = visit(ctx.expression(1));
+
+        return switch (ctx.op.getText()) {
+            case "is" -> left == right;
+            case "is not" -> left != right;
+            default -> throw new RuntimeException("Unknown operator: " + ctx.op.getText());
+        };
+    }
+
+    @Override
     public Object visitId(MineScriptParser.IdContext ctx) {
         String id = ctx.ID().getText();
         return symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol(id));

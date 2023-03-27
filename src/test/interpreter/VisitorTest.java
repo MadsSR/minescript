@@ -37,6 +37,12 @@ class VisitorTest {
     }
 
     @Test
+    void visitIsIsNot() {
+        Assertions.assertEquals(true, visitor.visitIsIsNot((MineScriptParser.IsIsNotContext)getExprTreeFromString("5 is 5")));
+        Assertions.assertEquals(false, visitor.visitIsIsNot((MineScriptParser.IsIsNotContext)getExprTreeFromString("5 is not 5")));
+    }
+
+    @Test
     void visitId() {
     }
 
