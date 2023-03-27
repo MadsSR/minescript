@@ -44,12 +44,13 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
 
     @Override
     public Object visitRepeat(MineScriptParser.RepeatContext ctx) {
-        if (visit(ctx.expression()) instanceof Integer times) {
+        if (visit(ctx.expression()) instanceof Integer times && times >= 0) {
             for (int i = 0; i < times; i++) {
                 visit(ctx.statements());
             }
-        } else {
-            throw new RuntimeException("Repeat expression must be a number");
+        }
+        else {
+            throw new RuntimeException("Repeat expression must be a non-negative number");
         }
 
         return null;
