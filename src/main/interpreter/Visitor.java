@@ -60,9 +60,18 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
     }
 
     @Override
+    //Boolean visitor for boolean values
     public Object visitBool(MineScriptParser.BoolContext ctx) {
-        return Boolean.parseBoolean(ctx.getText());
+        if (ctx.getText().equals("true") || ctx.getText().equals("false")) {
+            return Boolean.parseBoolean(ctx.getText());
+        }
+        else {
+            throw new RuntimeException("Boolean value must be true or false");
+        }
+        //return Boolean.parseBoolean(ctx.getText());*/
     }
+
+
 
     @Override
     public Object visitComp(MineScriptParser.CompContext ctx) {
