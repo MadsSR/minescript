@@ -16,22 +16,23 @@ class VisitorTest {
     @ParameterizedTest
     @ValueSource(ints = {-1000, -10, 0, 10, 1000})
     void visitAssignReturnsCorrectNumbers(int value) {
-        visitor.visitAssign((MineScriptParser.AssignContext)getStmtTreeFromString("x = " + value + "\n"));
-        Assertions.assertEquals(value, visitor.visitId((MineScriptParser.IdContext)getExprTreeFromString("x")));
+        visitor.visitAssign((MineScriptParser.AssignContext) getStmtTreeFromString("x = " + value + "\n"));
+        Assertions.assertEquals(value, visitor.visitId((MineScriptParser.IdContext) getExprTreeFromString("x")));
     }
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void visitAssignReturnsCorrectBools(boolean value) {
-        visitor.visitAssign((MineScriptParser.AssignContext)getStmtTreeFromString("x = "+ value +"\n"));
-        Assertions.assertEquals(value, visitor.visitId((MineScriptParser.IdContext)getExprTreeFromString("x")));
+        visitor.visitAssign((MineScriptParser.AssignContext) getStmtTreeFromString("x = " + value + "\n"));
+        Assertions.assertEquals(value, visitor.visitId((MineScriptParser.IdContext) getExprTreeFromString("x")));
     }
 
     @Test
     void visitAssignInvalidAssignThrowsException() {
         System.setErr(null);
         Assertions.assertThrows(NullPointerException.class, () ->
-            visitor.visitAssign((MineScriptParser.AssignContext)getStmtTreeFromString("x = \"hej\"\n")));
+                visitor.visitAssign((MineScriptParser.AssignContext) getStmtTreeFromString("x = \"hej\"\n"))
+        );
     }
 
     @Test
@@ -42,41 +43,81 @@ class VisitorTest {
     void visitIf() {
     }
 
-    @Test
-    void visitRepeat() {
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 10, 100})
+    void visitRepeatValidTimesEqualsNumIterations(int value) {
+        visitor.visitAssign((MineScriptParser.AssignContext) getStmtTreeFromString("x = 0\n"));
+        visitor.visitRepeat((MineScriptParser.RepeatContext) getStmtTreeFromString(
+                """
+                        repeat (%d) do
+                            x = x + 1
+                        endrepeat
+                        """.formatted(value)
+        ));
+        Assertions.assertEquals(value, visitor.visitId((MineScriptParser.IdContext) getExprTreeFromString("x")));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {-1, -10, -100})
+    void visitRepeatNegTimesThrowsException(int value) {
+        Assertions.assertThrows(RuntimeException.class, () ->
+                visitor.visitRepeat((MineScriptParser.RepeatContext) getStmtTreeFromString(
+                        """
+                                repeat (%d) do
+                                    x = x + 1
+                                endrepeat
+                                """.formatted(value)
+                ))
+        );
     }
 
     @Test
+    void visitRepeatNonIntTimesThrowsException() {
+        Assertions.assertThrows(RuntimeException.class, () ->
+                visitor.visitRepeat((MineScriptParser.RepeatContext) getStmtTreeFromString(
+                        """
+                                repeat ("hej") do
+                                    x = x + 1
+                                endrepeat
+                                """
+                ))
+        );
+    }
+
+
+    @Test
     void visitBoolPassTrueExpectedTrue() {
-        Assertions.assertEquals(true, visitor.visitBool((MineScriptParser.BoolContext)getExprTreeFromString("true")));
+        Assertions.assertEquals(true, visitor.visitBool((MineScriptParser.BoolContext) getExprTreeFromString("true")));
     }
+
     @Test
-    void visitBoolPassFalseExpectedFalse(){
-        Assertions.assertEquals(false, visitor.visitBool((MineScriptParser.BoolContext)getExprTreeFromString("false")));
+    void visitBoolPassFalseExpectedFalse() {
+        Assertions.assertEquals(false, visitor.visitBool((MineScriptParser.BoolContext) getExprTreeFromString("false")));
     }
+
     @Test
-    void visitBoolPassExceptions(){
-        Assertions.assertThrows(RuntimeException.class, () -> visitor.visitBool((MineScriptParser.BoolContext)getExprTreeFromString("abc")));
+    void visitBoolPassExceptions() {
+        Assertions.assertThrows(RuntimeException.class, () -> visitor.visitBool((MineScriptParser.BoolContext) getExprTreeFromString("abc")));
     }
 
     @Test
     void visitCompComparesIntValuesAndReturnsBooleanExpectsTrue() {
         //Initial tests for greater than and greater than or equal
-        Assertions.assertEquals(true, visitor.visitComp((MineScriptParser.CompContext)getExprTreeFromString("5 > 4")));
-        Assertions.assertEquals(true, visitor.visitComp((MineScriptParser.CompContext)getExprTreeFromString("5 >= 4")));
+        Assertions.assertEquals(true, visitor.visitComp((MineScriptParser.CompContext) getExprTreeFromString("5 > 4")));
+        Assertions.assertEquals(true, visitor.visitComp((MineScriptParser.CompContext) getExprTreeFromString("5 >= 4")));
     }
 
     @Test
     void visitCompComparesIntValuesAndReturnsBooleanExpectsFalse() {
         //Initial tests for less than and less than or equal
-        Assertions.assertEquals(false, visitor.visitComp((MineScriptParser.CompContext)getExprTreeFromString("5 < 4")));
-        Assertions.assertEquals(false, visitor.visitComp((MineScriptParser.CompContext)getExprTreeFromString("5 <= 4")));
+        Assertions.assertEquals(false, visitor.visitComp((MineScriptParser.CompContext) getExprTreeFromString("5 < 4")));
+        Assertions.assertEquals(false, visitor.visitComp((MineScriptParser.CompContext) getExprTreeFromString("5 <= 4")));
     }
 
     @Test
     void visitIsIsNot() {
-        Assertions.assertEquals(true, visitor.visitIsIsNot((MineScriptParser.IsIsNotContext)getExprTreeFromString("5 is 5")));
-        Assertions.assertEquals(false, visitor.visitIsIsNot((MineScriptParser.IsIsNotContext)getExprTreeFromString("5 is not 5")));
+        Assertions.assertEquals(true, visitor.visitIsIsNot((MineScriptParser.IsIsNotContext) getExprTreeFromString("5 is 5")));
+        Assertions.assertEquals(false, visitor.visitIsIsNot((MineScriptParser.IsIsNotContext) getExprTreeFromString("5 is not 5")));
     }
 
     @Test
@@ -91,6 +132,12 @@ class VisitorTest {
 
     @Test
     void visitNumber() {
+    }
+
+    @Test
+    void visitParenExpr() {
+        String input = "(10-3)\n";
+        Assertions.assertEquals(7, visitor.visitParenExpr((MineScriptParser.ParenExprContext) getExprTreeFromString(input)));
     }
 
     @Test
@@ -114,10 +161,10 @@ class VisitorTest {
         Assertions.assertThrows(RuntimeException.class, () -> visitor.visitPow((MineScriptParser.PowContext) getExprTreeFromString("5 ^ -1")));
     }
 
-//    @Test
-//    void visitPowExpr() {
-//        Assertions.assertEquals(25, visitor.visitPow((MineScriptParser.PowContext) getExprTreeFromString("5 ^ (2 + 0 * 1)")));
-//    }
+    @Test
+    void visitPowExpr() {
+        Assertions.assertEquals(25, visitor.visitPow((MineScriptParser.PowContext) getExprTreeFromString("5 ^ (2 + 0 * 1)")));
+    }
 
     @Test
     void visitPowId() {

@@ -7,6 +7,14 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
     private final ExpressionParser parser = new ExpressionParser();
 
     @Override
+    public Object visitStatements(MineScriptParser.StatementsContext ctx) {
+        for (MineScriptParser.StatementContext statement : ctx.statement()) {
+            visit(statement);
+        }
+
+        return null;
+    }
+    @Override
     public Object visitAssign(MineScriptParser.AssignContext ctx) {
         String id = ctx.ID().getText();
         var value = visit(ctx.expression());
@@ -44,12 +52,13 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
 
     @Override
     public Object visitRepeat(MineScriptParser.RepeatContext ctx) {
-        if (visit(ctx.expression()) instanceof Integer times) {
+        if (visit(ctx.expression()) instanceof Integer times && times >= 0) {
             for (int i = 0; i < times; i++) {
                 visit(ctx.statements());
             }
-        } else {
-            throw new RuntimeException("Repeat expression must be a number");
+        }
+        else {
+            throw new RuntimeException("Repeat expression must be a non-negative number");
         }
 
         return null;
@@ -66,6 +75,11 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
         //return Boolean.parseBoolean(ctx.getText());*/
     }
 
+
+    @Override
+    public Object visitNotExpr(MineScriptParser.NotExprContext ctx) {
+        return !parser.getBoolean(visit(ctx.expression()));
+    }
 
     @Override
     public Object visitComp(MineScriptParser.CompContext ctx) {
@@ -115,6 +129,16 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
     }
 
     @Override
+    public Object visitNeg(MineScriptParser.NegContext ctx) {
+        return -(int) visit(ctx.expression());
+    }
+
+    @Override
+    public Object visitParenExpr(MineScriptParser.ParenExprContext ctx) {
+        return visit(ctx.expression());
+    }
+
+    @Override
     public Object visitNumber(MineScriptParser.NumberContext ctx) {
         return Integer.parseInt(ctx.getText());
     }
@@ -143,11 +167,6 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
         }
 
         return (int) Math.pow(left, right);
-    }
-
-    @Override
-    public Object visitNeg(MineScriptParser.NegContext ctx) {
-        return -(int) visit(ctx.expression());
     }
 
     @Override
