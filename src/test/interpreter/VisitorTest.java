@@ -31,7 +31,8 @@ class VisitorTest {
     void visitAssignInvalidAssignThrowsException() {
         System.setErr(null);
         Assertions.assertThrows(NullPointerException.class, () ->
-            visitor.visitAssign((MineScriptParser.AssignContext)getStmtTreeFromString("x = \"hej\"\n")));
+            visitor.visitAssign((MineScriptParser.AssignContext)getStmtTreeFromString("x = \"hej\"\n"))
+        );
     }
 
     @Test
@@ -42,9 +43,47 @@ class VisitorTest {
     void visitIf() {
     }
 
-    @Test
-    void visitRepeat() {
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 10, 100})
+    void visitRepeatValidTimesEqualsNumIterations(int value) {
+        visitor.visitAssign((MineScriptParser.AssignContext)getStmtTreeFromString("x = 0\n"));
+        visitor.visitRepeat((MineScriptParser.RepeatContext)getStmtTreeFromString(
+                """
+                repeat (%d) do
+                    x = x + 1
+                endrepeat
+                """.formatted(value)
+        ));
+        Assertions.assertEquals(value, visitor.visitId((MineScriptParser.IdContext)getExprTreeFromString("x")));
     }
+
+    @ParameterizedTest
+    @ValueSource(ints = {-1, -10, -100})
+    void visitRepeatNegTimesThrowsException(int value) {
+        Assertions.assertThrows(RuntimeException.class, () ->
+            visitor.visitRepeat((MineScriptParser.RepeatContext)getStmtTreeFromString(
+                    """
+                    repeat (%d) do
+                        x = x + 1
+                    endrepeat
+                    """.formatted(value)
+            ))
+        );
+    }
+
+    @Test
+    void visitRepeatNonIntTimesThrowsException() {
+        Assertions.assertThrows(RuntimeException.class, () ->
+            visitor.visitRepeat((MineScriptParser.RepeatContext)getStmtTreeFromString(
+                    """
+                    repeat ("hej") do
+                        x = x + 1
+                    endrepeat
+                    """
+            ))
+        );
+    }
+
 
     @Test
     void visitBool() {
