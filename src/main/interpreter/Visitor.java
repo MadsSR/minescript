@@ -7,6 +7,14 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
     private final ExpressionParser parser = new ExpressionParser();
 
     @Override
+    public Object visitStatements(MineScriptParser.StatementsContext ctx) {
+        for (MineScriptParser.StatementContext statement : ctx.statement()) {
+            visit(statement);
+        }
+
+        return null;
+    }
+    @Override
     public Object visitAssign(MineScriptParser.AssignContext ctx) {
         String id = ctx.ID().getText();
         var value = visit(ctx.expression());
@@ -61,14 +69,17 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
     public Object visitBool(MineScriptParser.BoolContext ctx) {
         if (ctx.getText().equals("true") || ctx.getText().equals("false")) {
             return Boolean.parseBoolean(ctx.getText());
-        }
-        else {
+        } else {
             throw new RuntimeException("Boolean value must be true or false");
         }
         //return Boolean.parseBoolean(ctx.getText());*/
     }
 
 
+    @Override
+    public Object visitNotExpr(MineScriptParser.NotExprContext ctx) {
+        return !parser.getBoolean(visit(ctx.expression()));
+    }
 
     @Override
     public Object visitComp(MineScriptParser.CompContext ctx) {
@@ -164,5 +175,12 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
         var right = (boolean) visit(ctx.expression(1));
 
         return left && right;
+    
+    @Override
+    public Object visitOr(MineScriptParser.OrContext ctx) {
+        var left = (boolean) visit(ctx.expression(0));
+        var right = (boolean) visit(ctx.expression(1));
+
+        return left || right;
     }
 }
