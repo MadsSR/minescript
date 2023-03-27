@@ -11,12 +11,7 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
         String id = ctx.ID().getText();
         var value = visit(ctx.expression());
 
-        try {
-            symbolTable.enterSymbol(id, value.getClass(), value);
-        }
-        catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+        symbolTable.enterSymbol(id, value.getClass(), value);
 
         return null;
     }
