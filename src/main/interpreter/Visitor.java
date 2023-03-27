@@ -118,6 +118,16 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
     }
 
     @Override
+    public Object visitNeg(MineScriptParser.NegContext ctx) {
+        return -(int) visit(ctx.expression());
+    }
+
+    @Override
+    public Object visitParenExpr(MineScriptParser.ParenExprContext ctx) {
+        return visit(ctx.expression());
+    }
+
+    @Override
     public Object visitNumber(MineScriptParser.NumberContext ctx) {
         return Integer.parseInt(ctx.getText());
     }
@@ -146,10 +156,5 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
         }
 
         return (int) Math.pow(left, right);
-    }
-
-    @Override
-    public Object visitNeg(MineScriptParser.NegContext ctx) {
-        return -(int) visit(ctx.expression());
     }
 }
