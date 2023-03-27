@@ -29,11 +29,21 @@ class VisitorTest {
     }
 
     @Test
-    void visitBool() {
+    void visitBoolPassTrueExpectedTrue() {
+        Assertions.assertEquals(true, visitor.visitBool((MineScriptParser.BoolContext)getExprTreeFromString("true")));
+    }
+    @Test
+    void visitBoolPassFalseExpectedFalse(){
+        Assertions.assertEquals(false, visitor.visitBool((MineScriptParser.BoolContext)getExprTreeFromString("false")));
+    }
+    @Test
+    void visitBoolPassExceptions(){
+        Assertions.assertThrows(RuntimeException.class, () -> visitor.visitBool((MineScriptParser.BoolContext)getExprTreeFromString("abc")));
     }
 
     @Test
     void visitComp() {
+
     }
 
     @Test
