@@ -69,6 +69,11 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
     }
 
     @Override
+    public Object visitNotExpr(MineScriptParser.NotExprContext ctx) {
+        return !parser.getBoolean(visit(ctx.expression()));
+    }
+
+    @Override
     public Object visitComp(MineScriptParser.CompContext ctx) {
         Object left = visit(ctx.expression(0));
         Object right = visit(ctx.expression(1));
