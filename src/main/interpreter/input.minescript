@@ -1,10 +1,8 @@
-a = 10
-c = 80085
+a = 2
 
-define qweqwe(a)do
-    thatdog = 12
-    c = a
-    a = a
+define simon_says(a)do
+    a = a+1
+    simon_says(a)
 enddefine
 
-qweqwe(7)
+simon_says(a)

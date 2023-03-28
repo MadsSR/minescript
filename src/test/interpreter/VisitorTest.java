@@ -2,6 +2,7 @@ package interpreter;
 
 import interpreter.antlr.MineScriptLexer;
 import interpreter.antlr.MineScriptParser;
+import interpreter.types.MSBool;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.junit.jupiter.api.Test;
@@ -116,7 +117,7 @@ class VisitorTest {
 
     @Test
     void visitIsIsNotTestsIf5is5ExpectsTrue() {
-        Assertions.assertEquals(true, visitor.visitIsIsNot((MineScriptParser.IsIsNotContext) getExprTreeFromString("5 is 5")));
+        Assertions.assertEquals(true, ((MSBool) visitor.visitIsIsNot((MineScriptParser.IsIsNotContext) getExprTreeFromString("5 is 5"))).getValue());
     }
 
     @Test

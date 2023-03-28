@@ -1,5 +1,6 @@
 package interpreter;
 
+import interpreter.types.MSBool;
 import interpreter.types.MSType;
 import interpreter.types.MSVal;
 
@@ -25,7 +26,7 @@ public class SymbolTable {
         scopeStack.pop();
     }
 
-    public void enterSymbol(String name, MSType type, Object value) {
+    public void enterSymbol(String name, MSType type, MSVal value) {
         Symbol newSymbol = new Symbol(name, type, value);
 
         if (isVarInNewScope(name)) {
@@ -44,6 +45,7 @@ public class SymbolTable {
         }
         add(newSymbol);
     }
+
     public Symbol retrieveSymbol(String name) {
         if (isVarInNewScope(name)) {
             return hashTable.get(getPrefixName(name));
@@ -53,7 +55,8 @@ public class SymbolTable {
             throw new RuntimeException("Symbol not found: " + name);
         }
     }
-    public Object retrieveSymbolValue(Symbol symbol) {
+
+    public MSVal retrieveSymbolValue(Symbol symbol) {
         return symbol.value;
     }
 
@@ -80,9 +83,9 @@ public class SymbolTable {
     private static class Symbol {
         String name;
         MSType type;
-        Object value;
+        MSVal value;
 
-        public Symbol(String name, MSType type, Object value) {
+        public Symbol(String name, MSType type, MSVal value) {
             this.name = name;
             this.type = type;
             this.value = value;

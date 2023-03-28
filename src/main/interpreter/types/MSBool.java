@@ -17,5 +17,13 @@ public class MSBool extends MSVal{
         return MSType.MSBool;
     }
 
+    @Override
+    public boolean equals(MSVal value) {
+        if (value instanceof MSBool b) {
+            return this.value == b.value;
+        }
+        return false;
+    }
+
 }
 

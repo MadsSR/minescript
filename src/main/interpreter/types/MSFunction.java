@@ -42,4 +42,13 @@ public class MSFunction extends MSVal{
         return MSType.MSFunction;
     }
 
+    @Override
+    public boolean equals(MSVal value) {
+        if (value instanceof MSFunction f) {
+            return this.name.equals(f.name);
+        }
+        return false;
+    }
+
+
 }
