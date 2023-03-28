@@ -1,10 +1,8 @@
-Step(20)
-ronaldo = 23
+a = 2
 
-while (ronaldo > 21) do
-    ronaldo = ronaldo - 1
-    ben = 18
-endwhile
+define simon_says(a)do
+    a = a+1
+    simon_says(a)
+enddefine
 
-ben = ronaldo
-
+simon_says(a)

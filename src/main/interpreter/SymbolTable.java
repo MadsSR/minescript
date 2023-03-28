@@ -1,10 +1,11 @@
 package interpreter;
 
+import interpreter.types.MSBool;
+import interpreter.types.MSType;
+import interpreter.types.MSVal;
+
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 public class SymbolTable {
     private final Map<String, Symbol> hashTable = new HashMap<>();
@@ -25,22 +26,37 @@ public class SymbolTable {
         scopeStack.pop();
     }
 
-    public void enterSymbol(String name, Type type, Object value) {
+    public void enterSymbol(String name, MSType type, MSVal value) {
         Symbol newSymbol = new Symbol(name, type, value);
+
+        if (isVarInNewScope(name)) {
+            Symbol oldSymbol = hashTable.get(getPrefixName(name));
+            delete(oldSymbol.name);
+            Symbol prefixSymbol = new Symbol(oldSymbol.name, type, value);
+            add(prefixSymbol);
+            scopeStack.peek().add(prefixSymbol.name);
+            return;
+        }
 
         if (hashTable.containsKey(name)) {
             delete(newSymbol.name);
-        }
-        else {
+        } else {
             scopeStack.peek().add(newSymbol.name);
         }
         add(newSymbol);
     }
 
     public Symbol retrieveSymbol(String name) {
-        return hashTable.get(name);
+        if (isVarInNewScope(name)) {
+            return hashTable.get(getPrefixName(name));
+        } else if (hashTable.containsKey(name)) {
+            return hashTable.get(name);
+        } else {
+            throw new RuntimeException("Symbol not found: " + name);
+        }
     }
-    public Object retrieveSymbolValue(Symbol symbol) {
+
+    public MSVal retrieveSymbolValue(Symbol symbol) {
         return symbol.value;
     }
 
@@ -52,12 +68,24 @@ public class SymbolTable {
         hashTable.put(symbol.name, symbol);
     }
 
+    /**
+     * @param name name of the variable
+     * @return true if the variable is in the current scope
+     */
+    private boolean isVarInNewScope(String name) {
+        return scopeStack.peek().stream().anyMatch(s -> s.contains("." + name));
+    }
+
+    private String getPrefixName(String name) {
+        return scopeStack.peek().stream().filter(s -> s.contains("." + name)).findFirst().get();
+    }
+
     private static class Symbol {
         String name;
-        Type type;
-        Object value;
+        MSType type;
+        MSVal value;
 
-        public Symbol(String name, Type type, Object value) {
+        public Symbol(String name, MSType type, MSVal value) {
             this.name = name;
             this.type = type;
             this.value = value;
