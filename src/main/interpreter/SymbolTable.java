@@ -1,10 +1,10 @@
 package interpreter;
 
+import interpreter.types.MSType;
+import interpreter.types.MSVal;
+
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 public class SymbolTable {
     private final Map<String, Symbol> hashTable = new HashMap<>();
@@ -25,7 +25,7 @@ public class SymbolTable {
         scopeStack.pop();
     }
 
-    public void enterSymbol(String name, Type type, Object value) {
+    public void enterSymbol(String name, MSType type, Object value) {
         Symbol newSymbol = new Symbol(name, type, value);
 
         if (hashTable.containsKey(name)) {
@@ -54,10 +54,10 @@ public class SymbolTable {
 
     private static class Symbol {
         String name;
-        Type type;
+        MSType type;
         Object value;
 
-        public Symbol(String name, Type type, Object value) {
+        public Symbol(String name, MSType type, Object value) {
             this.name = name;
             this.type = type;
             this.value = value;

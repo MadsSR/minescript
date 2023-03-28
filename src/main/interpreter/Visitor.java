@@ -1,6 +1,12 @@
 package interpreter;
 
 import interpreter.antlr.*;
+import interpreter.types.*;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Visitor extends MineScriptBaseVisitor<Object> {
     private final SymbolTable symbolTable = new SymbolTable();
@@ -19,7 +25,11 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
         String id = ctx.ID().getText();
         var value = visit(ctx.expression());
 
-        symbolTable.enterSymbol(id, value.getClass(), value);
+        if(value instanceof MSVal msVal){
+            symbolTable.enterSymbol(id, msVal.getType(), value);
+        }
+
+
 
         return null;
     }
@@ -69,12 +79,7 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
     @Override
     //Boolean visitor for boolean values
     public Object visitBool(MineScriptParser.BoolContext ctx) {
-        if (ctx.getText().equals("true") || ctx.getText().equals("false")) {
-            return Boolean.parseBoolean(ctx.getText());
-        } else {
-            throw new RuntimeException("Boolean value must be true or false");
-        }
-        //return Boolean.parseBoolean(ctx.getText());*/
+        return new MSBool(Boolean.parseBoolean(ctx.getText()));
     }
 
 
@@ -141,11 +146,12 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
     }
 
     @Override
-    public Object visitNumber(MineScriptParser.NumberContext ctx) {
-        return Integer.parseInt(ctx.getText());
+    public MSVal visitNumber(MineScriptParser.NumberContext ctx) {
+        return new MSNumber(Integer.parseInt(ctx.getText()));
     }
 
 
+    //TODO: Make MSNumber instead of int
     @Override
     public Object visitMultDivMod(MineScriptParser.MultDivModContext ctx) {
         var left = (int) visit(ctx.expression(0));
@@ -159,6 +165,7 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
         };
     }
 
+    //TODO: Make MSNumber instead of int
     @Override
     public Object visitPow(MineScriptParser.PowContext ctx) {
         var left = (int) visit(ctx.expression(0));
@@ -177,6 +184,7 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
         var right = (boolean) visit(ctx.expression(1));
 
         return left && right;
+    }
     
     @Override
     public Object visitOr(MineScriptParser.OrContext ctx) {
@@ -184,5 +192,110 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
         var right = (boolean) visit(ctx.expression(1));
 
         return left || right;
+    }
+
+    @Override
+    public Object visitFuncCall(MineScriptParser.FuncCallContext ctx) {
+        var id = ctx.ID().getText();
+        ArrayList<MSVal> actualParams = visitActual_parameters(ctx.actual_parameters());
+
+        switch (id) {
+            case "Step":
+                // code for Step function
+                break;
+            case "Turn":
+                // code for Turn function
+                break;
+            case "useBlock":
+                // code for useBlock function
+                break;
+            case "Break":
+                // code for Break function
+                break;
+            case "Roll":
+                // code for Roll function
+                break;
+            case "Peek":
+                // code for Peek function
+                break;
+            case "Sqrt":
+                // code for Sqrt function
+                break;
+            case "Random":
+                // code for Random function
+                break;
+            case "RandomBlock":
+                // code for RandomBlock function
+                break;
+            case "SetSpeed":
+                // code for SetSpeed function
+                break;
+            case "GetXPosition":
+                // code for GetXPosition function
+                break;
+            case "GetYPosition":
+                // code for GetYPosition function
+                break;
+            case "GetZPosition":
+                // code for GetZPosition function
+                break;
+            case "GetHorizontalDirection":
+                // code for GetHorizontalDirection function
+                break;
+            case "GetVerticalDirection":
+                // code for GetVerticalDirection function
+                break;
+            case "RandomNumbers":
+                // code for RandomNumbers case
+                break;
+            default:
+                var value = symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol(id));
+                if (value instanceof MSFunction function) {
+                    symbolTable.enterScope();
+                    var formalParams = function.getParameters();
+                    for (int i = 0; i < formalParams.size(); i++) {
+                        symbolTable.enterSymbol(formalParams.get(i), actualParams.get(i).getType(), actualParams.get(i));
+                    }
+                    visit(function.getCtx());
+                    symbolTable.exitScope();
+                } else {
+                    throw new RuntimeException("Cannot call " + id + " because it is not a function");
+                }
+
+
+
+
+        }
+        return null;
+    }
+
+    @Override
+    public Object visitFuncDecl(MineScriptParser.FuncDeclContext ctx) {
+
+        String id = ctx.ID().getText();
+        ArrayList<String> formalParams = visitFormal_paramaters(ctx.formal_paramaters());
+        formalParams.replaceAll(s -> id + "." + s);
+        var statementsCtx = ctx.statements();
+        MSFunction function = new MSFunction(id, formalParams, statementsCtx);
+        symbolTable.enterSymbol(id, function.getType(), function);
+
+        return null;
+    }
+
+    @Override
+    public ArrayList<MSVal> visitActual_parameters(MineScriptParser.Actual_parametersContext ctx) {
+        ArrayList<MSVal> actualParams = new ArrayList<MSVal>();
+        for (var param : ctx.expression()) {
+            actualParams.add((MSVal) visit(param));
+        }
+        return actualParams;
+    }
+
+    public ArrayList<String> visitFormal_paramaters(MineScriptParser.Formal_paramatersContext ctx) {
+        ArrayList<String> formalParams = new ArrayList<>();
+        for (var param : ctx.ID()) {
+            formalParams.add(param.getText());
+        }
+        return formalParams;
     }
 }

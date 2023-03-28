@@ -1,10 +1,7 @@
-Step(20)
-ronaldo = 23
+define qweqwe(a, b, c)do
+    ben = a
+    bss = b
+    dlp = c
+enddefine
 
-while (ronaldo > 21) do
-    ronaldo = ronaldo - 1
-    ben = 18
-endwhile
-
-ben = ronaldo
-
+qweqwe(412, 35)
