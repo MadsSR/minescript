@@ -28,17 +28,30 @@ public class SymbolTable {
     public void enterSymbol(String name, MSType type, Object value) {
         Symbol newSymbol = new Symbol(name, type, value);
 
+        if (isVarInNewScope(name)) {
+            Symbol oldSymbol = hashTable.get(getPrefixName(name));
+            delete(oldSymbol.name);
+            Symbol prefixSymbol = new Symbol(oldSymbol.name, type, value);
+            add(prefixSymbol);
+            scopeStack.peek().add(prefixSymbol.name);
+            return;
+        }
+
         if (hashTable.containsKey(name)) {
             delete(newSymbol.name);
-        }
-        else {
+        } else {
             scopeStack.peek().add(newSymbol.name);
         }
         add(newSymbol);
     }
-
     public Symbol retrieveSymbol(String name) {
-        return hashTable.get(name);
+        if (isVarInNewScope(name)) {
+            return hashTable.get(getPrefixName(name));
+        } else if (hashTable.containsKey(name)) {
+            return hashTable.get(name);
+        } else {
+            throw new RuntimeException("Symbol not found: " + name);
+        }
     }
     public Object retrieveSymbolValue(Symbol symbol) {
         return symbol.value;
@@ -50,6 +63,18 @@ public class SymbolTable {
 
     private void add(Symbol symbol) {
         hashTable.put(symbol.name, symbol);
+    }
+
+    /**
+     * @param name name of the variable
+     * @return true if the variable is in the current scope
+     */
+    private boolean isVarInNewScope(String name) {
+        return scopeStack.peek().stream().anyMatch(s -> s.contains("." + name));
+    }
+
+    private String getPrefixName(String name) {
+        return scopeStack.peek().stream().filter(s -> s.contains("." + name)).findFirst().get();
     }
 
     private static class Symbol {

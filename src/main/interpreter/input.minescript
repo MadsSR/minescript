@@ -1,7 +1,10 @@
-define qweqwe(a, b, c)do
-    ben = a
-    bss = b
-    dlp = c
+a = 10
+c = 80085
+
+define qweqwe(a)do
+    thatdog = 12
+    c = a
+    a = a
 enddefine
 
-qweqwe(412, 35)
+qweqwe(7)

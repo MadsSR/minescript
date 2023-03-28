@@ -29,8 +29,6 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
             symbolTable.enterSymbol(id, msVal.getType(), value);
         }
 
-
-
         return null;
     }
 
@@ -252,9 +250,10 @@ public class Visitor extends MineScriptBaseVisitor<Object> {
                 var value = symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol(id));
                 if (value instanceof MSFunction function) {
                     symbolTable.enterScope();
-                    var formalParams = function.getParameters();
+                    var formalParams = function.getParameters(); // Gets parameters
                     for (int i = 0; i < formalParams.size(); i++) {
-                        symbolTable.enterSymbol(formalParams.get(i), actualParams.get(i).getType(), actualParams.get(i));
+                        symbolTable.enterSymbol(formalParams.get(i), actualParams.get(i).getType(), actualParams.get(i)); // Actual parameters are binded to formal parameters
+
                     }
                     visit(function.getCtx());
                     symbolTable.exitScope();
