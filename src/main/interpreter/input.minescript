@@ -1,17 +1,9 @@
-a = 10
+a = 2
 
 define simon_says(a)do
-
-    define ben(a)do
-        a = a + 2
-        ben(a)
-        simon_says(a)
-
-    enddefine
-
-    ben(a)
-
+    a = a+1
+    simon_says(a)
 enddefine
 
-simon_says(2)
 
+simon_says(a)

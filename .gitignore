@@ -163,3 +163,7 @@ gradle-app.setting
 ### Gradle Patch ###
 # Java heap dump
 *.hprof
+
+
+### MineScript ###
+/src/main/interpreter/input.minescript

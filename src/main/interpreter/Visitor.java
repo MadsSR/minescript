@@ -287,7 +287,6 @@ public class Visitor extends MineScriptBaseVisitor<MSVal> {
 
         String id = ctx.ID().getText();
         ArrayList<String> formalParams = getFormalParams(ctx.formal_paramaters());
-        //formalParams.replaceAll(s -> id + "." + s);
         var statementsCtx = ctx.statements();
         MSFunction function = new MSFunction(id, formalParams, statementsCtx);
         symbolTable.enterSymbol(id, function.getType(), function);
