@@ -268,6 +268,7 @@ public class Visitor extends MineScriptBaseVisitor<MSVal> {
                     symbolTable.enterScope();
                     var formalParams = function.getParameters(); // Gets parameters
                     for (int i = 0; i < formalParams.size(); i++) {
+                        formalParams.set(i, id + "." + formalParams.get(i));
                         symbolTable.enterSymbol(formalParams.get(i), actualParams.get(i).getType(), actualParams.get(i)); // Actual parameters are binded to formal parameters
 
                     }
@@ -286,7 +287,6 @@ public class Visitor extends MineScriptBaseVisitor<MSVal> {
 
         String id = ctx.ID().getText();
         ArrayList<String> formalParams = getFormalParams(ctx.formal_paramaters());
-        formalParams.replaceAll(s -> id + "." + s);
         var statementsCtx = ctx.statements();
         MSFunction function = new MSFunction(id, formalParams, statementsCtx);
         symbolTable.enterSymbol(id, function.getType(), function);
