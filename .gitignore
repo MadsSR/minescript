@@ -166,4 +166,4 @@ gradle-app.setting
 
 
 ### MineScript ###
-src/main/interpreter/input.minescript
+/src/main/interpreter/input.minescript
