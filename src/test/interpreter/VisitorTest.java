@@ -3,6 +3,8 @@ package interpreter;
 import interpreter.antlr.MineScriptLexer;
 import interpreter.antlr.MineScriptParser;
 import interpreter.types.MSBool;
+import interpreter.types.MSNumber;
+import interpreter.types.MSVal;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.junit.jupiter.api.Test;
@@ -18,14 +20,14 @@ class VisitorTest {
     @ValueSource(ints = {-1000, -10, 0, 10, 1000})
     void visitAssignReturnsCorrectNumbers(int value) {
         visitor.visitAssign((MineScriptParser.AssignContext) getStmtTreeFromString("x = " + value + "\n"));
-        Assertions.assertEquals(value, visitor.visitId((MineScriptParser.IdContext) getExprTreeFromString("x")));
+        Assertions.assertEquals(value, ((MSNumber) visitor.visitId((MineScriptParser.IdContext) getExprTreeFromString("x"))).getValue());
     }
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void visitAssignReturnsCorrectBools(boolean value) {
         visitor.visitAssign((MineScriptParser.AssignContext) getStmtTreeFromString("x = " + value + "\n"));
-        Assertions.assertEquals(value, visitor.visitId((MineScriptParser.IdContext) getExprTreeFromString("x")));
+        Assertions.assertEquals(value, ((MSBool) visitor.visitId((MineScriptParser.IdContext) getExprTreeFromString("x"))).getValue());
     }
 
     @Test
@@ -55,7 +57,7 @@ class VisitorTest {
                         endrepeat
                         """.formatted(value)
         ));
-        Assertions.assertEquals(value, visitor.visitId((MineScriptParser.IdContext) getExprTreeFromString("x")));
+        Assertions.assertEquals(value, ((MSNumber) visitor.visitId((MineScriptParser.IdContext) getExprTreeFromString("x"))).getValue());
     }
 
     @ParameterizedTest
@@ -88,12 +90,12 @@ class VisitorTest {
 
     @Test
     void visitBoolPassTrueExpectedTrue() {
-        Assertions.assertEquals(true, visitor.visitBool((MineScriptParser.BoolContext) getExprTreeFromString("true")));
+        Assertions.assertTrue(((MSBool) visitor.visitBool((MineScriptParser.BoolContext) getExprTreeFromString("true"))).getValue());
     }
 
     @Test
     void visitBoolPassFalseExpectedFalse() {
-        Assertions.assertEquals(false, visitor.visitBool((MineScriptParser.BoolContext) getExprTreeFromString("false")));
+        Assertions.assertFalse(((MSBool) visitor.visitBool((MineScriptParser.BoolContext) getExprTreeFromString("false"))).getValue());
     }
 
     @Test
@@ -104,25 +106,25 @@ class VisitorTest {
     @Test
     void visitCompComparesIntValuesAndReturnsBooleanExpectsTrue() {
         //Initial tests for greater than and greater than or equal
-        Assertions.assertEquals(true, visitor.visitComp((MineScriptParser.CompContext) getExprTreeFromString("5 > 4")));
-        Assertions.assertEquals(true, visitor.visitComp((MineScriptParser.CompContext) getExprTreeFromString("5 >= 4")));
+        Assertions.assertTrue(((MSBool) visitor.visitComp((MineScriptParser.CompContext) getExprTreeFromString("5 > 4"))).getValue());
+        Assertions.assertTrue(((MSBool) visitor.visitComp((MineScriptParser.CompContext) getExprTreeFromString("5 >= 4"))).getValue());
     }
 
     @Test
     void visitCompComparesIntValuesAndReturnsBooleanExpectsFalse() {
         //Initial tests for less than and less than or equal
-        Assertions.assertEquals(false, visitor.visitComp((MineScriptParser.CompContext) getExprTreeFromString("5 < 4")));
-        Assertions.assertEquals(false, visitor.visitComp((MineScriptParser.CompContext) getExprTreeFromString("5 <= 4")));
+        Assertions.assertFalse(((MSBool) visitor.visitComp((MineScriptParser.CompContext) getExprTreeFromString("5 < 4"))).getValue());
+        Assertions.assertFalse(((MSBool) visitor.visitComp((MineScriptParser.CompContext) getExprTreeFromString("5 <= 4"))).getValue());
     }
 
     @Test
     void visitIsIsNotTestsIf5is5ExpectsTrue() {
-        Assertions.assertEquals(true, ((MSBool) visitor.visitIsIsNot((MineScriptParser.IsIsNotContext) getExprTreeFromString("5 is 5"))).getValue());
+        Assertions.assertTrue(((MSBool) visitor.visitIsIsNot((MineScriptParser.IsIsNotContext) getExprTreeFromString("5 is 5"))).getValue());
     }
 
     @Test
     void visitIsIsNotTestsIf5isNot5ExpectsFalse() {
-        Assertions.assertEquals(false, visitor.visitIsIsNot((MineScriptParser.IsIsNotContext) getExprTreeFromString("5 is not 5")));
+        Assertions.assertFalse(((MSBool) visitor.visitIsIsNot((MineScriptParser.IsIsNotContext) getExprTreeFromString("5 is not 5"))).getValue());
     }
 
     @Test
@@ -131,8 +133,8 @@ class VisitorTest {
 
     @Test
     void visitAddSub() {
-        Assertions.assertEquals(10, visitor.visitAddSub((MineScriptParser.AddSubContext) getExprTreeFromString("5 + 5")));
-        Assertions.assertEquals(0, visitor.visitAddSub((MineScriptParser.AddSubContext) getExprTreeFromString("5 - 5")));
+        Assertions.assertEquals(10, ((MSNumber) visitor.visitAddSub((MineScriptParser.AddSubContext) getExprTreeFromString("5 + 5"))).getValue());
+        Assertions.assertEquals(0, ((MSNumber) visitor.visitAddSub((MineScriptParser.AddSubContext) getExprTreeFromString("5 - 5"))).getValue());
     }
 
     @Test
@@ -142,23 +144,23 @@ class VisitorTest {
     @Test
     void visitParenExpr() {
         String input = "(10-3)\n";
-        Assertions.assertEquals(7, visitor.visitParenExpr((MineScriptParser.ParenExprContext) getExprTreeFromString(input)));
+        Assertions.assertEquals(7, ((MSNumber) visitor.visitParenExpr((MineScriptParser.ParenExprContext) getExprTreeFromString(input))).getValue());
     }
 
     @Test
     void visitMultDivMod() {
-        Assertions.assertEquals(25, visitor.visitMultDivMod((MineScriptParser.MultDivModContext) getExprTreeFromString("5 * 5")));
-        Assertions.assertEquals(1, visitor.visitMultDivMod((MineScriptParser.MultDivModContext) getExprTreeFromString("5 / 5")));
-        Assertions.assertEquals(0, visitor.visitMultDivMod((MineScriptParser.MultDivModContext) getExprTreeFromString("5 % 5")));
+        Assertions.assertEquals(25, ((MSNumber) visitor.visitMultDivMod((MineScriptParser.MultDivModContext) getExprTreeFromString("5 * 5"))).getValue());
+        Assertions.assertEquals(1, ((MSNumber) visitor.visitMultDivMod((MineScriptParser.MultDivModContext) getExprTreeFromString("5 / 5"))).getValue());
+        Assertions.assertEquals(0, ((MSNumber) visitor.visitMultDivMod((MineScriptParser.MultDivModContext) getExprTreeFromString("5 % 5"))).getValue());
     }
 
 
     @Test
     void visitPow() {
-        Assertions.assertEquals(25, visitor.visitPow((MineScriptParser.PowContext) getExprTreeFromString("5 ^ 2")));
-        Assertions.assertEquals(1, visitor.visitPow((MineScriptParser.PowContext) getExprTreeFromString("5 ^ 0")));
-        Assertions.assertEquals(0, visitor.visitPow((MineScriptParser.PowContext) getExprTreeFromString("0 ^ 5")));
-        Assertions.assertEquals(1, visitor.visitPow((MineScriptParser.PowContext) getExprTreeFromString("1 ^ 5")));
+        Assertions.assertEquals(25, ((MSNumber) visitor.visitPow((MineScriptParser.PowContext) getExprTreeFromString("5 ^ 2"))).getValue());
+        Assertions.assertEquals(1, ((MSNumber) visitor.visitPow((MineScriptParser.PowContext) getExprTreeFromString("5 ^ 0"))).getValue());
+        Assertions.assertEquals(0, ((MSNumber) visitor.visitPow((MineScriptParser.PowContext) getExprTreeFromString("0 ^ 5"))).getValue());
+        Assertions.assertEquals(1, ((MSNumber) visitor.visitPow((MineScriptParser.PowContext) getExprTreeFromString("1 ^ 5"))).getValue());
     }
 
     @Test
@@ -168,13 +170,13 @@ class VisitorTest {
 
     @Test
     void visitPowExpr() {
-        Assertions.assertEquals(25, visitor.visitPow((MineScriptParser.PowContext) getExprTreeFromString("5 ^ (2 + 0 * 1)")));
+        Assertions.assertEquals(25, ((MSNumber) visitor.visitPow((MineScriptParser.PowContext) getExprTreeFromString("5 ^ (2 + 0 * 1)"))).getValue());
     }
 
     @Test
     void visitPowId() {
         visitor.visitAssign((MineScriptParser.AssignContext) getStmtTreeFromString("x = 2\n"));
-        Assertions.assertEquals(25, visitor.visitPow((MineScriptParser.PowContext) getExprTreeFromString("5 ^ x")));
+        Assertions.assertEquals(25, ((MSNumber) visitor.visitPow((MineScriptParser.PowContext) getExprTreeFromString("5 ^ x"))).getValue());
     }
 
     @Test
@@ -185,20 +187,20 @@ class VisitorTest {
 
     @Test
     void visitNegNegativeNumber() {
-        Assertions.assertEquals(-5, visitor.visitNeg((MineScriptParser.NegContext) getExprTreeFromString("-5")));
-        Assertions.assertEquals(-3335, visitor.visitNeg((MineScriptParser.NegContext) getExprTreeFromString("-3335")));
+        Assertions.assertEquals(-5, ((MSNumber) visitor.visitNeg((MineScriptParser.NegContext) getExprTreeFromString("-5"))).getValue());
+        Assertions.assertEquals(-3335, ((MSNumber) visitor.visitNeg((MineScriptParser.NegContext) getExprTreeFromString("-3335"))).getValue());
     }
 
     @Test
     void visitNegExpr() {
-        Assertions.assertEquals(-10, visitor.visitNeg((MineScriptParser.NegContext) getExprTreeFromString("-(5 + 5)")));
-        Assertions.assertEquals(-1, visitor.visitNeg((MineScriptParser.NegContext) getExprTreeFromString("-(5 / 5)")));
+        Assertions.assertEquals(-10, ((MSNumber) visitor.visitNeg((MineScriptParser.NegContext) getExprTreeFromString("-(5 + 5)"))).getValue());
+        Assertions.assertEquals(-1, ((MSNumber) visitor.visitNeg((MineScriptParser.NegContext) getExprTreeFromString("-(5 / 5)"))).getValue());
     }
 
     @Test
     void visitNegId() {
         visitor.visitAssign((MineScriptParser.AssignContext) getStmtTreeFromString("x = 5\n"));
-        Assertions.assertEquals(-5, visitor.visitNeg((MineScriptParser.NegContext) getExprTreeFromString("-x")));
+        Assertions.assertEquals(-5, ((MSNumber) visitor.visitNeg((MineScriptParser.NegContext) getExprTreeFromString("-x"))).getValue());
     }
 
     @Test
@@ -207,28 +209,28 @@ class VisitorTest {
     }
     @Test
     void visitOrTrueOrFalseExpectsTrue() {
-        Assertions.assertEquals(true, visitor.visitOr((MineScriptParser.OrContext) getExprTreeFromString("true or false")));
+        Assertions.assertTrue(((MSBool) visitor.visitOr((MineScriptParser.OrContext) getExprTreeFromString("true or false"))).getValue());
     }
     @Test
     void visitOrTrueOrTrueExpectsTrue() {
-        Assertions.assertEquals(true, visitor.visitOr((MineScriptParser.OrContext) getExprTreeFromString("true or true")));
+        Assertions.assertTrue(((MSBool) visitor.visitOr((MineScriptParser.OrContext) getExprTreeFromString("true or true"))).getValue());
     }
     @Test
     void visitOrFalseOrFalseExpectsFalse() {
-        Assertions.assertEquals(false, visitor.visitOr((MineScriptParser.OrContext) getExprTreeFromString("false or false")));
+        Assertions.assertFalse(((MSBool) visitor.visitOr((MineScriptParser.OrContext) getExprTreeFromString("false or false"))).getValue());
     }
 
 
     @Test
     void visitAndComparesTwoTruesExpectsTrue() {
-        Assertions.assertEquals(true, visitor.visitAnd((MineScriptParser.AndContext) getExprTreeFromString("true and true")));
+        Assertions.assertTrue(((MSBool) visitor.visitAnd((MineScriptParser.AndContext) getExprTreeFromString("true and true"))).getValue());
     }
 
     @Test
     void visitAndComparesFalseOutcomesExpectsFalse() {
-        Assertions.assertEquals(false, visitor.visitAnd((MineScriptParser.AndContext) getExprTreeFromString("true and false")));
-        Assertions.assertEquals(false, visitor.visitAnd((MineScriptParser.AndContext) getExprTreeFromString("false and true")));
-        Assertions.assertEquals(false, visitor.visitAnd((MineScriptParser.AndContext) getExprTreeFromString("false and false")));
+        Assertions.assertFalse(((MSBool) visitor.visitAnd((MineScriptParser.AndContext) getExprTreeFromString("true and false"))).getValue());
+        Assertions.assertFalse(((MSBool) visitor.visitAnd((MineScriptParser.AndContext) getExprTreeFromString("false and true"))).getValue());
+        Assertions.assertFalse(((MSBool) visitor.visitAnd((MineScriptParser.AndContext) getExprTreeFromString("false and false"))).getValue());
     }
 
     private MineScriptParser.ExpressionContext getExprTreeFromString(String input) {
