@@ -34,7 +34,6 @@ public class SymbolTable {
             delete(oldSymbol.name);
             Symbol prefixSymbol = new Symbol(oldSymbol.name, type, value);
             add(prefixSymbol);
-            scopeStack.peek().add(prefixSymbol.name);
             return;
         }
 
@@ -73,7 +72,7 @@ public class SymbolTable {
      * @return true if the variable is in the current scope
      */
     private boolean isVarInNewScope(String name) {
-        return scopeStack.peek().stream().anyMatch(s -> s.contains("." + name));
+        return scopeStack.peek().stream().anyMatch(s -> s.endsWith("." + name));
     }
 
     private String getPrefixName(String name) {
