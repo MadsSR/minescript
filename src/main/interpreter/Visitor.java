@@ -49,15 +49,16 @@ public class Visitor extends MineScriptBaseVisitor<MSVal> {
 
     @Override
     public MSVal visitIf(MineScriptParser.IfContext ctx) {
-        if (parser.getBoolean(visit(ctx.expression(0))).getValue()) {
-            visit(ctx.statements(0));
-        } else if (ctx.expression().size() > 1) {
-            for (int i = 1; i < ctx.expression().size(); i++) {
-                if (parser.getBoolean(visit(ctx.expression(i))).getValue()) {
-                    visit(ctx.statements(i));
-                }
+        // Handle if and else if
+        for (var expression : ctx.expression()) {
+            if (parser.getBoolean(visit(expression)).getValue()) {
+                visit(ctx.statements(ctx.expression().indexOf(expression)));
+                return null;
             }
-        } else if (ctx.statements().size() > ctx.expression().size()) {
+        }
+
+        // Handle else
+        if (ctx.expression().size() < ctx.statements().size()) {
             visit(ctx.statements(ctx.statements().size() - 1));
         }
 
