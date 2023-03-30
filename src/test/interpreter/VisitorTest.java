@@ -43,7 +43,107 @@ class VisitorTest {
     }
 
     @Test
-    void visitIf() {
+    void visitIfIfEvaluatesTrue() {
+        String input = """
+                if (x is 0) do
+                    x = 1
+                endif
+                """;
+        visitor.visitAssign((MineScriptParser.AssignContext) getStmtTreeFromString("x = 0\n"));
+        visitor.visitIf((MineScriptParser.IfContext) getStmtTreeFromString(input));
+        Assertions.assertEquals(1, ((MSNumber) visitor.visitId((MineScriptParser.IdContext) getExprTreeFromString("x"))).getValue());
+    }
+
+    @Test
+    void visitIfIfEvaluatesFalse() {
+        String input = """
+                if (x is 0) do
+                    x = 1
+                endif
+                """;
+        visitor.visitAssign((MineScriptParser.AssignContext) getStmtTreeFromString("x = 1\n"));
+        visitor.visitIf((MineScriptParser.IfContext) getStmtTreeFromString(input));
+        Assertions.assertEquals(1, ((MSNumber) visitor.visitId((MineScriptParser.IdContext) getExprTreeFromString("x"))).getValue());
+    }
+
+    @Test
+    void visitIfElseIfEvaluatesTrue() {
+        String input = """
+                if (x is 0) do
+                    x = 1
+                else do
+                    x = 2
+                endif
+                """;
+        visitor.visitAssign((MineScriptParser.AssignContext) getStmtTreeFromString("x = 0\n"));
+        visitor.visitIf((MineScriptParser.IfContext) getStmtTreeFromString(input));
+        Assertions.assertEquals(1, ((MSNumber) visitor.visitId((MineScriptParser.IdContext) getExprTreeFromString("x"))).getValue());
+    }
+
+    @Test
+    void visitIfElseIfEvaluatesFalse() {
+        String input = """
+                if (x is 0) do
+                    x = 1
+                else do
+                    x = 2
+                endif
+                """;
+        visitor.visitAssign((MineScriptParser.AssignContext) getStmtTreeFromString("x = 1\n"));
+        visitor.visitIf((MineScriptParser.IfContext) getStmtTreeFromString(input));
+        Assertions.assertEquals(2, ((MSNumber) visitor.visitId((MineScriptParser.IdContext) getExprTreeFromString("x"))).getValue());
+    }
+
+    @Test
+    void visitIfElseIfElseIfEvaluatesTrue() {
+        String input = """
+                if (x is 0) do
+                    x = 1
+                else if (x is 1) do
+                    x = 2
+                else do
+                    x = 3
+                endif
+                """;
+        visitor.visitAssign((MineScriptParser.AssignContext) getStmtTreeFromString("x = 0\n"));
+        visitor.visitIf((MineScriptParser.IfContext) getStmtTreeFromString(input));
+        Assertions.assertEquals(1, ((MSNumber) visitor.visitId((MineScriptParser.IdContext) getExprTreeFromString("x"))).getValue());
+    }
+
+    @Test
+    void visitIfElseIfElseElseIfEvaluatesTrue() {
+        String input = """
+                if (x is 0) do
+                    x = 1
+                else if (x is 1) do
+                    x = 2
+                else if (x is 2) do
+                    x = 3
+                else do
+                    x = 4
+                endif
+                """;
+        visitor.visitAssign((MineScriptParser.AssignContext) getStmtTreeFromString("x = 2\n"));
+        visitor.visitIf((MineScriptParser.IfContext) getStmtTreeFromString(input));
+        Assertions.assertEquals(3, ((MSNumber) visitor.visitId((MineScriptParser.IdContext) getExprTreeFromString("x"))).getValue());
+    }
+
+    @Test
+    void visitIfElseIfElseElseIfEvaluatesFalse() {
+        String input = """
+                if (x is 0) do
+                    x = 1
+                else if (x is 1) do
+                    x = 2
+                else if (x is 2) do
+                    x = 3
+                else do
+                    x = 4
+                endif
+                """;
+        visitor.visitAssign((MineScriptParser.AssignContext) getStmtTreeFromString("x = 3\n"));
+        visitor.visitIf((MineScriptParser.IfContext) getStmtTreeFromString(input));
+        Assertions.assertEquals(4, ((MSNumber) visitor.visitId((MineScriptParser.IdContext) getExprTreeFromString("x"))).getValue());
     }
 
     @ParameterizedTest
@@ -207,14 +307,17 @@ class VisitorTest {
     void visitNegStringThrowsException() {
         Assertions.assertThrows(RuntimeException.class, () -> visitor.visitNeg((MineScriptParser.NegContext) getExprTreeFromString("-unknown")));
     }
+
     @Test
     void visitOrTrueOrFalseExpectsTrue() {
         Assertions.assertTrue(((MSBool) visitor.visitOr((MineScriptParser.OrContext) getExprTreeFromString("true or false"))).getValue());
     }
+
     @Test
     void visitOrTrueOrTrueExpectsTrue() {
         Assertions.assertTrue(((MSBool) visitor.visitOr((MineScriptParser.OrContext) getExprTreeFromString("true or true"))).getValue());
     }
+
     @Test
     void visitOrFalseOrFalseExpectsFalse() {
         Assertions.assertFalse(((MSBool) visitor.visitOr((MineScriptParser.OrContext) getExprTreeFromString("false or false"))).getValue());
