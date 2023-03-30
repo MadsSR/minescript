@@ -9,7 +9,7 @@ public class Interpreter {
     public static void main(String[] args) throws Exception {
         try {
             // create a CharStream that reads from standard input
-            CharStream input = CharStreams.fromFileName("src/main/interpreter/input.minescript");
+            CharStream input = CharStreams.fromString(CharStreams.fromFileName("src/main/interpreter/input.minescript") + System.lineSeparator());
             // create a lexer that feeds off of input CharStream
             MineScriptLexer lexer = new MineScriptLexer(input);
             // create a buffer of tokens pulled from the lexer

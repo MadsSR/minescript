@@ -1,5 +1,6 @@
 package interpreter;
 
+import interpreter.exceptions.SymbolNotFoundException;
 import interpreter.types.MSBool;
 import interpreter.types.MSType;
 import interpreter.types.MSVal;
@@ -51,7 +52,7 @@ public class SymbolTable {
         } else if (hashTable.containsKey(name)) {
             return hashTable.get(name);
         } else {
-            throw new RuntimeException("Symbol not found: " + name);
+            throw new SymbolNotFoundException("Could not find symbol in symbol table: " + name);
         }
     }
 
