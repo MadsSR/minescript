@@ -4,7 +4,6 @@ import interpreter.antlr.MineScriptLexer;
 import interpreter.antlr.MineScriptParser;
 import interpreter.types.MSBool;
 import interpreter.types.MSNumber;
-import interpreter.types.MSVal;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.junit.jupiter.api.Test;
@@ -38,8 +37,39 @@ class VisitorTest {
         );
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = {0, 5, 10, 15})
+    void visitWhileTrueExprCorrectNumIterations(int value) {
+        String input = """
+                while (x < %d) do
+                    x = x + 1
+                endwhile
+                """.formatted(value);
+        visitor.visitAssign((MineScriptParser.AssignContext) getStmtTreeFromString("x = 0\n"));
+        visitor.visitWhile((MineScriptParser.WhileContext) getStmtTreeFromString(input));
+        Assertions.assertEquals(value, ((MSNumber) visitor.visitId((MineScriptParser.IdContext) getExprTreeFromString("x"))).getValue());
+    }
+
     @Test
-    void visitWhile() {
+    void visitWhileFalseExprSkipDo() {
+        String input = """
+                while (false) do
+                    x = x + 1
+                endwhile
+                """;
+        visitor.visitAssign((MineScriptParser.AssignContext) getStmtTreeFromString("x = 0\n"));
+        visitor.visitWhile((MineScriptParser.WhileContext) getStmtTreeFromString(input));
+        Assertions.assertEquals(0, ((MSNumber) visitor.visitId((MineScriptParser.IdContext) getExprTreeFromString("x"))).getValue());
+    }
+
+    @Test
+    void visitWhileInvalidExprThrowsException() {
+        String input = """
+                while (abcd) do
+                    x = x + 1
+                endwhile
+                """;
+        Assertions.assertThrows(RuntimeException.class, () -> visitor.visitWhile((MineScriptParser.WhileContext) getStmtTreeFromString(input)));
     }
 
     @Test
@@ -187,7 +217,6 @@ class VisitorTest {
         );
     }
 
-
     @Test
     void visitBoolPassTrueExpectedTrue() {
         Assertions.assertTrue(((MSBool) visitor.visitBool((MineScriptParser.BoolContext) getExprTreeFromString("true"))).getValue());
@@ -254,7 +283,6 @@ class VisitorTest {
         Assertions.assertEquals(0, ((MSNumber) visitor.visitMultDivMod((MineScriptParser.MultDivModContext) getExprTreeFromString("5 % 5"))).getValue());
     }
 
-
     @Test
     void visitPow() {
         Assertions.assertEquals(25, ((MSNumber) visitor.visitPow((MineScriptParser.PowContext) getExprTreeFromString("5 ^ 2"))).getValue());
@@ -283,7 +311,6 @@ class VisitorTest {
     void visitPowStringThrowsException() {
         Assertions.assertThrows(RuntimeException.class, () -> visitor.visitPow((MineScriptParser.PowContext) getExprTreeFromString("5 ^ unknown")));
     }
-
 
     @Test
     void visitNegNegativeNumber() {
