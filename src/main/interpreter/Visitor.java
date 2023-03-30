@@ -1,6 +1,7 @@
 package interpreter;
 
 import interpreter.antlr.*;
+import interpreter.exceptions.SymbolNotFoundException;
 import interpreter.types.*;
 
 import java.util.ArrayList;
@@ -284,23 +285,37 @@ public class Visitor extends MineScriptBaseVisitor<MSVal> {
                 // code for RandomNumbers case
                 break;
             default:
-                var value = symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol(id));
+                MSVal value;
+
+                try {
+                    value = symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol(id));
+                }
+                catch (SymbolNotFoundException e) {
+                    throw new RuntimeException("Cannot call " + id + " because it is not declared");
+                }
+
                 if (value instanceof MSFunction function) {
-                    symbolTable.enterScope();
                     var formalParams = function.getParameters();
+
+                    if (formalParams.size() != actualParams.size()) {
+                        throw new RuntimeException("Cannot call " + id + " because it has " + formalParams.size() + " parameters, but " + actualParams.size() + " were given");
+                    }
+
+                    symbolTable.enterScope();
 
                     // Bind actual params to formal params
                     for (int i = 0; i < formalParams.size(); i++) {
                         formalParams.set(i, id + "." + formalParams.get(i));
                         symbolTable.enterSymbol(formalParams.get(i), actualParams.get(i).getType(), actualParams.get(i));
                     }
+
                     retVal = visit(function.getCtx());
                     hasReturned = false;
                     symbolTable.exitScope();
-                } else {
+                }
+                else {
                     throw new RuntimeException("Cannot call " + id + " because it is not a function");
                 }
-
         }
         inFunctionDecl = false;
         return retVal;
@@ -308,9 +323,8 @@ public class Visitor extends MineScriptBaseVisitor<MSVal> {
 
     @Override
     public MSVal visitFuncDecl(MineScriptParser.FuncDeclContext ctx) {
-
-        String id = ctx.ID().getText();
         ArrayList<String> formalParams = getFormalParams(ctx.formal_paramaters());
+        String id = ctx.ID().getText();
         var statementsCtx = ctx.statements();
         MSFunction function = new MSFunction(id, formalParams, statementsCtx);
         symbolTable.enterSymbol(id, function.getType(), function);
@@ -330,6 +344,10 @@ public class Visitor extends MineScriptBaseVisitor<MSVal> {
 
     private ArrayList<String> getFormalParams(MineScriptParser.Formal_paramatersContext ctx) {
         ArrayList<String> formalParams = new ArrayList<>();
+
+        if (ctx == null)
+            return formalParams;
+
         for (var param : ctx.ID()) {
             formalParams.add(param.getText());
         }
@@ -338,6 +356,10 @@ public class Visitor extends MineScriptBaseVisitor<MSVal> {
 
     private ArrayList<MSVal> getActualParams(MineScriptParser.Actual_parametersContext ctx) {
         ArrayList<MSVal> actualParams = new ArrayList<>();
+
+        if (ctx == null)
+            return actualParams;
+
         for (var param : ctx.expression()) {
             actualParams.add(visit(param));
         }
