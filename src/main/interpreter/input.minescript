@@ -1,11 +1,11 @@
 a = 2
 
+b = simon_says(a)
+
 define simon_says(a)do
     a = a+1
-    return 2
+    return a
     ben = 5
 enddefine
-
-b = simon_says(a)
 
 ben = 2

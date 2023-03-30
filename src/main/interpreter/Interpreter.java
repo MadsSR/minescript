@@ -5,6 +5,7 @@ import org.antlr.v4.runtime.tree.*;
 import interpreter.antlr.*;
 
 public class Interpreter {
+
     public static void main(String[] args) throws Exception {
         try {
             // create a CharStream that reads from standard input
