@@ -12,6 +12,22 @@ public class Visitor extends MineScriptBaseVisitor<MSVal> {
     private boolean inFunctionDecl = false;
 
     @Override
+    public MSVal visitProgram(MineScriptParser.ProgramContext ctx) {
+        for (MineScriptParser.StatementContext statement : ctx.statement()) {
+            if (statement instanceof MineScriptParser.FuncDeclContext) {
+                visit(statement);
+            }
+        }
+
+        for (MineScriptParser.StatementContext statement : ctx.statement()) {
+            if (!(statement instanceof MineScriptParser.FuncDeclContext)) {
+                visit(statement);
+            }
+        }
+        return null;
+    }
+
+    @Override
     public MSVal visitStatements(MineScriptParser.StatementsContext ctx) {
         MSVal val;
         for (MineScriptParser.StatementContext statement : ctx.statement()) {
