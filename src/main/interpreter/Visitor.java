@@ -3,24 +3,25 @@ package interpreter;
 import interpreter.antlr.*;
 import interpreter.types.*;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class Visitor extends MineScriptBaseVisitor<MSVal> {
     private final SymbolTable symbolTable = new SymbolTable();
     private final ExpressionParser parser = new ExpressionParser();
+    private boolean hasReturned = false;
+    private boolean inFunctionDecl = false;
 
     @Override
     public MSVal visitStatements(MineScriptParser.StatementsContext ctx) {
+        MSVal val;
         for (MineScriptParser.StatementContext statement : ctx.statement()) {
-            visit(statement);
+            val = visit(statement);
+            if (hasReturned) {
+                return val;
+            }
         }
-
         return null;
     }
-
     @Override
     public MSVal visitAssign(MineScriptParser.AssignContext ctx) {
         String id = ctx.ID().getText();
@@ -40,11 +41,6 @@ public class Visitor extends MineScriptBaseVisitor<MSVal> {
         symbolTable.exitScope();
 
         return null;
-    }
-
-    @Override
-    public MSVal visitExpr(MineScriptParser.ExprContext ctx) {
-        return (MSVal) visit(ctx.expression());
     }
 
     @Override
@@ -158,8 +154,6 @@ public class Visitor extends MineScriptBaseVisitor<MSVal> {
         return new MSNumber(Integer.parseInt(ctx.getText()));
     }
 
-
-    //TODO: Make MSNumber instead of int
     @Override
     public MSVal visitMultDivMod(MineScriptParser.MultDivModContext ctx) {
         MSVal left = visit(ctx.expression(0));
@@ -176,7 +170,6 @@ public class Visitor extends MineScriptBaseVisitor<MSVal> {
         throw new RuntimeException("Cannot multiply / divide / mod " + left.getClass() + " and " + right.getClass());
     }
 
-    //TODO: Make MSNumber instead of int
     @Override
     public MSVal visitPow(MineScriptParser.PowContext ctx) {
         MSVal left = visit(ctx.expression(0));
@@ -209,9 +202,20 @@ public class Visitor extends MineScriptBaseVisitor<MSVal> {
     }
 
     @Override
+    public MSVal visitReturn(MineScriptParser.ReturnContext ctx) {
+        if (!inFunctionDecl) {
+            throw new RuntimeException("Cannot return outside of define block");
+        }
+        hasReturned = true;
+        return visit(ctx.expression());
+    }
+
+    @Override
     public MSVal visitFuncCall(MineScriptParser.FuncCallContext ctx) {
         var id = ctx.ID().getText();
         ArrayList<MSVal> actualParams = getActualParams(ctx.actual_parameters());
+        MSVal retVal = null;
+        inFunctionDecl = true;
 
         switch (id) {
             case "Step":
@@ -266,20 +270,23 @@ public class Visitor extends MineScriptBaseVisitor<MSVal> {
                 var value = symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol(id));
                 if (value instanceof MSFunction function) {
                     symbolTable.enterScope();
-                    var formalParams = function.getParameters(); // Gets parameters
+                    var formalParams = function.getParameters();
+
+                    // Bind actual params to formal params
                     for (int i = 0; i < formalParams.size(); i++) {
                         formalParams.set(i, id + "." + formalParams.get(i));
-                        symbolTable.enterSymbol(formalParams.get(i), actualParams.get(i).getType(), actualParams.get(i)); // Actual parameters are binded to formal parameters
-
+                        symbolTable.enterSymbol(formalParams.get(i), actualParams.get(i).getType(), actualParams.get(i));
                     }
-                    visit(function.getCtx());
+                    retVal = visit(function.getCtx());
+                    hasReturned = false;
                     symbolTable.exitScope();
                 } else {
                     throw new RuntimeException("Cannot call " + id + " because it is not a function");
                 }
 
         }
-        return null;
+        inFunctionDecl = false;
+        return retVal;
     }
 
     @Override
