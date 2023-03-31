@@ -16,13 +16,10 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"minescript.ExampleMod"
+			"minescript.MineScript"
 		],
 		"client": [
-			"minescript.ExampleModClient"
-		],
-		"fabric-datagen": [
-			"minescript.ExampleModDataGenerator"
+			"minescript.MineScriptClient"
 		]
 	},
 	"mixins": [
