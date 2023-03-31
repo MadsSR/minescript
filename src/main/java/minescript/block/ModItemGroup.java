@@ -12,7 +12,7 @@ public class ModItemGroup {
 
     public static void registerItemGroups() {
         MINESCRIPT_GROUP = FabricItemGroup.builder(new Identifier("minescript", "minescript_group"))
-                .displayName(Text.literal("MineScript group"))
+                .displayName(Text.literal("MineScript"))
                 .icon(() -> new ItemStack(Items.DIAMOND_HOE))
                 .entries((enabledFeatures, entries) -> {
                     entries.add(Items.DIAMOND);
