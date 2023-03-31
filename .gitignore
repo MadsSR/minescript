@@ -167,3 +167,6 @@ gradle-app.setting
 
 ### MineScript ###
 /src/main/interpreter/input.minescript
+
+### Fabric ###
+/run
