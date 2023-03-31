@@ -374,4 +374,89 @@ class VisitorTest {
         var parser = new MineScriptParser(new CommonTokenStream(lexer));
         return parser.statement();
     }
+
+    @Test
+    void visitFuncCallNoFormalParamsNoActualParamReturnsValue() {
+        visitor.visitFuncDecl((MineScriptParser.FuncDeclContext) getStmtTreeFromString(
+                """
+                        define test() do 
+                            return 5
+                        enddefine
+                        """
+        ));
+        Assertions.assertEquals(5, ((MSNumber) visitor.visitFuncCall((MineScriptParser.FuncCallContext) getExprTreeFromString("test()"))).getValue());
+    }
+
+    @Test
+    void visitFuncCallNoFormalParamsOneActualParamThrowsException() {
+        visitor.visitFuncDecl((MineScriptParser.FuncDeclContext) getStmtTreeFromString(
+                """
+                        define test() do 
+                            return 5
+                        enddefine
+                        """
+        ));
+        Assertions.assertThrows(RuntimeException.class, () -> visitor.visitFuncCall((MineScriptParser.FuncCallContext) getExprTreeFromString("test(5)")));
+    }
+
+    @Test
+    void visitFuncCallOneFormalParamsNoActualParamsThrowsException() {
+        visitor.visitFuncDecl((MineScriptParser.FuncDeclContext) getStmtTreeFromString(
+                """
+                        define test(x) do 
+                            return 5
+                        enddefine
+                        """
+        ));
+        Assertions.assertThrows(RuntimeException.class, () -> visitor.visitFuncCall((MineScriptParser.FuncCallContext) getExprTreeFromString("test()")));
+    }
+
+    @Test
+    void visitFuncCallOneFormalParamOneActualParamReturnsVariable() {
+        visitor.visitFuncDecl((MineScriptParser.FuncDeclContext) getStmtTreeFromString(
+                """
+                        define test(x) do 
+                            return x
+                        enddefine
+                        """
+        ));
+        Assertions.assertEquals(5, ((MSNumber) visitor.visitFuncCall((MineScriptParser.FuncCallContext) getExprTreeFromString("test(5)"))).getValue());
+    }
+
+    @Test
+    void visitFuncCallOneFormalParamMultipleActualParamsThrowsException() {
+        visitor.visitFuncDecl((MineScriptParser.FuncDeclContext) getStmtTreeFromString(
+                """
+                        define test(x) do 
+                            return x
+                        enddefine
+                        """
+        ));
+        Assertions.assertThrows(RuntimeException.class, () -> visitor.visitFuncCall((MineScriptParser.FuncCallContext) getExprTreeFromString("test(5, 6)")));
+    }
+
+    @Test
+    void visitFuncCallMultipleFormalParamsOneActualParamThrowsException() {
+        visitor.visitFuncDecl((MineScriptParser.FuncDeclContext) getStmtTreeFromString(
+                """
+                        define test(x, y) do 
+                            return x
+                        enddefine
+                        """
+        ));
+        Assertions.assertThrows(RuntimeException.class, () -> visitor.visitFuncCall((MineScriptParser.FuncCallContext) getExprTreeFromString("test(5)")));
+    }
+
+    @Test
+    void visitFuncCallMultipleFormalParamsMultipleActualParamsReturnsValue() {
+        visitor.visitFuncDecl((MineScriptParser.FuncDeclContext) getStmtTreeFromString(
+                """
+                        define test(x, y) do 
+                            z = x + y
+                            return z
+                        enddefine
+                        """
+        ));
+        Assertions.assertEquals(11, ((MSNumber) visitor.visitFuncCall((MineScriptParser.FuncCallContext) getExprTreeFromString("test(5, 6)"))).getValue());
+    }
 }
