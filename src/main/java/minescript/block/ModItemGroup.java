@@ -1,4 +1,4 @@
-package java.minescript.block;
+package minescript.block;
 
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.minecraft.item.ItemGroup;
@@ -11,7 +11,7 @@ public class ModItemGroup {
     public static ItemGroup MINESCRIPT_GROUP;
 
     public static void registerItemGroups() {
-        MINESCRIPT_GROUP = FabricItemGroup.builder(new Identifier("java/minescript", "minescript_group"))
+        MINESCRIPT_GROUP = FabricItemGroup.builder(new Identifier("minescript", "minescript_group"))
                 .displayName(Text.literal("MineScript group"))
                 .icon(() -> new ItemStack(Items.DIAMOND_HOE))
                 .entries((enabledFeatures, entries) -> {

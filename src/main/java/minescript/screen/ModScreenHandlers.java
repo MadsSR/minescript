@@ -1,4 +1,4 @@
-package java.minescript.screen;
+package minescript.screen;
 
 public class ModScreenHandlers {
 

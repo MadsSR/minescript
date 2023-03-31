@@ -1,7 +1,7 @@
-package java.minescript;
+package minescript;
 
-import java.minescript.block.ModBlocks;
-import java.minescript.block.ModItemGroup;
+import minescript.block.ModBlocks;
+import minescript.block.ModItemGroup;
 import net.fabricmc.api.ModInitializer;
 
 import org.slf4j.Logger;
@@ -11,8 +11,8 @@ public class MineScript implements ModInitializer {
 	// This logger is used to write text to the console and the log file.
 	// It is considered best practice to use your mod id as the logger's name.
 	// That way, it's clear which mod wrote info, warnings, and errors.
-	public static final Logger LOGGER = LoggerFactory.getLogger("java/minescript");
-	public static final String MOD_ID = "java/minescript";
+	public static final Logger LOGGER = LoggerFactory.getLogger("minescript");
+	public static final String MOD_ID = "minescript";
 
 	@Override
 	public void onInitialize() {

@@ -1,7 +1,7 @@
-package java.minescript.block.entity;
+package minescript.block.entity;
 
-import java.minescript.MineScript;
-import java.minescript.block.ModBlocks;
+import minescript.MineScript;
+import minescript.block.ModBlocks;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.registry.Registries;

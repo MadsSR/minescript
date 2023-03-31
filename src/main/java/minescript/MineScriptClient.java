@@ -1,4 +1,4 @@
-package java.minescript;
+package minescript;
 
 import net.fabricmc.api.ClientModInitializer;
 

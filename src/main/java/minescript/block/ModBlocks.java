@@ -1,7 +1,7 @@
-package java.minescript.block;
+package minescript.block;
 
-import java.minescript.MineScript;
-import java.minescript.block.custom.TurtleBlock;
+import minescript.MineScript;
+import minescript.block.custom.TurtleBlock;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;

@@ -1,6 +1,6 @@
-package java.minescript.block.entity;
+package minescript.block.entity;
 
-import java.minescript.item.inventory.ImplementedInventory;
+import minescript.item.inventory.ImplementedInventory;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;

@@ -1,7 +1,7 @@
-package java.minescript.block.custom;
+package minescript.block.custom;
 
-import java.minescript.block.entity.ModBlockEntities;
-import java.minescript.block.entity.TurtleBlockEntity;
+import minescript.block.entity.ModBlockEntities;
+import minescript.block.entity.TurtleBlockEntity;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;

@@ -1,4 +1,4 @@
-package java.minescript.item.inventory;
+package minescript.item.inventory;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventories;
