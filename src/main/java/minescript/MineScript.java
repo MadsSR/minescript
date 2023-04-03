@@ -2,8 +2,10 @@ package minescript;
 
 import minescript.block.ModBlocks;
 import minescript.block.ModItemGroup;
+import minescript.block.entity.ModBlockEntities;
 import net.fabricmc.api.ModInitializer;
 
+import net.minecraft.registry.Registry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +24,7 @@ public class MineScript implements ModInitializer {
 
 		LOGGER.info("Hello Fabric world!");
 		ModItemGroup.registerItemGroups();
+		ModBlockEntities.registerBlockEntities();
 		ModBlocks.registerModBlocks();
 	}
 
