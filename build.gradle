@@ -17,8 +17,7 @@ group = project.maven_group
 repositories {
     mavenCentral()
     maven {
-        name = "CottonMC"
-        url = "https://server.bbkr.space/artifactory/libs-release"
+        url = "https://maven.wispforest.io/"
     }
 }
 
@@ -38,8 +37,6 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
 
-    modImplementation include("io.github.cottonmc:LibGui:7.0.0-beta.2+1.19.4")
-
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
@@ -47,10 +44,7 @@ dependencies {
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    // Uncomment the following line to enable the deprecated Fabric API modules.
-    // These are included in the Fabric API production distribution and allow you to update your mod to the latest modules at a later more convenient time.
-
-    // modImplementation "net.fabricmc.fabric-api:fabric-api-deprecated:${project.fabric_version}"
+    modImplementation "io.wispforest:owo-lib:${project.owo_version}"
 }
 
 processResources {

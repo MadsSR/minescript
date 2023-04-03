@@ -1,0 +1,25 @@
+<owo-ui xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/wisp-forest/owo-lib/0.8/owo-ui.xsd">
+    <components>
+        <flow-layout direction="vertical">
+            <children>
+                <flow-layout direction="vertical">
+                    <children>
+                        <EditBoxWidget id="edit-box">
+                            <margins>
+                                <all>15</all>
+                            </margins>
+                        </EditBoxWidget>
+                    </children>
+                    <surface>
+                        <panel dark="true"/>
+                    </surface>
+                </flow-layout>
+            </children>
+            <vertical-alignment>center</vertical-alignment>
+            <horizontal-alignment>center</horizontal-alignment>
+            <surface>
+                <vanilla-translucent/>
+            </surface>
+        </flow-layout>
+    </components>
+</owo-ui>
