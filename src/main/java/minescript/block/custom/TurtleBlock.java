@@ -3,7 +3,6 @@ package minescript.block.custom;
 import minescript.block.entity.ModBlockEntities;
 import minescript.block.entity.TurtleBlockEntity;
 import minescript.screen.TextEditorScreen;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
@@ -13,7 +12,6 @@ import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -21,12 +19,6 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
 
 public class TurtleBlock extends BlockWithEntity implements BlockEntityProvider {
     public TurtleBlock(Settings settings) {
@@ -49,15 +41,6 @@ public class TurtleBlock extends BlockWithEntity implements BlockEntityProvider 
         }
 
         return ActionResult.SUCCESS;
-    }
-
-    @Override
-    public void onSteppedOn(World world, BlockPos pos, BlockState state, Entity entity) {
-        if(entity instanceof LivingEntity livingEntity) {
-            livingEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.JUMP_BOOST, 200));
-        }
-
-        super.onSteppedOn(world, pos, state, entity);
     }
 
     @Nullable

@@ -8,7 +8,6 @@ import net.fabricmc.api.ModInitializer;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.EditBoxWidget;
-import net.minecraft.registry.Registry;
 import net.minecraft.text.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
