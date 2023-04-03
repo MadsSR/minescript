@@ -2,6 +2,8 @@ package minescript.block.custom;
 
 import minescript.block.entity.ModBlockEntities;
 import minescript.block.entity.TurtleBlockEntity;
+import minescript.screen.TextEditorScreen;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
@@ -9,6 +11,7 @@ import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.text.Text;
@@ -42,9 +45,10 @@ public class TurtleBlock extends BlockWithEntity implements BlockEntityProvider 
         // Client: Main Hand & Off Hand
         if (world.isClient && hand == Hand.MAIN_HAND) {
             player.sendMessage(Text.literal("Right Clicked This!"));
+            MinecraftClient.getInstance().setScreen(new TextEditorScreen());
         }
 
-        return super.onUse(state, world, pos, player, hand, hit);
+        return ActionResult.SUCCESS;
     }
 
     @Override
