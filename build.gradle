@@ -23,36 +23,13 @@ repositories {
 }
 
 sourceSets {
-    main.java.srcDirs = ['src/main/java', 'src/main/interpreter']
+    main.java.srcDirs = ['src/main/java', 'src/main']
     test.java.srcDirs = ['src/test']
 }
 
 test {
     useJUnitPlatform()
 }
-
-//loom {
-//    splitEnvironmentSourceSets()
-//
-//    mods {
-//        modid {
-//            sourceSet sourceSets.main
-//            sourceSet sourceSets.client
-//        }
-//    }
-//    runs {
-//        // This adds a new gradle task that runs the datagen API: "gradlew runDatagen"
-//        datagen {
-//            inherit server
-//            name "Data Generation"
-//            vmArg "-Dfabric-api.datagen"
-//            vmArg "-Dfabric-api.datagen.output-dir=${file("src/main/fabric/generated")}"
-//            vmArg "-Dfabric-api.datagen.modid=minescript"
-//
-//            runDir "build/datagen"
-//        }
-//    }
-//}
 
 dependencies {
     implementation 'org.antlr:antlr4-runtime:4.12.0'
