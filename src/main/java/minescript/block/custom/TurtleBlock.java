@@ -40,7 +40,9 @@ public class TurtleBlock extends BlockWithEntity implements BlockEntityProvider 
                               Hand hand, BlockHitResult hit) {
         // Server: Main Hand & Off Hand
         // Client: Main Hand & Off Hand
-        player.sendMessage(Text.literal("Right Clicked This!"));
+        if (world.isClient && hand == Hand.MAIN_HAND) {
+            player.sendMessage(Text.literal("Right Clicked This!"));
+        }
 
         return super.onUse(state, world, pos, player, hand, hit);
     }
