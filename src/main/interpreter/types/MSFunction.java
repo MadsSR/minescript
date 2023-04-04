@@ -3,20 +3,17 @@ package interpreter.types;
 
 import interpreter.antlr.MineScriptParser;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumSet;
-import java.util.List;
 
-public class MSFunction extends MSVal{
+public class MSFunction extends MSType {
 
     private String name;
     private ArrayList<String> parameters;
     private MineScriptParser.StatementsContext ctx;
 
     public MSFunction(String name, ArrayList<String> parameters, MineScriptParser.StatementsContext ctx) {
-        super(MSType.MSFunction);
+        super(MSTypeEnum.MSFunction);
         if (EnumSet.allOf(MSInbuiltFunction.class).contains(name)){
             throw new RuntimeException("Cannot redefine inbuilt function: " + name);
         }
@@ -38,12 +35,12 @@ public class MSFunction extends MSVal{
     }
 
     @Override
-    public MSType getType() {
-        return MSType.MSFunction;
+    public MSTypeEnum getType() {
+        return MSTypeEnum.MSFunction;
     }
 
     @Override
-    public boolean equals(MSVal value) {
+    public boolean equals(MSType value) {
         if (value instanceof MSFunction f) {
             return this.name.equals(f.name);
         }
