@@ -1,10 +1,10 @@
 package interpreter.types;
 
-public class MSBool extends MSVal{
+public class MSBool extends MSType {
     private boolean value;
 
     public MSBool(boolean value) {
-        super(MSType.MSBool);
+        super(MSTypeEnum.MSBool);
         this.value = value;
     }
 
@@ -13,12 +13,12 @@ public class MSBool extends MSVal{
     }
 
     @Override
-    public MSType getType() {
-        return MSType.MSBool;
+    public MSTypeEnum getType() {
+        return MSTypeEnum.MSBool;
     }
 
     @Override
-    public boolean equals(MSVal value) {
+    public boolean equals(MSType value) {
         if (value instanceof MSBool b) {
             return this.value == b.value;
         }

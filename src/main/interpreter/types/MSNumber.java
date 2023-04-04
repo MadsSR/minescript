@@ -1,17 +1,17 @@
 package interpreter.types;
 
-public class MSNumber extends MSVal{
+public class MSNumber extends MSType {
     private int value;
 
 
     public MSNumber(int value) {
-        super(MSType.MSNumber);
+        super(MSTypeEnum.MSNumber);
         this.value = value;
     }
 
     @Override
-    public MSType getType() {
-        return MSType.MSNumber;
+    public MSTypeEnum getType() {
+        return MSTypeEnum.MSNumber;
     }
 
     public int getValue() {
@@ -19,7 +19,7 @@ public class MSNumber extends MSVal{
     }
 
     @Override
-    public boolean equals(MSVal value) {
+    public boolean equals(MSType value) {
         if (value instanceof MSNumber n) {
             return this.value == n.value;
         }

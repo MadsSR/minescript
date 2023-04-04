@@ -1,11 +1,9 @@
 package interpreter;
 
 import interpreter.exceptions.SymbolNotFoundException;
-import interpreter.types.MSBool;
+import interpreter.types.MSTypeEnum;
 import interpreter.types.MSType;
-import interpreter.types.MSVal;
 
-import java.lang.reflect.Type;
 import java.util.*;
 
 public class SymbolTable {
@@ -27,7 +25,7 @@ public class SymbolTable {
         scopeStack.pop();
     }
 
-    public void enterSymbol(String name, MSType type, MSVal value) {
+    public void enterSymbol(String name, MSTypeEnum type, MSType value) {
         Symbol newSymbol = new Symbol(name, type, value);
 
         if (isVarInNewScope(name)) {
@@ -56,7 +54,7 @@ public class SymbolTable {
         }
     }
 
-    public MSVal retrieveSymbolValue(Symbol symbol) {
+    public MSType retrieveSymbolValue(Symbol symbol) {
         return symbol.value;
     }
 
@@ -82,10 +80,10 @@ public class SymbolTable {
 
     private static class Symbol {
         String name;
-        MSType type;
-        MSVal value;
+        MSTypeEnum type;
+        MSType value;
 
-        public Symbol(String name, MSType type, MSVal value) {
+        public Symbol(String name, MSTypeEnum type, MSType value) {
             this.name = name;
             this.type = type;
             this.value = value;

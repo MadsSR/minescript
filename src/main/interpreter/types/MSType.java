@@ -1,8 +1,16 @@
 package interpreter.types;
 
-public enum MSType {
-    MSNumber,
-    MSBool,
-    MSFunction
-}
+public abstract class MSType {
+    private MSTypeEnum type;
 
+    public MSType(MSTypeEnum type) {
+        this.type = type;
+    }
+
+    public MSTypeEnum getType() {
+        return type;
+    }
+
+    public abstract boolean equals(MSType value);
+
+}

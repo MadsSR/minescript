@@ -6,14 +6,14 @@ import interpreter.types.*;
 
 import java.util.ArrayList;
 
-public class Visitor extends MineScriptBaseVisitor<MSVal> {
+public class Visitor extends MineScriptBaseVisitor<MSType> {
     private final SymbolTable symbolTable = new SymbolTable();
     private final ExpressionParser parser = new ExpressionParser();
     private boolean hasReturned = false;
-    private boolean inFunctionDecl = false;
+    private boolean inFunctionCall = false;
 
     @Override
-    public MSVal visitProgram(MineScriptParser.ProgramContext ctx) {
+    public MSType visitProgram(MineScriptParser.ProgramContext ctx) {
         for (MineScriptParser.StatementContext statement : ctx.statement()) {
             if (statement instanceof MineScriptParser.FuncDeclContext) {
                 visit(statement);
@@ -29,20 +29,30 @@ public class Visitor extends MineScriptBaseVisitor<MSVal> {
     }
 
     @Override
-    public MSVal visitStatements(MineScriptParser.StatementsContext ctx) {
-        MSVal val;
+    public MSType visitStatements(MineScriptParser.StatementsContext ctx) {
+        MSType val;
+
+        if (!inFunctionCall)
+            symbolTable.enterScope();
+
         for (MineScriptParser.StatementContext statement : ctx.statement()) {
             val = visit(statement);
             if (hasReturned) {
+                if (!inFunctionCall)
+                    symbolTable.exitScope();
                 return val;
             }
         }
+
+        if (!inFunctionCall)
+            symbolTable.exitScope();
+
         return null;
     }
     @Override
-    public MSVal visitAssign(MineScriptParser.AssignContext ctx) {
+    public MSType visitAssign(MineScriptParser.AssignContext ctx) {
         String id = ctx.ID().getText();
-        MSVal value = visit(ctx.expression());
+        MSType value = visit(ctx.expression());
 
         symbolTable.enterSymbol(id, value.getType(), value);
 
@@ -50,18 +60,16 @@ public class Visitor extends MineScriptBaseVisitor<MSVal> {
     }
 
     @Override
-    public MSVal visitWhile(MineScriptParser.WhileContext ctx) {
-        symbolTable.enterScope();
+    public MSType visitWhile(MineScriptParser.WhileContext ctx) {
         while (parser.getBoolean(visit(ctx.expression())).getValue()) {
             visit(ctx.statements());
         }
-        symbolTable.exitScope();
 
         return null;
     }
 
     @Override
-    public MSVal visitIf(MineScriptParser.IfContext ctx) {
+    public MSType visitIf(MineScriptParser.IfContext ctx) {
         // Handle if and else if
         for (var expression : ctx.expression()) {
             if (parser.getBoolean(visit(expression)).getValue()) {
@@ -79,7 +87,7 @@ public class Visitor extends MineScriptBaseVisitor<MSVal> {
     }
 
     @Override
-    public MSVal visitRepeat(MineScriptParser.RepeatContext ctx) {
+    public MSType visitRepeat(MineScriptParser.RepeatContext ctx) {
         if (visit(ctx.expression()) instanceof MSNumber times && times.getValue() >= 0) {
             for (int i = 0; i < times.getValue(); i++) {
                 visit(ctx.statements());
@@ -93,20 +101,20 @@ public class Visitor extends MineScriptBaseVisitor<MSVal> {
 
     @Override
     //Boolean visitor for boolean values
-    public MSVal visitBool(MineScriptParser.BoolContext ctx) {
+    public MSType visitBool(MineScriptParser.BoolContext ctx) {
         return new MSBool(Boolean.parseBoolean(ctx.getText()));
     }
 
 
     @Override
-    public MSVal visitNotExpr(MineScriptParser.NotExprContext ctx) {
+    public MSType visitNotExpr(MineScriptParser.NotExprContext ctx) {
         return parser.getNegatedBoolean(visit(ctx.expression()));
     }
 
     @Override
-    public MSVal visitComp(MineScriptParser.CompContext ctx) {
-        MSVal left = visit(ctx.expression(0));
-        MSVal right = visit(ctx.expression(1));
+    public MSType visitComp(MineScriptParser.CompContext ctx) {
+        MSType left = visit(ctx.expression(0));
+        MSType right = visit(ctx.expression(1));
 
         if (left instanceof MSNumber l && right instanceof MSNumber r) {
             return new MSBool(switch (ctx.op.getText()) {
@@ -121,9 +129,9 @@ public class Visitor extends MineScriptBaseVisitor<MSVal> {
     }
 
     @Override
-    public MSVal visitIsIsNot(MineScriptParser.IsIsNotContext ctx) {
-        MSVal left = visit(ctx.expression(0));
-        MSVal right = visit(ctx.expression(1));
+    public MSType visitIsIsNot(MineScriptParser.IsIsNotContext ctx) {
+        MSType left = visit(ctx.expression(0));
+        MSType right = visit(ctx.expression(1));
 
         return new MSBool(switch (ctx.op.getText()) {
             case "is" -> left.equals(right);
@@ -133,15 +141,15 @@ public class Visitor extends MineScriptBaseVisitor<MSVal> {
     }
 
     @Override
-    public MSVal visitId(MineScriptParser.IdContext ctx) {
+    public MSType visitId(MineScriptParser.IdContext ctx) {
         String id = ctx.ID().getText();
         return symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol(id));
     }
 
     @Override
-    public MSVal visitAddSub(MineScriptParser.AddSubContext ctx) {
-        MSVal left = visit(ctx.expression(0));
-        MSVal right = visit(ctx.expression(1));
+    public MSType visitAddSub(MineScriptParser.AddSubContext ctx) {
+        MSType left = visit(ctx.expression(0));
+        MSType right = visit(ctx.expression(1));
 
         if (left instanceof MSNumber l && right instanceof MSNumber r) {
             return new MSNumber(switch (ctx.op.getText()) {
@@ -155,7 +163,7 @@ public class Visitor extends MineScriptBaseVisitor<MSVal> {
     }
 
     @Override
-    public MSVal visitNeg(MineScriptParser.NegContext ctx) {
+    public MSType visitNeg(MineScriptParser.NegContext ctx) {
         if (visit(ctx.expression()) instanceof MSNumber n) {
             return new MSNumber(-n.getValue());
         }
@@ -163,19 +171,19 @@ public class Visitor extends MineScriptBaseVisitor<MSVal> {
     }
 
     @Override
-    public MSVal visitParenExpr(MineScriptParser.ParenExprContext ctx) {
+    public MSType visitParenExpr(MineScriptParser.ParenExprContext ctx) {
         return visit(ctx.expression());
     }
 
     @Override
-    public MSVal visitNumber(MineScriptParser.NumberContext ctx) {
+    public MSType visitNumber(MineScriptParser.NumberContext ctx) {
         return new MSNumber(Integer.parseInt(ctx.getText()));
     }
 
     @Override
-    public MSVal visitMultDivMod(MineScriptParser.MultDivModContext ctx) {
-        MSVal left = visit(ctx.expression(0));
-        MSVal right = visit(ctx.expression(1));
+    public MSType visitMultDivMod(MineScriptParser.MultDivModContext ctx) {
+        MSType left = visit(ctx.expression(0));
+        MSType right = visit(ctx.expression(1));
 
         if (left instanceof MSNumber l && right instanceof MSNumber r) {
             return new MSNumber(switch (ctx.op.getText()) {
@@ -189,9 +197,9 @@ public class Visitor extends MineScriptBaseVisitor<MSVal> {
     }
 
     @Override
-    public MSVal visitPow(MineScriptParser.PowContext ctx) {
-        MSVal left = visit(ctx.expression(0));
-        MSVal right = visit(ctx.expression(1));
+    public MSType visitPow(MineScriptParser.PowContext ctx) {
+        MSType left = visit(ctx.expression(0));
+        MSType right = visit(ctx.expression(1));
 
         if (left instanceof MSNumber l && right instanceof MSNumber r) {
             if (r.getValue() < 0) {
@@ -204,24 +212,24 @@ public class Visitor extends MineScriptBaseVisitor<MSVal> {
     }
 
     @Override
-    public MSVal visitAnd(MineScriptParser.AndContext ctx) {
-        MSVal left = visit(ctx.expression(0));
-        MSVal right = visit(ctx.expression(1));
+    public MSType visitAnd(MineScriptParser.AndContext ctx) {
+        MSType left = visit(ctx.expression(0));
+        MSType right = visit(ctx.expression(1));
 
         return new MSBool(parser.getBoolean(left).getValue() && parser.getBoolean(right).getValue());
     }
 
     @Override
-    public MSVal visitOr(MineScriptParser.OrContext ctx) {
-        MSVal left = visit(ctx.expression(0));
-        MSVal right = visit(ctx.expression(1));
+    public MSType visitOr(MineScriptParser.OrContext ctx) {
+        MSType left = visit(ctx.expression(0));
+        MSType right = visit(ctx.expression(1));
 
         return new MSBool(parser.getBoolean(left).getValue() || parser.getBoolean(right).getValue());
     }
 
     @Override
-    public MSVal visitReturn(MineScriptParser.ReturnContext ctx) {
-        if (!inFunctionDecl) {
+    public MSType visitReturn(MineScriptParser.ReturnContext ctx) {
+        if (!inFunctionCall) {
             throw new RuntimeException("Cannot return outside of define block");
         }
         hasReturned = true;
@@ -229,11 +237,11 @@ public class Visitor extends MineScriptBaseVisitor<MSVal> {
     }
 
     @Override
-    public MSVal visitFuncCall(MineScriptParser.FuncCallContext ctx) {
+    public MSType visitFuncCall(MineScriptParser.FuncCallContext ctx) {
         var id = ctx.ID().getText();
-        ArrayList<MSVal> actualParams = getActualParams(ctx.actual_parameters());
-        MSVal retVal = null;
-        inFunctionDecl = true;
+        ArrayList<MSType> actualParams = getActualParams(ctx.actual_parameters());
+        MSType retVal = null;
+        inFunctionCall = true;
 
         switch (id) {
             case "Step":
@@ -285,7 +293,7 @@ public class Visitor extends MineScriptBaseVisitor<MSVal> {
                 // code for RandomNumbers case
                 break;
             default:
-                MSVal value;
+                MSType value;
 
                 try {
                     value = symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol(id));
@@ -317,12 +325,12 @@ public class Visitor extends MineScriptBaseVisitor<MSVal> {
                     throw new RuntimeException("Cannot call " + id + " because it is not a function");
                 }
         }
-        inFunctionDecl = false;
+        inFunctionCall = false;
         return retVal;
     }
 
     @Override
-    public MSVal visitFuncDecl(MineScriptParser.FuncDeclContext ctx) {
+    public MSType visitFuncDecl(MineScriptParser.FuncDeclContext ctx) {
         ArrayList<String> formalParams = getFormalParams(ctx.formal_paramaters());
         String id = ctx.ID().getText();
         var statementsCtx = ctx.statements();
@@ -333,12 +341,12 @@ public class Visitor extends MineScriptBaseVisitor<MSVal> {
     }
 
     @Override
-    public MSVal visitActual_parameters(MineScriptParser.Actual_parametersContext ctx) {
+    public MSType visitActual_parameters(MineScriptParser.Actual_parametersContext ctx) {
         return null;
     }
 
     @Override
-    public MSVal visitFormal_paramaters(MineScriptParser.Formal_paramatersContext ctx) {
+    public MSType visitFormal_paramaters(MineScriptParser.Formal_paramatersContext ctx) {
         return null;
     }
 
@@ -354,8 +362,8 @@ public class Visitor extends MineScriptBaseVisitor<MSVal> {
         return formalParams;
     }
 
-    private ArrayList<MSVal> getActualParams(MineScriptParser.Actual_parametersContext ctx) {
-        ArrayList<MSVal> actualParams = new ArrayList<>();
+    private ArrayList<MSType> getActualParams(MineScriptParser.Actual_parametersContext ctx) {
+        ArrayList<MSType> actualParams = new ArrayList<>();
 
         if (ctx == null)
             return actualParams;
