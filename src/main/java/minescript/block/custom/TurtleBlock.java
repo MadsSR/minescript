@@ -3,26 +3,30 @@ package minescript.block.custom;
 import minescript.block.entity.ModBlockEntities;
 import minescript.block.entity.TurtleBlockEntity;
 import minescript.screen.TextEditorScreen;
-import net.minecraft.block.BlockEntityProvider;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
+import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.Text;
+import net.minecraft.state.StateManager;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+import net.minecraft.state.property.Properties;
+
+import javax.swing.*;
 
 public class TurtleBlock extends BlockWithEntity implements BlockEntityProvider {
+
     public TurtleBlock(Settings settings) {
         super(settings);
+
+        setDefaultState(getDefaultState().with(Properties.HORIZONTAL_FACING, Direction.NORTH));
     }
 
     @Override
@@ -31,13 +35,10 @@ public class TurtleBlock extends BlockWithEntity implements BlockEntityProvider 
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player,
-                              Hand hand, BlockHitResult hit) {
-        // Server: Main Hand & Off Hand
-        // Client: Main Hand & Off Hand
+    public ActionResult onUse(BlockState state, World world, BlockPos pos,
+                              PlayerEntity player, Hand hand, BlockHitResult hit) {
         if (world.isClient && hand == Hand.MAIN_HAND) {
-            player.sendMessage(Text.literal("Right Clicked This!"));
-            MinecraftClient.getInstance().setScreen(new TextEditorScreen());
+            MinecraftClient.getInstance().setScreen(new TextEditorScreen(world.getBlockEntity(pos)));
         }
 
         return ActionResult.SUCCESS;
@@ -54,4 +55,10 @@ public class TurtleBlock extends BlockWithEntity implements BlockEntityProvider 
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
         return checkType(type, ModBlockEntities.TURTLE_BLOCK_ENTITY, TurtleBlockEntity::tick);
     }
+
+    @Override
+    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+        builder.add(Properties.HORIZONTAL_FACING);
+    }
+
 }
