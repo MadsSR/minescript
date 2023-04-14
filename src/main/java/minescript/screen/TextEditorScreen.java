@@ -1,19 +1,27 @@
 package minescript.screen;
 
+import interpreter.Interpreter;
 import io.wispforest.owo.ui.base.BaseUIModelScreen;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
 import minescript.block.entity.TurtleBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.EditBoxWidget;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 public class TextEditorScreen extends BaseUIModelScreen<FlowLayout> {
+    private TurtleBlockEntity turtleBlockEntity;
 
-    private BlockEntity blockEntity;
     public TextEditorScreen(BlockEntity blockEntity) {
         super(FlowLayout.class, DataSource.file("../src/main/resources/assets/minescript/owo_ui/editor.xml"));
         //super(FlowLayout.class, DataSource.asset(new Identifier("minescript", "editor")));
-        this.blockEntity = blockEntity;
+
+        if (blockEntity instanceof TurtleBlockEntity turtle) {
+            turtleBlockEntity = (TurtleBlockEntity) blockEntity;
+        }
     }
 
     @Override
@@ -31,9 +39,13 @@ public class TextEditorScreen extends BaseUIModelScreen<FlowLayout> {
         var runButton = rootComponent.childById(ButtonComponent.class, "run-button");
         if (runButton == null) throw new NullPointerException("runButton is null");
         runButton.onPress(button -> {
-            if (blockEntity instanceof TurtleBlockEntity turtleBlockEntity) {
-                turtleBlockEntity.step(Integer.parseInt(editor.getText()));
-            }
+            turtleBlockEntity.startInterpreter(editor.getText());
         });
     }
+
+    @Override
+    public boolean shouldPause() {
+        return false;
+    }
+
 }

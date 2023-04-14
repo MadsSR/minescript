@@ -3,6 +3,7 @@ package interpreter;
 import interpreter.antlr.*;
 import interpreter.exceptions.SymbolNotFoundException;
 import interpreter.types.*;
+import minescript.block.entity.TurtleBlockEntity;
 
 import java.util.ArrayList;
 
@@ -11,6 +12,11 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     private final ExpressionParser parser = new ExpressionParser();
     private boolean hasReturned = false;
     private boolean inFunctionCall = false;
+    private TurtleBlockEntity entity;
+
+    public Visitor(TurtleBlockEntity entity) {
+        this.entity = entity;
+    }
 
     @Override
     public MSType visitProgram(MineScriptParser.ProgramContext ctx) {
@@ -61,11 +67,13 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
 
     @Override
     public MSType visitWhile(MineScriptParser.WhileContext ctx) {
-        while (parser.getBoolean(visit(ctx.expression())).getValue()) {
-            visit(ctx.statements());
+        MSType value = null;
+
+        while (parser.getBoolean(visit(ctx.expression())).getValue() && !hasReturned) {
+            value = visit(ctx.statements());
         }
 
-        return null;
+        return value;
     }
 
     @Override
@@ -73,14 +81,13 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         // Handle if and else if
         for (var expression : ctx.expression()) {
             if (parser.getBoolean(visit(expression)).getValue()) {
-                visit(ctx.statements(ctx.expression().indexOf(expression)));
-                return null;
+                return visit(ctx.statements(ctx.expression().indexOf(expression)));
             }
         }
 
         // Handle else
         if (ctx.expression().size() < ctx.statements().size()) {
-            visit(ctx.statements(ctx.statements().size() - 1));
+            return visit(ctx.statements(ctx.statements().size() - 1));
         }
 
         return null;
@@ -88,15 +95,19 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
 
     @Override
     public MSType visitRepeat(MineScriptParser.RepeatContext ctx) {
+        MSType value = null;
+
         if (visit(ctx.expression()) instanceof MSNumber times && times.getValue() >= 0) {
             for (int i = 0; i < times.getValue(); i++) {
-                visit(ctx.statements());
+                value = visit(ctx.statements());
+                if (hasReturned)
+                    return value;
             }
         } else {
             throw new RuntimeException("Repeat expression must be a non-negative number");
         }
 
-        return null;
+        return value;
     }
 
     @Override
@@ -125,7 +136,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 default -> throw new RuntimeException("Unknown operator: " + ctx.op.getText());
             });
         }
-        throw new RuntimeException("cannot compare " + left.getClass() + " and " + right.getClass());
+        throw new RuntimeException("Cannot compare " + left.getClass() + " and " + right.getClass());
     }
 
     @Override
@@ -143,7 +154,16 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     @Override
     public MSType visitId(MineScriptParser.IdContext ctx) {
         String id = ctx.ID().getText();
-        return symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol(id));
+        MSType value;
+
+        try {
+             value = symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol(id));
+        }
+        catch (SymbolNotFoundException e) {
+            throw new RuntimeException("Cannot reference '" + id + "' as it is not defined");
+        }
+
+        return value;
     }
 
     @Override
@@ -246,6 +266,11 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         switch (id) {
             case "Step":
                 // code for Step function
+                if (actualParams.get(0) instanceof MSNumber n) {
+                    // create new thread to run step function and wait for it to finish
+                    entity.step(n.getValue());
+                    entity = entity.getTurtleEntity();
+                }
                 break;
             case "Turn":
                 // code for Turn function
@@ -299,14 +324,14 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                     value = symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol(id));
                 }
                 catch (SymbolNotFoundException e) {
-                    throw new RuntimeException("Cannot call " + id + " because it is not declared");
+                    throw new RuntimeException("Cannot call function '" + id + "' because it is not defined");
                 }
 
                 if (value instanceof MSFunction function) {
                     var formalParams = function.getParameters();
 
                     if (formalParams.size() != actualParams.size()) {
-                        throw new RuntimeException("Cannot call " + id + " because it has " + formalParams.size() + " parameters, but " + actualParams.size() + " were given");
+                        throw new RuntimeException("Cannot call '" + id + "' because it has " + formalParams.size() + " parameters, but " + actualParams.size() + " were given");
                     }
 
                     symbolTable.enterScope();
@@ -322,7 +347,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                     symbolTable.exitScope();
                 }
                 else {
-                    throw new RuntimeException("Cannot call " + id + " because it is not a function");
+                    throw new RuntimeException("Cannot call '" + id + "' because it is not a function");
                 }
         }
         inFunctionCall = false;

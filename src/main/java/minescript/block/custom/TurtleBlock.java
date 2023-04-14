@@ -19,6 +19,8 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.state.property.Properties;
 
+import javax.swing.*;
+
 public class TurtleBlock extends BlockWithEntity implements BlockEntityProvider {
 
     public TurtleBlock(Settings settings) {
@@ -33,16 +35,10 @@ public class TurtleBlock extends BlockWithEntity implements BlockEntityProvider 
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player,
-                              Hand hand, BlockHitResult hit) {
-        // Server: Main Hand & Off Hand
-        // Client: Main Hand & Off Hand
+    public ActionResult onUse(BlockState state, World world, BlockPos pos,
+                              PlayerEntity player, Hand hand, BlockHitResult hit) {
         if (world.isClient && hand == Hand.MAIN_HAND) {
             MinecraftClient.getInstance().setScreen(new TextEditorScreen(world.getBlockEntity(pos)));
-        }
-
-        if (!world.isClient && hand == Hand.MAIN_HAND) {
-
         }
 
         return ActionResult.SUCCESS;
@@ -64,6 +60,5 @@ public class TurtleBlock extends BlockWithEntity implements BlockEntityProvider 
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
         builder.add(Properties.HORIZONTAL_FACING);
     }
-
 
 }

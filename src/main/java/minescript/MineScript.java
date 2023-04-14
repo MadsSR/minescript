@@ -4,6 +4,7 @@ import io.wispforest.owo.ui.parsing.UIParsing;
 import minescript.block.ModBlocks;
 import minescript.block.ModItemGroup;
 import minescript.block.entity.ModBlockEntities;
+import minescript.networking.MineScriptPackets;
 import net.fabricmc.api.ModInitializer;
 
 import net.minecraft.client.MinecraftClient;
@@ -29,6 +30,7 @@ public class MineScript implements ModInitializer {
 		ModItemGroup.registerItemGroups();
 		ModBlockEntities.registerBlockEntities();
 		ModBlocks.registerModBlocks();
+		MineScriptPackets.registerC2SPackets();
 
 		UIParsing.registerFactory("EditBoxWidget", parent -> new EditBoxWidget(MinecraftClient.getInstance().textRenderer, 0, 0, 400, 300, Text.of("Write MineScript code here..."), Text.of("")));
 	}
