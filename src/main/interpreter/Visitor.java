@@ -55,6 +55,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
 
         return null;
     }
+
     @Override
     public MSType visitAssign(MineScriptParser.AssignContext ctx) {
         String id = ctx.ID().getText();
@@ -157,9 +158,8 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         MSType value;
 
         try {
-             value = symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol(id));
-        }
-        catch (SymbolNotFoundException e) {
+            value = symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol(id));
+        } catch (SymbolNotFoundException e) {
             throw new RuntimeException("Cannot reference '" + id + "' as it is not defined");
         }
 
@@ -317,27 +317,27 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 }
                 break;
             case "GetXPosition":
-                // code for GetXPosition function
-                break;
+                return new MSNumber(entity.getXPosition());
             case "GetYPosition":
                 // code for GetYPosition function
-                break;
+                return new MSNumber(entity.getYPosition());
             case "GetZPosition":
-                // code for GetZPosition function
-                break;
+                return new MSNumber(entity.getZPosition());
             case "GetHorizontalDirection":
                 // code for GetHorizontalDirection function
                 break;
             case "GetVerticalDirection":
                 // code for GetVerticalDirection function
                 break;
+            case "Print":
+                entity.print(actualParams.get(0).getClass().getName() +" is: "+ actualParams.get(0).toString(), MSMessageType.INFO);
+                break;
             default:
                 MSType value;
 
                 try {
                     value = symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol(id));
-                }
-                catch (SymbolNotFoundException e) {
+                } catch (SymbolNotFoundException e) {
                     throw new RuntimeException("Cannot call function '" + id + "' because it is not defined");
                 }
 
@@ -359,8 +359,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                     retVal = visit(function.getCtx());
                     hasReturned = false;
                     symbolTable.exitScope();
-                }
-                else {
+                } else {
                     throw new RuntimeException("Cannot call '" + id + "' because it is not a function");
                 }
         }
