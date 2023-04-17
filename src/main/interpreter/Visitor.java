@@ -4,6 +4,9 @@ import interpreter.antlr.*;
 import interpreter.exceptions.SymbolNotFoundException;
 import interpreter.types.*;
 import minescript.block.entity.TurtleBlockEntity;
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
+import net.minecraft.registry.Registries;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -57,6 +60,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
 
         return null;
     }
+
     @Override
     public MSType visitAssign(MineScriptParser.AssignContext ctx) {
         String id = ctx.ID().getText();
@@ -159,9 +163,8 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         MSType value;
 
         try {
-             value = symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol(id));
-        }
-        catch (SymbolNotFoundException e) {
+            value = symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol(id));
+        } catch (SymbolNotFoundException e) {
             throw new RuntimeException("Cannot reference '" + id + "' as it is not defined");
         }
 
@@ -323,16 +326,27 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 break;
             case "Random":
                 // code for Random function
-                if (actualParams.size() != 1) {
-                    throw new RuntimeException("Random function expects 1 parameter");
+                if (actualParams.size() != 0 && actualParams.size() != 1) {
+                    throw new RuntimeException("Random function expects 0 or 1 parameter");
                 }
 
-                if (actualParams.get(0) instanceof MSNumber n) {
+                if (actualParams.size() == 0) {
+                    retVal = new MSNumber(random.nextInt());
+                }
+                else if (actualParams.get(0) instanceof MSNumber n) {
                     retVal = new MSNumber(random.nextInt(n.getValue()));
                 }
                 else {
-                    retVal = new MSNumber(random.nextInt());
+                    throw new RuntimeException("Random function expects a number parameter");
                 }
+                break;
+            case "RandomBlock":
+                // code for RandomBlock function
+                if (actualParams.size() != 0) {
+                    throw new RuntimeException("RandomBlock function expects 0 parameters");
+                }
+
+                retVal = new MSBlock(Registries.BLOCK.get(random.nextInt(Registries.BLOCK.size())));
                 break;
             case "SetSpeed":
                 // code for SetSpeed function
@@ -345,27 +359,27 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 }
                 break;
             case "GetXPosition":
-                // code for GetXPosition function
-                break;
+                return new MSNumber(entity.getXPosition());
             case "GetYPosition":
                 // code for GetYPosition function
-                break;
+                return new MSNumber(entity.getYPosition());
             case "GetZPosition":
-                // code for GetZPosition function
-                break;
+                return new MSNumber(entity.getZPosition());
             case "GetHorizontalDirection":
                 // code for GetHorizontalDirection function
                 break;
             case "GetVerticalDirection":
                 // code for GetVerticalDirection function
                 break;
+            case "Print":
+                entity.print(actualParams.get(0).getClass().getName() +" is: "+ actualParams.get(0).toString(), MSMessageType.INFO);
+                break;
             default:
                 MSType value;
 
                 try {
                     value = symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol(id));
-                }
-                catch (SymbolNotFoundException e) {
+                } catch (SymbolNotFoundException e) {
                     throw new RuntimeException("Cannot call function '" + id + "' because it is not defined");
                 }
 
@@ -387,8 +401,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                     retVal = visit(function.getCtx());
                     hasReturned = false;
                     symbolTable.exitScope();
-                }
-                else {
+                } else {
                     throw new RuntimeException("Cannot call '" + id + "' because it is not a function");
                 }
         }
