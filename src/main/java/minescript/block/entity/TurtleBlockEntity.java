@@ -143,4 +143,16 @@ public class TurtleBlockEntity extends BlockEntity implements NamedScreenHandler
             }
         }
     }
+
+    public int getXPosition() {
+        return turtlePos.getX();
+    }
+
+    public int getYPosition() {
+        return turtlePos.getY();
+    }
+
+    public int getZPosition() {
+        return turtlePos.getZ();
+    }
 }
