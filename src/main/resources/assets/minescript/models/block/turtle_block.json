@@ -1,0 +1,14 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "up": "minescript:block/turtle_block_top",
+    "down": "minescript:block/turtle_block_bottom",
+    "north": "minescript:block/turtle_block_front",
+    "south": "minescript:block/turtle_block_back",
+    "east": "minescript:block/turtle_block_right",
+    "west": "minescript:block/turtle_block_left",
+    "particle": "minescript:block/simonbejer"
+  }
+}
+
+

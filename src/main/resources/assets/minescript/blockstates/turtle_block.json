@@ -1,0 +1,9 @@
+{
+  "variants": {
+    "facing=north": { "model": "minescript:block/turtle_block", "uvlock": false },
+    "facing=east":  { "model": "minescript:block/turtle_block", "y":  90, "uvlock": false },
+    "facing=south": { "model": "minescript:block/turtle_block", "y": 180, "uvlock": false },
+    "facing=west":  { "model": "minescript:block/turtle_block", "y": 270, "uvlock": false }
+  }
+}
+
