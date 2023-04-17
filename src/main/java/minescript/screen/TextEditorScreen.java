@@ -30,6 +30,7 @@ public class TextEditorScreen extends BaseUIModelScreen<FlowLayout> {
 
         if (editor == null) throw new NullPointerException("editor is null");
         editor.active = true;
+        if (turtleBlockEntity.input != null) editor.setText(turtleBlockEntity.input);
         editor.mouseDown().subscribe((a,b,c) -> {
             editor.setFocused(true);
 
@@ -39,7 +40,9 @@ public class TextEditorScreen extends BaseUIModelScreen<FlowLayout> {
         var runButton = rootComponent.childById(ButtonComponent.class, "run-button");
         if (runButton == null) throw new NullPointerException("runButton is null");
         runButton.onPress(button -> {
+            turtleBlockEntity.input = editor.getText();
             turtleBlockEntity.startInterpreter(editor.getText());
+            MinecraftClient.getInstance().setScreen(null);
         });
     }
 

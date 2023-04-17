@@ -1,8 +1,12 @@
 package minescript.networking.packet;
 
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.command.argument.BlockStateArgument;
+import net.minecraft.command.argument.BlockStateArgumentType;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
@@ -19,6 +23,9 @@ public class StepC2SPacket {
 
         BlockPos pos = buf.readBlockPos();
         int steps = buf.readInt();
+        int id = buf.readInt();
+        BlockState placingBlockState = Block.getStateFromRawId(id);
+
         BlockPos newPos = pos;
         BlockState state = world.getBlockState(pos);
 
@@ -30,6 +37,7 @@ public class StepC2SPacket {
         }
 
         world.setBlockState(newPos, state, Block.NOTIFY_ALL);
-        world.removeBlock(pos, false);
+        world.setBlockState(pos, placingBlockState, Block.NOTIFY_ALL);
+
     }
 }

@@ -167,6 +167,18 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     }
 
     @Override
+    public MSType visitBlock(MineScriptParser.BlockContext ctx) {
+        String blockId = ctx.BLOCK().getText();
+        return new MSBlock(blockId);
+    }
+
+    @Override
+    public MSType visitRelDir(MineScriptParser.RelDirContext ctx) {
+        String relDir = ctx.RELDIR().getText();
+        return new MSRelDir(relDir);
+    }
+
+    @Override
     public MSType visitAddSub(MineScriptParser.AddSubContext ctx) {
         MSType left = visit(ctx.expression(0));
         MSType right = visit(ctx.expression(1));
@@ -269,14 +281,19 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 if (actualParams.get(0) instanceof MSNumber n) {
                     // create new thread to run step function and wait for it to finish
                     entity.step(n.getValue());
-                    entity = entity.getTurtleEntity();
                 }
                 break;
             case "Turn":
                 // code for Turn function
+                if (actualParams.get(0) instanceof MSRelDir d) {
+                    entity.turn(d.getValue());
+                }
                 break;
-            case "useBlock":
+            case "UseBlock":
                 // code for useBlock function
+                if (actualParams.get(0) instanceof MSBlock b) {
+                    entity.useBlock(b.getValue());
+                }
                 break;
             case "Break":
                 // code for Break function
@@ -293,11 +310,11 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
             case "Random":
                 // code for Random function
                 break;
-            case "RandomBlock":
-                // code for RandomBlock function
-                break;
             case "SetSpeed":
                 // code for SetSpeed function
+                if (actualParams.get(0) instanceof MSNumber n) {
+                    entity.setSpeed(n.getValue());
+                }
                 break;
             case "GetXPosition":
                 // code for GetXPosition function
@@ -313,9 +330,6 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 break;
             case "GetVerticalDirection":
                 // code for GetVerticalDirection function
-                break;
-            case "RandomNumbers":
-                // code for RandomNumbers case
                 break;
             default:
                 MSType value;
@@ -350,6 +364,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                     throw new RuntimeException("Cannot call '" + id + "' because it is not a function");
                 }
         }
+        entity = entity.getTurtleEntity();
         inFunctionCall = false;
         return retVal;
     }
