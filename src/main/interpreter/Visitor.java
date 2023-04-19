@@ -4,12 +4,17 @@ import interpreter.antlr.*;
 import interpreter.exceptions.SymbolNotFoundException;
 import interpreter.types.*;
 import minescript.block.entity.TurtleBlockEntity;
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
+import net.minecraft.registry.Registries;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Visitor extends MineScriptBaseVisitor<MSType> {
     private final SymbolTable symbolTable = new SymbolTable();
     private final ExpressionParser parser = new ExpressionParser();
+    private final Random random = new Random(System.currentTimeMillis());
     private boolean hasReturned = false;
     private boolean inFunctionCall = false;
     private TurtleBlockEntity entity;
@@ -278,6 +283,10 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         switch (id) {
             case "Step":
                 // code for Step function
+                if (actualParams.size() != 1) {
+                    throw new RuntimeException("Step function expects 1 parameter");
+                }
+
                 if (actualParams.get(0) instanceof MSNumber n) {
                     // create new thread to run step function and wait for it to finish
                     entity.step(n.getValue());
@@ -285,12 +294,20 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 break;
             case "Turn":
                 // code for Turn function
+                if (actualParams.size() != 1) {
+                    throw new RuntimeException("Turn function expects 1 parameter");
+                }
+
                 if (actualParams.get(0) instanceof MSRelDir d) {
                     entity.turn(d.getValue());
                 }
                 break;
             case "UseBlock":
                 // code for useBlock function
+                if (actualParams.size() != 1) {
+                    throw new RuntimeException("UseBlock function expects 1 parameter");
+                }
+
                 if (actualParams.get(0) instanceof MSBlock b) {
                     entity.useBlock(b.getValue());
                 }
@@ -312,9 +329,34 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 break;
             case "Random":
                 // code for Random function
+                if (actualParams.size() != 0 && actualParams.size() != 1) {
+                    throw new RuntimeException("Random function expects 0 or 1 parameter");
+                }
+
+                if (actualParams.size() == 0) {
+                    retVal = new MSNumber(random.nextInt());
+                }
+                else if (actualParams.get(0) instanceof MSNumber n) {
+                    retVal = new MSNumber(random.nextInt(n.getValue()));
+                }
+                else {
+                    throw new RuntimeException("Random function expects a number parameter");
+                }
+                break;
+            case "RandomBlock":
+                // code for RandomBlock function
+                if (actualParams.size() != 0) {
+                    throw new RuntimeException("RandomBlock function expects 0 parameters");
+                }
+
+                retVal = new MSBlock(Registries.BLOCK.get(random.nextInt(Registries.BLOCK.size())));
                 break;
             case "SetSpeed":
                 // code for SetSpeed function
+                if (actualParams.size() != 1) {
+                    throw new RuntimeException("SetSpeed function expects 1 parameter");
+                }
+
                 if (actualParams.get(0) instanceof MSNumber n) {
                     entity.setSpeed(n.getValue());
                 }

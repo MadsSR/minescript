@@ -16,6 +16,11 @@ public class MSBlock extends MSType {
         }
     }
 
+    public MSBlock(Block block) {
+        super(MSTypeEnum.MSBlock);
+        this.block = block;
+    }
+
     public Block getValue() {
         return block;
     }
