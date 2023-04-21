@@ -324,6 +324,9 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 break;
             case "Sqrt":
                 // code for Sqrt function
+                if (actualParams.size() == 1 && actualParams.get(0) instanceof MSNumber n) {
+                    return new MSNumber((int) Math.round(Math.sqrt(n.getValue())));
+                }
                 break;
             case "Random":
                 // code for Random function
