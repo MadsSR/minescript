@@ -1,10 +1,12 @@
 package minescript.networking.packet;
 
+import minescript.block.custom.TurtleBlock;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.enums.WallMountLocation;
 import net.minecraft.command.argument.BlockStateArgument;
 import net.minecraft.command.argument.BlockStateArgumentType;
 import net.minecraft.network.PacketByteBuf;
@@ -29,11 +31,19 @@ public class StepC2SPacket {
         BlockPos newPos = pos;
         BlockState state = world.getBlockState(pos);
 
-        switch (state.get(Properties.HORIZONTAL_FACING)) {
-            case NORTH -> newPos = newPos.north(steps);
-            case SOUTH -> newPos = newPos.south(steps);
-            case EAST -> newPos = newPos.east(steps);
-            case WEST -> newPos = newPos.west(steps);
+        if (state.get(TurtleBlock.FACE) == WallMountLocation.WALL) {
+            switch (state.get(Properties.HORIZONTAL_FACING)) {
+                case NORTH -> newPos = newPos.north(1);
+                case SOUTH -> newPos = newPos.south(1);
+                case EAST -> newPos = newPos.east(1);
+                case WEST -> newPos = newPos.west(1);
+            }
+        }
+        else {
+            switch (state.get(TurtleBlock.FACE)) {
+                case FLOOR -> newPos = newPos.down(1);
+                case CEILING -> newPos = newPos.up(1);
+            }
         }
 
         world.setBlockState(newPos, state, Block.NOTIFY_ALL);

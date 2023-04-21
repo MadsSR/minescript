@@ -1,31 +1,32 @@
 package interpreter.types;
 
 public class MSRelDir extends MSType {
-    private final int degree;
-
-    public MSRelDir(int degree) {
-        super(MSTypeEnum.MSRelDir);
-        this.degree = degree;
-    }
+    private final Direction direction;
 
     public MSRelDir(String direction) {
         super(MSTypeEnum.MSRelDir);
         switch (direction) {
-            case "left" -> this.degree = -90;
-            case "right" -> this.degree = 90;
-            default -> this.degree = 0;
+            case "left" -> this.direction = Direction.LEFT;
+            case "right" -> this.direction = Direction.RIGHT;
+            case "up" -> this.direction = Direction.UP;
+            case "down" -> this.direction = Direction.DOWN;
+            default -> throw new IllegalArgumentException("Invalid direction: " + direction);
         }
     }
 
-    public int getValue() {
-        return degree;
+    public Direction getValue() {
+        return direction;
     }
 
     @Override
     public boolean equals(MSType value) {
-        if (value instanceof MSRelDir) {
-            return ((MSRelDir) value).getValue() == degree;
-        }
-        return false;
+        return value instanceof MSRelDir relDir && relDir.getValue() == direction;
+    }
+
+    public enum Direction {
+        UP,
+        DOWN,
+        LEFT,
+        RIGHT
     }
 }

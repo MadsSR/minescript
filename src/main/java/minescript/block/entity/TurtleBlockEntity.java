@@ -2,7 +2,8 @@ package minescript.block.entity;
 
 import interpreter.Interpreter;
 import interpreter.types.MSMessageType;
-import minescript.item.inventory.ImplementedInventory;
+import interpreter.types.MSRelDir.Direction;
+import minescript.block.custom.TurtleBlock;
 import minescript.networking.MineScriptPackets;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
@@ -10,62 +11,55 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.block.enums.WallMountLocation;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.screen.NamedScreenHandlerFactory;
-import net.minecraft.screen.ScreenHandler;
 import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
-import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 
-public class TurtleBlockEntity extends BlockEntity implements NamedScreenHandlerFactory, ImplementedInventory {
+public class TurtleBlockEntity extends BlockEntity {
 
     private Block placingBlock;
     private BlockPos turtlePos;
     private Thread interpreterThread;
     private int actionDelay;
-    public String input;
+    public Text input;
 
     public TurtleBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.TURTLE_BLOCK_ENTITY, pos, state);
         actionDelay = 500;
         turtlePos = pos;
         placingBlock = Blocks.AIR;
+        input = Text.empty();
     }
 
-    @Override
-    public DefaultedList<ItemStack> getItems() {
-        return null;
-    }
+//    @Override
+//    public void writeNbt(NbtCompound tag) {
+//        super.writeNbt(tag);
+//        tag.putString("input", Text.Serializer.toJson(input));
+//    }
+//
+//    @Override
+//    public void readNbt(NbtCompound tag) {
+//        super.readNbt(tag);
+//        Text temp = Text.Serializer.fromJson(tag.getString("input"));
+//        if (!temp.equals(Text.empty())) {
+//            input = temp;
+//        }
+//    }
 
-    @Override
-    public Text getDisplayName() {
-        return Text.literal("MineScript Turtle");
-    }
-
-    @Nullable
-    @Override
-    public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return null;
-    }
+//    @Override
+//    public Packet<ClientPlayPacketListener> toUpdatePacket() {
+//        return BlockEntityUpdateS2CPacket.create(this);
+//    }
+//
+//    @Override
+//    public NbtCompound toInitialChunkDataNbt() {
+//        return createNbt();
+//    }
 
     public static void tick(World world, BlockPos pos, BlockState state, TurtleBlockEntity entity) {
-    }
-
-    public TurtleBlockEntity getTurtleEntity() {
-        if (world.getBlockEntity(turtlePos) instanceof TurtleBlockEntity turtleEntity) {
-            turtleEntity.interpreterThread = interpreterThread;
-            turtleEntity.actionDelay = actionDelay;
-            turtleEntity.input = input;
-            return turtleEntity;
-        }
-        return null;
     }
 
     public void step(int steps) {
@@ -79,18 +73,21 @@ public class TurtleBlockEntity extends BlockEntity implements NamedScreenHandler
             ClientPlayNetworking.send(MineScriptPackets.STEP_ID, buf);
 
             BlockState state = world.getBlockState(turtlePos);
-            BlockPos newPos = turtlePos;
 
-            switch (state.get(Properties.HORIZONTAL_FACING)) {
-                case NORTH -> newPos = newPos.north(1);
-                case SOUTH -> newPos = newPos.south(1);
-                case EAST -> newPos = newPos.east(1);
-                case WEST -> newPos = newPos.west(1);
+            if (state.get(TurtleBlock.FACE) == WallMountLocation.WALL) {
+                switch (state.get(Properties.HORIZONTAL_FACING)) {
+                    case NORTH -> turtlePos = turtlePos.north(1);
+                    case SOUTH -> turtlePos = turtlePos.south(1);
+                    case EAST -> turtlePos = turtlePos.east(1);
+                    case WEST -> turtlePos = turtlePos.west(1);
+                }
             }
-
-            world.setBlockState(newPos, state, Block.NOTIFY_ALL);
-            world.setBlockState(turtlePos, placingBlock.getDefaultState(), Block.NOTIFY_ALL);
-            turtlePos = newPos;
+            else {
+                switch (state.get(TurtleBlock.FACE)) {
+                    case FLOOR -> turtlePos = turtlePos.down(1);
+                    case CEILING -> turtlePos = turtlePos.up(1);
+                }
+            }
         }
     }
 
@@ -105,11 +102,11 @@ public class TurtleBlockEntity extends BlockEntity implements NamedScreenHandler
         placingBlock = block;
     }
 
-    public void turn(int degrees) {
+    public void turn(Direction direction) {
         timeout();
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeBlockPos(turtlePos);
-        buf.writeInt(degrees);
+        buf.writeInt(direction.ordinal());
 
         ClientPlayNetworking.send(MineScriptPackets.TURN_ID, buf);
     }

@@ -22,6 +22,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     public Visitor(TurtleBlockEntity entity) {
         this.entity = entity;
     }
+    public Visitor() { this.entity = null; }
 
     @Override
     public MSType visitProgram(MineScriptParser.ProgramContext ctx) {
@@ -405,7 +406,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                     throw new RuntimeException("Cannot call '" + id + "' because it is not a function");
                 }
         }
-        entity = entity.getTurtleEntity();
+//        entity = entity.getTurtleEntity();
         inFunctionCall = false;
         return retVal;
     }
