@@ -4,7 +4,7 @@ grammar MineScript;
 COMMENT: '#' ~[\r\n]* -> skip;
 
 // Tokens
-RELDIR: 'left' | 'right';
+RELDIR: 'left' | 'right' | 'up' | 'down';
 ABSDIR: 'north' | 'south' | 'east' | 'west';
 NUMBER: [0-9]+;
 BOOL: 'true' | 'false';
