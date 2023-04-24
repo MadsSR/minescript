@@ -41,6 +41,7 @@ public class TurtleBlockEntity extends BlockEntity {
             turtleEntity.actionDelay = actionDelay;
             turtleEntity.input = input;
             turtleEntity.turtlePos = turtlePos;
+            turtleEntity.placingBlock = placingBlock;
             return turtleEntity;
         }
         return null;

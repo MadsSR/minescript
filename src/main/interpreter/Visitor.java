@@ -276,8 +276,9 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         if (functionCallCounter == 0) {
             throw new RuntimeException("Cannot return outside of define block");
         }
+        MSType retVal = visit(ctx.expression());
         hasReturned = true;
-        return visit(ctx.expression());
+        return retVal;
     }
 
     @Override
