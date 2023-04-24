@@ -35,30 +35,16 @@ public class TurtleBlockEntity extends BlockEntity {
         input = Text.empty();
     }
 
-//    @Override
-//    public void writeNbt(NbtCompound tag) {
-//        super.writeNbt(tag);
-//        tag.putString("input", Text.Serializer.toJson(input));
-//    }
-//
-//    @Override
-//    public void readNbt(NbtCompound tag) {
-//        super.readNbt(tag);
-//        Text temp = Text.Serializer.fromJson(tag.getString("input"));
-//        if (!temp.equals(Text.empty())) {
-//            input = temp;
-//        }
-//    }
-
-//    @Override
-//    public Packet<ClientPlayPacketListener> toUpdatePacket() {
-//        return BlockEntityUpdateS2CPacket.create(this);
-//    }
-//
-//    @Override
-//    public NbtCompound toInitialChunkDataNbt() {
-//        return createNbt();
-//    }
+    public TurtleBlockEntity getTurtleEntity() {
+        if (world.getBlockEntity(turtlePos) instanceof TurtleBlockEntity turtleEntity) {
+            turtleEntity.interpreterThread = interpreterThread;
+            turtleEntity.actionDelay = actionDelay;
+            turtleEntity.input = input;
+            turtleEntity.turtlePos = turtlePos;
+            return turtleEntity;
+        }
+        return null;
+    }
 
     public static void tick(World world, BlockPos pos, BlockState state, TurtleBlockEntity entity) {
     }
@@ -73,9 +59,10 @@ public class TurtleBlockEntity extends BlockEntity {
             ClientPlayNetworking.send(MineScriptPackets.STEP_ID, buf);
 
             BlockState state = world.getBlockState(turtlePos);
+            BlockPos oldPos = turtlePos;
 
-            if (!state.contains(TurtleBlock.FACE) || !state.contains(Properties.HORIZONTAL_FACING))
-                throw new RuntimeException("Property does not exist");
+//            if (!state.contains(TurtleBlock.FACE) || !state.contains(Properties.HORIZONTAL_FACING))
+//                throw new RuntimeException("Property does not exist");
 
             if (state.get(TurtleBlock.FACE) == WallMountLocation.WALL) {
                 switch (state.get(Properties.HORIZONTAL_FACING)) {
@@ -91,6 +78,9 @@ public class TurtleBlockEntity extends BlockEntity {
                     case CEILING -> turtlePos = turtlePos.up(1);
                 }
             }
+
+            world.setBlockState(turtlePos, state, Block.NOTIFY_ALL);
+            world.setBlockState(oldPos, placingBlock.getDefaultState(), Block.NOTIFY_ALL);
         }
     }
 

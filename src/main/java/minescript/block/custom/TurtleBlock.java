@@ -31,10 +31,10 @@ public class TurtleBlock extends BlockWithEntity implements BlockEntityProvider 
     public TurtleBlock(Settings settings) {
         super(settings);
 
-//        setDefaultState(getDefaultState()
-//                .with(Properties.HORIZONTAL_FACING, Direction.NORTH)
-//                .with(Properties.VERTICAL_DIRECTION, null)
-//        );
+        setDefaultState(getDefaultState()
+                .with(Properties.HORIZONTAL_FACING, Direction.NORTH)
+                .with(FACE, WallMountLocation.WALL)
+        );
     }
 
     @Override

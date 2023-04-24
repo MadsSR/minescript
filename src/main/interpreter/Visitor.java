@@ -420,7 +420,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                     throw new RuntimeException("Cannot call '" + id + "' because it is not a function");
                 }
         }
-//        entity = entity.getTurtleEntity();
+        entity = entity.getTurtleEntity();
         functionCallCounter--;
         return retVal;
     }

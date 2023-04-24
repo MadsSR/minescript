@@ -33,6 +33,7 @@ public class StepC2SPacket {
 
         if (!state.contains(TurtleBlock.FACE) || !state.contains(Properties.HORIZONTAL_FACING)) {
             PrintC2SPacket.print("Property does not exist", player, MSMessageType.ERROR);
+            PrintC2SPacket.print("POS: " + pos, player, MSMessageType.INFO);
             return;
         }
 
