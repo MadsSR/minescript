@@ -22,7 +22,10 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     public Visitor(TurtleBlockEntity entity) {
         this.entity = entity;
     }
-    public Visitor() { this.entity = null; }
+
+    public Visitor() {
+        this.entity = null;
+    }
 
     @Override
     public MSType visitProgram(MineScriptParser.ProgramContext ctx) {
@@ -309,8 +312,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
 
                 if (dir instanceof MSRelDir relDir) {
                     entity.turn(relDir.getValue());
-                }
-                else if (dir instanceof MSAbsDir absDir) {
+                } else if (dir instanceof MSAbsDir absDir) {
                     entity.turn(absDir.getValue());
                 }
                 break;
@@ -331,7 +333,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 // code for Roll function
                 break;
             case "Peek":
-                // code for Peek function
+                retVal = new MSBlock(entity.peek());
                 break;
             case "Sqrt":
                 // code for Sqrt function
@@ -347,11 +349,9 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
 
                 if (actualParams.size() == 0) {
                     retVal = new MSNumber(random.nextInt());
-                }
-                else if (actualParams.get(0) instanceof MSNumber n) {
+                } else if (actualParams.get(0) instanceof MSNumber n) {
                     retVal = new MSNumber(random.nextInt(n.getValue()));
-                }
-                else {
+                } else {
                     throw new RuntimeException("Random function expects a number parameter");
                 }
                 break;
@@ -374,12 +374,14 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 }
                 break;
             case "GetXPosition":
-                return new MSNumber(entity.getXPosition());
+                retVal = new MSNumber(entity.getXPosition());
+                break;
             case "GetYPosition":
-                // code for GetYPosition function
-                return new MSNumber(entity.getYPosition());
+                retVal = new MSNumber(entity.getYPosition());
+                break;
             case "GetZPosition":
-                return new MSNumber(entity.getZPosition());
+                retVal = new MSNumber(entity.getZPosition());
+                break;
             case "GetHorizontalDirection":
                 // code for GetHorizontalDirection function
                 break;
@@ -387,7 +389,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 // code for GetVerticalDirection function
                 break;
             case "Print":
-                entity.print(actualParams.get(0).getClass().getName() +" is: "+ actualParams.get(0).toString(), MSMessageType.INFO);
+                entity.print(actualParams.get(0).getClass().getName() + " is: " + actualParams.get(0).toString(), MSMessageType.INFO);
                 break;
             default:
                 MSType value;

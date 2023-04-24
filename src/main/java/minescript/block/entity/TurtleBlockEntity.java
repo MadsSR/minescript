@@ -71,8 +71,7 @@ public class TurtleBlockEntity extends BlockEntity {
                     case EAST -> turtlePos = turtlePos.east(1);
                     case WEST -> turtlePos = turtlePos.west(1);
                 }
-            }
-            else {
+            } else {
                 switch (state.get(TurtleBlock.FACE)) {
                     case FLOOR -> turtlePos = turtlePos.down(1);
                     case CEILING -> turtlePos = turtlePos.up(1);
@@ -153,5 +152,32 @@ public class TurtleBlockEntity extends BlockEntity {
 
     public int getZPosition() {
         return turtlePos.getZ();
+    }
+
+    public Block peek() {
+
+        BlockState state = world.getBlockState(turtlePos);
+
+
+        if (!state.contains(TurtleBlock.FACE) || !state.contains(Properties.HORIZONTAL_FACING))
+            throw new RuntimeException("Property does not exist");
+
+
+        BlockPos peekPos = null;
+        if (state.get(TurtleBlock.FACE) == WallMountLocation.WALL) {
+            switch (state.get(Properties.HORIZONTAL_FACING)) {
+                case NORTH -> peekPos = turtlePos.north(1);
+                case SOUTH -> peekPos = turtlePos.south(1);
+                case EAST -> peekPos = turtlePos.east(1);
+                case WEST -> peekPos = turtlePos.west(1);
+            }
+        } else {
+            switch (state.get(TurtleBlock.FACE)) {
+                case FLOOR -> peekPos = turtlePos.down(1);
+                case CEILING -> peekPos = turtlePos.up(1);
+            }
+        }
+
+        return world.getBlockState(peekPos).getBlock();
     }
 }
