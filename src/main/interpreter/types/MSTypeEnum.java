@@ -5,6 +5,7 @@ public enum MSTypeEnum {
     MSBool,
     MSFunction,
     MSBlock,
-    MSRelDir
+    MSRelDir,
+    MSAbsDir
 }
 

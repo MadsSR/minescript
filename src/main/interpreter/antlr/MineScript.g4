@@ -4,8 +4,8 @@ grammar MineScript;
 COMMENT: '#' ~[\r\n]* -> skip;
 
 // Tokens
-RELDIR: 'left' | 'right';
-ABSDIR: 'north' | 'south' | 'east' | 'west';
+RELDIR: 'left' | 'right' | 'up' | 'down';
+ABSDIR: 'north' | 'south' | 'east' | 'west' | 'top' | 'bottom';
 NUMBER: [0-9]+;
 BOOL: 'true' | 'false';
 BLOCK: 'minecraft:'[a-zA-Z0-9_]+;

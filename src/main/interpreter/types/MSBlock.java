@@ -21,6 +21,11 @@ public class MSBlock extends MSType {
         this.block = block;
     }
 
+    @Override
+    public String toString() {
+        return block.toString().replace("Block{", "").replace("}", "");
+    }
+
     public Block getValue() {
         return block;
     }

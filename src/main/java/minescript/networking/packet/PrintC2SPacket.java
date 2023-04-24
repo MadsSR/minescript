@@ -17,7 +17,11 @@ public class PrintC2SPacket {
         String message = buf.readString();
         int type = buf.readInt();
 
-        switch (MSMessageType.values()[type]) {
+        print(message, player, MSMessageType.values()[type]);
+    }
+
+    public static void print(String message, ServerPlayerEntity player, MSMessageType type) {
+        switch (type) {
             case ERROR -> message = "§cERROR:§r " + message;
             case WARNING -> message = "§eWARNING:§r " + message;
             case INFO -> message = "§aINFO:§r " + message;
