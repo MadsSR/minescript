@@ -25,6 +25,8 @@ public class TurtleBlockEntity extends BlockEntity {
     private BlockPos turtlePos;
     private Thread interpreterThread;
     private int actionDelay;
+
+    public boolean shouldBreak = true;
     public Text input;
 
     public TurtleBlockEntity(BlockPos pos, BlockState state) {
@@ -41,6 +43,8 @@ public class TurtleBlockEntity extends BlockEntity {
             turtleEntity.actionDelay = actionDelay;
             turtleEntity.input = input;
             turtleEntity.turtlePos = turtlePos;
+            turtleEntity.placingBlock = placingBlock;
+            turtleEntity.shouldBreak = shouldBreak;
             return turtleEntity;
         }
         return null;
@@ -51,6 +55,12 @@ public class TurtleBlockEntity extends BlockEntity {
 
     public void step(int steps) {
         for (int i = 0; i < steps; i++) {
+
+            if (!shouldBreak && peek() != Blocks.AIR) {
+                print("Cannot move forward, block in the way", MSMessageType.WARNING);
+                return;
+            }
+
             timeout();
             PacketByteBuf buf = PacketByteBufs.create();
             buf.writeBlockPos(turtlePos);
@@ -180,4 +190,6 @@ public class TurtleBlockEntity extends BlockEntity {
 
         return world.getBlockState(peekPos).getBlock();
     }
+
+
 }

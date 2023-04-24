@@ -18,6 +18,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     private boolean hasReturned = false;
     private int functionCallCounter = 0;
     private TurtleBlockEntity entity;
+    private boolean shouldBreak = true;
 
     public Visitor(TurtleBlockEntity entity) {
         this.entity = entity;
@@ -327,7 +328,24 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 }
                 break;
             case "Break":
-                // code for Break function
+
+                if (actualParams.size() > 1) {
+                    throw new RuntimeException("Break function expects 1 parameter");
+                }
+
+                if (actualParams.size() == 0) {
+                    retVal = new MSBool(shouldBreak);
+                    break;
+                }
+
+
+                if (actualParams.get(0) instanceof MSBool b) {
+                    entity.shouldBreak = b.getValue();
+                    shouldBreak = b.getValue();
+                } else {
+                    throw new RuntimeException("Break function expects a boolean parameter");
+                }
+                retVal = new MSBool(shouldBreak);
                 break;
             case "Roll":
                 // code for Roll function
