@@ -185,6 +185,12 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     }
 
     @Override
+    public MSType visitAbsDir(MineScriptParser.AbsDirContext ctx) {
+        String absDir = ctx.ABSDIR().getText();
+        return new MSAbsDir(absDir);
+    }
+
+    @Override
     public MSType visitAddSub(MineScriptParser.AddSubContext ctx) {
         MSType left = visit(ctx.expression(0));
         MSType right = visit(ctx.expression(1));
@@ -299,8 +305,13 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                     throw new RuntimeException("Turn function expects 1 parameter");
                 }
 
-                if (actualParams.get(0) instanceof MSRelDir d) {
-                    entity.turn(d.getValue());
+                MSType dir = actualParams.get(0);
+
+                if (dir instanceof MSRelDir relDir) {
+                    entity.turn(relDir.getValue());
+                }
+                else if (dir instanceof MSAbsDir absDir) {
+                    entity.turn(absDir.getValue());
                 }
                 break;
             case "UseBlock":

@@ -1,8 +1,9 @@
 package minescript.block.entity;
 
 import interpreter.Interpreter;
+import interpreter.types.MSAbsDir;
 import interpreter.types.MSMessageType;
-import interpreter.types.MSRelDir.Direction;
+import interpreter.types.MSRelDir;
 import minescript.block.custom.TurtleBlock;
 import minescript.networking.MineScriptPackets;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -102,13 +103,22 @@ public class TurtleBlockEntity extends BlockEntity {
         placingBlock = block;
     }
 
-    public void turn(Direction direction) {
+    public void turn(MSRelDir.Direction direction) {
         timeout();
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeBlockPos(turtlePos);
         buf.writeInt(direction.ordinal());
 
-        ClientPlayNetworking.send(MineScriptPackets.TURN_ID, buf);
+        ClientPlayNetworking.send(MineScriptPackets.TURN_RELDIR_ID, buf);
+    }
+
+    public void turn(MSAbsDir.Direction direction) {
+        timeout();
+        PacketByteBuf buf = PacketByteBufs.create();
+        buf.writeBlockPos(turtlePos);
+        buf.writeInt(direction.ordinal());
+
+        ClientPlayNetworking.send(MineScriptPackets.TURN_ABSDIR_ID, buf);
     }
 
     public void print(String msg, MSMessageType type) {
