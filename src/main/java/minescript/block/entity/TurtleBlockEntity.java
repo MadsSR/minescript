@@ -68,12 +68,14 @@ public class TurtleBlockEntity extends BlockEntity {
             timeout();
             PacketByteBuf buf = PacketByteBufs.create();
             buf.writeBlockPos(turtlePos);
-            buf.writeInt(1);
             buf.writeInt(Block.getRawIdFromState(placingBlock.getDefaultState()));
 
             ClientPlayNetworking.send(MineScriptPackets.STEP_ID, buf);
 
             BlockState state = world.getBlockState(turtlePos);
+
+            if (!state.contains(TurtleBlock.FACE) || !state.contains(Properties.HORIZONTAL_FACING))
+                throw new RuntimeException("Property does not exist");
 
             if (state.get(TurtleBlock.FACE) == WallMountLocation.WALL) {
                 switch (state.get(Properties.HORIZONTAL_FACING)) {

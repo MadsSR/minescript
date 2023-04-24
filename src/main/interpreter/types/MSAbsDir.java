@@ -10,6 +10,8 @@ public class MSAbsDir extends MSType {
             case "south" -> this.direction = Direction.SOUTH;
             case "west" -> this.direction = Direction.WEST;
             case "east" -> this.direction = Direction.EAST;
+            case "top" -> this.direction = Direction.TOP;
+            case "bottom" -> this.direction = Direction.BOTTOM;
             default -> throw new IllegalArgumentException("Invalid direction: " + direction);
         }
     }
@@ -27,6 +29,8 @@ public class MSAbsDir extends MSType {
         NORTH,
         SOUTH,
         WEST,
-        EAST
+        EAST,
+        TOP,
+        BOTTOM
     }
 }

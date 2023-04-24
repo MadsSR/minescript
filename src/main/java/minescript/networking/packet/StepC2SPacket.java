@@ -1,5 +1,6 @@
 package minescript.networking.packet;
 
+import interpreter.types.MSMessageType;
 import minescript.block.custom.TurtleBlock;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.block.AbstractBlock;
@@ -24,12 +25,16 @@ public class StepC2SPacket {
         ServerWorld world = player.getWorld();
 
         BlockPos pos = buf.readBlockPos();
-        int steps = buf.readInt();
         int id = buf.readInt();
         BlockState placingBlockState = Block.getStateFromRawId(id);
 
         BlockPos newPos = pos;
         BlockState state = world.getBlockState(pos);
+
+        if (!state.contains(TurtleBlock.FACE) || !state.contains(Properties.HORIZONTAL_FACING)) {
+            PrintC2SPacket.print("Property does not exist", player, MSMessageType.ERROR);
+            return;
+        }
 
         if (state.get(TurtleBlock.FACE) == WallMountLocation.WALL) {
             switch (state.get(Properties.HORIZONTAL_FACING)) {

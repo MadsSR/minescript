@@ -16,7 +16,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     private final ExpressionParser parser = new ExpressionParser();
     private final Random random = new Random(System.currentTimeMillis());
     private boolean hasReturned = false;
-    private boolean inFunctionCall = false;
+    private int functionCallCounter = 0;
     private TurtleBlockEntity entity;
 
     public Visitor(TurtleBlockEntity entity) {
@@ -44,19 +44,19 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     public MSType visitStatements(MineScriptParser.StatementsContext ctx) {
         MSType val;
 
-        if (!inFunctionCall)
+        if (functionCallCounter == 0)
             symbolTable.enterScope();
 
         for (MineScriptParser.StatementContext statement : ctx.statement()) {
             val = visit(statement);
             if (hasReturned) {
-                if (!inFunctionCall)
+                if (functionCallCounter == 0)
                     symbolTable.exitScope();
                 return val;
             }
         }
 
-        if (!inFunctionCall)
+        if (functionCallCounter == 0)
             symbolTable.exitScope();
 
         return null;
@@ -273,7 +273,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
 
     @Override
     public MSType visitReturn(MineScriptParser.ReturnContext ctx) {
-        if (!inFunctionCall) {
+        if (functionCallCounter == 0) {
             throw new RuntimeException("Cannot return outside of define block");
         }
         hasReturned = true;
@@ -285,7 +285,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         var id = ctx.ID().getText();
         ArrayList<MSType> actualParams = getActualParams(ctx.actual_parameters());
         MSType retVal = null;
-        inFunctionCall = true;
+        functionCallCounter++;
 
         switch (id) {
             case "Step":
@@ -421,7 +421,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 }
         }
 //        entity = entity.getTurtleEntity();
-        inFunctionCall = false;
+        functionCallCounter--;
         return retVal;
     }
 
