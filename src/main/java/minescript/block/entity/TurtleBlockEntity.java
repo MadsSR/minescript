@@ -192,4 +192,46 @@ public class TurtleBlockEntity extends BlockEntity {
     }
 
 
+
+    public String getHorizontalDirection(){
+        BlockState state = world.getBlockState(turtlePos);
+        if (state.contains(Properties.HORIZONTAL_FACING)) {
+            return state.get(Properties.HORIZONTAL_FACING).toString();
+        }
+        return "north";
+    }
+
+    public String getVerticalDirection(){
+        BlockState state = world.getBlockState(turtlePos);
+        if (state.contains(TurtleBlock.FACE)) {
+            switch(state.get(TurtleBlock.FACE)){
+                case FLOOR:
+                    return "bottom";
+                case CEILING:
+                    return "top";
+            }
+        }
+        if (state.contains(Properties.HORIZONTAL_FACING)) {
+            return state.get(Properties.HORIZONTAL_FACING).toString();
+        }
+        return "north";
+    }
+
+    public void setPosition(BlockPos pos) {
+        timeout();
+
+        PacketByteBuf buf = PacketByteBufs.create();
+        buf.writeBlockPos(turtlePos);
+        buf.writeBlockPos(pos);
+
+        ClientPlayNetworking.send(MineScriptPackets.SET_ID, buf);
+
+        BlockState state = world.getBlockState(turtlePos);
+
+        world.removeBlock(turtlePos, false);
+        world.setBlockState(pos, state, Block.NOTIFY_ALL);
+
+        turtlePos = pos;
+
+    }
 }

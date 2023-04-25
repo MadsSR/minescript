@@ -25,6 +25,11 @@ public class MSAbsDir extends MSType {
         return value instanceof MSAbsDir absDir && absDir.getValue() == direction;
     }
 
+    @Override
+    public String toString(){
+        return direction.toString().toLowerCase();
+    }
+
     public enum Direction {
         NORTH,
         SOUTH,
