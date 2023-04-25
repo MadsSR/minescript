@@ -1,6 +1,7 @@
 package minescript.networking.packet;
 
 import interpreter.types.MSAbsDir;
+import interpreter.types.MSMessageType;
 import minescript.block.custom.TurtleBlock;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.block.Block;
@@ -18,11 +19,18 @@ import net.minecraft.util.math.Direction;
 public class TurnAbsDirC2SPacket {
     public static void receive(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler,
                                PacketByteBuf buf, PacketSender responseSender) {
+
         ServerWorld world = player.getWorld();
 
         BlockPos pos = buf.readBlockPos();
         MSAbsDir.Direction direction = MSAbsDir.Direction.values()[buf.readInt()];
         BlockState state = world.getBlockState(pos);
+
+        if (!state.contains(TurtleBlock.FACE) || !state.contains(Properties.HORIZONTAL_FACING)) {
+            PrintC2SPacket.print("Property does not exist", player, MSMessageType.ERROR);
+            return;
+        }
+
         Direction facing = state.get(Properties.HORIZONTAL_FACING);
         WallMountLocation face = state.get(TurtleBlock.FACE);
 

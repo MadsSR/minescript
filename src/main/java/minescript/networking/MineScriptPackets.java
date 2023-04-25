@@ -14,9 +14,9 @@ public class MineScriptPackets {
 
     public static void registerC2SPackets() {
         ServerPlayNetworking.registerGlobalReceiver(STEP_ID, StepC2SPacket::receive);
-        ServerPlayNetworking.registerGlobalReceiver(SET_ID, SetPositionC2SPacket::receive);
         ServerPlayNetworking.registerGlobalReceiver(TURN_RELDIR_ID, TurnRelDirC2SPacket::receive);
         ServerPlayNetworking.registerGlobalReceiver(TURN_ABSDIR_ID, TurnAbsDirC2SPacket::receive);
+        ServerPlayNetworking.registerGlobalReceiver(SET_ID, SetPositionC2SPacket::receive);
         ServerPlayNetworking.registerGlobalReceiver(PRINT_ID, PrintC2SPacket::receive);
     }
 }

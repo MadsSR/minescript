@@ -6,6 +6,8 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 import interpreter.antlr.*;
 
+import java.util.Arrays;
+
 public class Interpreter implements Runnable {
 
     private static TurtleBlockEntity entity;
@@ -39,7 +41,7 @@ public class Interpreter implements Runnable {
             //System.out.println(tree.toStringTree(parser)); // print LISP-style tree
         }
         catch (Exception e) {
-            entity.print(e.getMessage(), MSMessageType.ERROR);
+            entity.print(e.getMessage() + Arrays.stream(e.getStackTrace()), MSMessageType.ERROR);
         }
     }
 }

@@ -19,11 +19,15 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     private boolean hasReturned = false;
     private int functionCallCounter = 0;
     private TurtleBlockEntity entity;
+    private boolean shouldBreak = true;
 
     public Visitor(TurtleBlockEntity entity) {
         this.entity = entity;
     }
-    public Visitor() { this.entity = null; }
+
+    public Visitor() {
+        this.entity = null;
+    }
 
     @Override
     public MSType visitProgram(MineScriptParser.ProgramContext ctx) {
@@ -277,8 +281,9 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         if (functionCallCounter == 0) {
             throw new RuntimeException("Cannot return outside of define block");
         }
+        MSType retVal = visit(ctx.expression());
         hasReturned = true;
-        return visit(ctx.expression());
+        return retVal;
     }
 
     @Override
@@ -310,8 +315,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
 
                 if (dir instanceof MSRelDir relDir) {
                     entity.turn(relDir.getValue());
-                }
-                else if (dir instanceof MSAbsDir absDir) {
+                } else if (dir instanceof MSAbsDir absDir) {
                     entity.turn(absDir.getValue());
                 }
                 break;
@@ -326,10 +330,30 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 }
                 break;
             case "Break":
-                // code for Break function
+
+                if (actualParams.size() > 1) {
+                    throw new RuntimeException("Break function expects 1 parameter");
+                }
+
+                if (actualParams.size() == 0) {
+                    retVal = new MSBool(shouldBreak);
+                    break;
+                }
+
+
+                if (actualParams.get(0) instanceof MSBool b) {
+                    entity.shouldBreak = b.getValue();
+                    shouldBreak = b.getValue();
+                } else {
+                    throw new RuntimeException("Break function expects a boolean parameter");
+                }
+                retVal = new MSBool(shouldBreak);
+                break;
+            case "Roll":
+                // code for Roll function
                 break;
             case "Peek":
-                // code for Peek function
+                retVal = new MSBlock(entity.peek());
                 break;
             case "Sqrt":
                 // code for Sqrt function
@@ -345,11 +369,9 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
 
                 if (actualParams.size() == 0) {
                     retVal = new MSNumber(random.nextInt());
-                }
-                else if (actualParams.get(0) instanceof MSNumber n) {
+                } else if (actualParams.get(0) instanceof MSNumber n) {
                     retVal = new MSNumber(random.nextInt(n.getValue()));
-                }
-                else {
+                } else {
                     throw new RuntimeException("Random function expects a number parameter");
                 }
                 break;
@@ -372,16 +394,20 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 }
                 break;
             case "GetXPosition":
-                return new MSNumber(entity.getXPosition());
+                retVal = new MSNumber(entity.getXPosition());
+                break;
             case "GetYPosition":
-                // code for GetYPosition function
-                return new MSNumber(entity.getYPosition());
+                retVal = new MSNumber(entity.getYPosition());
+                break;
             case "GetZPosition":
-                return new MSNumber(entity.getZPosition());
+                retVal = new MSNumber(entity.getZPosition());
+                break;
             case "GetHorizontalDirection":
-                return new MSAbsDir(entity.getHorizontalDirection());
+                retVal = new MSAbsDir(entity.getHorizontalDirection());
+                break;
             case "GetVerticalDirection":
-                return new MSAbsDir(entity.getVerticalDirection());
+                retVal = new MSAbsDir(entity.getVerticalDirection());
+                break;
             case "SetCoordinates":
                 // code for SetCoordinates function
                 if (actualParams.size() != 3) {
