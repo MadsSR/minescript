@@ -7,6 +7,7 @@ import minescript.block.entity.TurtleBlockEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.registry.Registries;
+import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -327,9 +328,6 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
             case "Break":
                 // code for Break function
                 break;
-            case "Roll":
-                // code for Roll function
-                break;
             case "Peek":
                 // code for Peek function
                 break;
@@ -381,13 +379,57 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
             case "GetZPosition":
                 return new MSNumber(entity.getZPosition());
             case "GetHorizontalDirection":
-                // code for GetHorizontalDirection function
-                break;
+                return new MSAbsDir(entity.getHorizontalDirection());
             case "GetVerticalDirection":
-                // code for GetVerticalDirection function
+                return new MSAbsDir(entity.getVerticalDirection());
+            case "SetCoordinates":
+                // code for SetCoordinates function
+                if (actualParams.size() != 3) {
+                    throw new RuntimeException("SetCoordinates function expects 3 parameters");
+                }
+
+                if (actualParams.get(0) instanceof MSNumber x && actualParams.get(1) instanceof MSNumber y && actualParams.get(2) instanceof MSNumber z) {
+                    entity.setPosition(new BlockPos(x.getValue(), y.getValue(), z.getValue()));
+                }
+                break;
+            case "SetXCoordinate":
+                // code for SetXCoordinate function
+                if (actualParams.size() != 1) {
+                    throw new RuntimeException("SetXCoordinate function expects 1 parameter");
+                }
+
+                if (actualParams.get(0) instanceof MSNumber n) {
+                    entity.setPosition(new BlockPos(n.getValue(), entity.getYPosition(), entity.getZPosition()));
+                }
+                break;
+            case "SetYCoordinate":
+                // code for SetYCoordinate function
+                if (actualParams.size() != 1) {
+                    throw new RuntimeException("SetXCoordinate function expects 1 parameter");
+                }
+
+                if (actualParams.get(0) instanceof MSNumber n) {
+                    entity.setPosition(new BlockPos(entity.getXPosition(), n.getValue(), entity.getZPosition()));
+                }
+                break;
+            case "SetZCoordinate":
+                // code for SetZCoordinate function
+                if (actualParams.size() != 1) {
+                    throw new RuntimeException("SetXCoordinate function expects 1 parameter");
+                }
+
+                if (actualParams.get(0) instanceof MSNumber n) {
+                    entity.setPosition(new BlockPos(entity.getXPosition(), entity.getYPosition(), n.getValue()));
+                }
                 break;
             case "Print":
-                entity.print(actualParams.get(0).getClass().getName() +" is: "+ actualParams.get(0).toString(), MSMessageType.INFO);
+                ctx.actual_parameters().expression().forEach(expressionContext -> {
+                    if(expressionContext.getText().toString().equals(visit(expressionContext).toString())){
+                        entity.print(visit(expressionContext).toString(), MSMessageType.INFO);
+                    } else {
+                        entity.print(expressionContext.getText() +" is: "+ visit(expressionContext).toString(), MSMessageType.INFO);
+                    }
+                });
                 break;
             default:
                 MSType value;

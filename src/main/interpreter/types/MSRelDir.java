@@ -23,6 +23,11 @@ public class MSRelDir extends MSType {
         return value instanceof MSRelDir relDir && relDir.getValue() == direction;
     }
 
+    @Override
+    public String toString(){
+        return direction.toString().toLowerCase();
+    }
+
     public enum Direction {
         UP,
         DOWN,

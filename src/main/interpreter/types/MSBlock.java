@@ -32,4 +32,9 @@ public class MSBlock extends MSType {
         }
         return false;
     }
+
+    @Override
+    public String toString() {
+        return block.toString().replace("Block{", "").replace("}", "");
+    }
 }
