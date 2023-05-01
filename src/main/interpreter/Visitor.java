@@ -263,17 +263,23 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     @Override
     public MSType visitAnd(MineScriptParser.AndContext ctx) {
         MSType left = visit(ctx.expression(0));
+        if (parser.getBoolean(left).getValue() == false) {
+            return new MSBool(false);
+        }
         MSType right = visit(ctx.expression(1));
+        return new MSBool(parser.getBoolean(right).getValue());
 
-        return new MSBool(parser.getBoolean(left).getValue() && parser.getBoolean(right).getValue());
     }
 
     @Override
     public MSType visitOr(MineScriptParser.OrContext ctx) {
         MSType left = visit(ctx.expression(0));
+        if (parser.getBoolean(left).getValue() == true) {
+            return new MSBool(true);
+        }
         MSType right = visit(ctx.expression(1));
 
-        return new MSBool(parser.getBoolean(left).getValue() || parser.getBoolean(right).getValue());
+        return new MSBool(parser.getBoolean(right).getValue());
     }
 
     @Override
