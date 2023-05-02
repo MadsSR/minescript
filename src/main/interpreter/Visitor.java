@@ -159,7 +159,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         return new MSBool(switch (ctx.op.getText()) {
             case "is" -> left.equals(right);
             case "is not" -> !left.equals(right);
-            default -> throw new RuntimeException("Unknown operator: " + ctx.op.getText());
+            default -> throw new RuntimeException("Unknown operator ' '" + ctx.op.getText() + "' '");
         });
     }
 
@@ -207,8 +207,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 default -> throw new RuntimeException("Unknown operator: " + ctx.op.getText());
             });
         }
-        throw new RuntimeException("cannot add / subtract " + left.getClass() + " and " + right.getClass());
-
+        throw new RuntimeException("Cannot " + left.getClass() + " " + ctx.op.getText() + " " + right.getClass());
     }
 
     @Override
@@ -242,7 +241,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 default -> throw new RuntimeException("Unknown operator: " + ctx.op.getText());
             });
         }
-        throw new RuntimeException("Cannot multiply / divide / mod " + left.getClass() + " and " + right.getClass());
+        throw new RuntimeException("Cannot use " + ctx.op.getText() + " on " + left.getClass() + " and " + right.getClass());
     }
 
     @Override
@@ -456,10 +455,10 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 break;
             case "Print":
                 ctx.actual_parameters().expression().forEach(expressionContext -> {
-                    if(expressionContext.getText().toString().equals(visit(expressionContext).toString())){
+                    if (expressionContext.getText().toString().equals(visit(expressionContext).toString())) {
                         entity.print(visit(expressionContext).toString(), MSMessageType.INFO);
                     } else {
-                        entity.print(expressionContext.getText() +" is: "+ visit(expressionContext).toString(), MSMessageType.INFO);
+                        entity.print(expressionContext.getText() + " is: " + visit(expressionContext).toString(), MSMessageType.INFO);
                     }
                 });
                 break;
@@ -476,7 +475,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                     var formalParams = function.getParameters();
 
                     if (formalParams.size() != actualParams.size()) {
-                        throw new RuntimeException("Cannot call '" + id + "' because it has " + formalParams.size() + " parameters, but " + actualParams.size() + " were given");
+                        throw new RuntimeException("Cannot call function '" + id + "' because it has " + formalParams.size() + " parameters, but " + actualParams.size() + " were given");
                     }
 
                     symbolTable.enterScope();
@@ -494,7 +493,9 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                     throw new RuntimeException("Cannot call '" + id + "' because it is not a function");
                 }
         }
-        entity = entity.getTurtleEntity();
+        if (entity != null)
+            entity = entity.getTurtleEntity();
+
         functionCallCounter--;
         return retVal;
     }
