@@ -14,7 +14,7 @@ public class MSFunction extends MSType {
 
     public MSFunction(String name, ArrayList<String> parameters, MineScriptParser.StatementsContext ctx) {
         super(MSTypeEnum.MSFunction);
-        if (EnumSet.allOf(MSInbuiltFunction.class).contains(name)){
+        if (EnumSet.allOf(MSInbuiltFunction.class).contains(MSInbuiltFunction.valueOf(name))) {
             throw new RuntimeException("Cannot redefine inbuilt function: " + name);
         }
         this.name = name;
