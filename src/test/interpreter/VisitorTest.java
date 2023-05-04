@@ -236,14 +236,12 @@ class VisitorTest {
 
     @Test
     void visitCompComparesIntValuesAndReturnsBooleanExpectsTrue() {
-        //Initial tests for greater than and greater than or equal
         Assertions.assertTrue(((MSBool) visitor.visitComp((MineScriptParser.CompContext) getExprTreeFromString("5 > 4"))).getValue());
         Assertions.assertTrue(((MSBool) visitor.visitComp((MineScriptParser.CompContext) getExprTreeFromString("5 >= 4"))).getValue());
     }
 
     @Test
     void visitCompComparesIntValuesAndReturnsBooleanExpectsFalse() {
-        //Initial tests for less than and less than or equal
         Assertions.assertFalse(((MSBool) visitor.visitComp((MineScriptParser.CompContext) getExprTreeFromString("5 < 4"))).getValue());
         Assertions.assertFalse(((MSBool) visitor.visitComp((MineScriptParser.CompContext) getExprTreeFromString("5 <= 4"))).getValue());
     }
@@ -268,6 +266,7 @@ class VisitorTest {
     void visitNumberReadsNumFromInputExpectsTrue() {
         Assertions.assertEquals(5, ((MSNumber) visitor.visitNumber((MineScriptParser.NumberContext) getExprTreeFromString("5"))).getValue());
     }
+
     @Test
     void visitNumberWithCorrectInputExpectedTrue(){
         Assertions.assertEquals(5, ((MSNumber) visitor.visitNumber((MineScriptParser.NumberContext) getExprTreeFromString("5"))).getValue());
@@ -277,6 +276,7 @@ class VisitorTest {
     void visitNumberWithIncorrectInputExpectedTrue(){
         Assertions.assertThrows(RuntimeException.class, () -> visitor.visitNumber((MineScriptParser.NumberContext) getExprTreeFromString("abc")));
     }
+
     @Test
     void visitRelDirWithCorrectInputsExpectsTrue() {
         MSRelDir.Direction up_direction = ((MSRelDir) visitor.visitRelDir((MineScriptParser.RelDirContext) getExprTreeFromString("up"))).getValue();
