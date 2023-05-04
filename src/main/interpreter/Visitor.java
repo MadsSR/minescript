@@ -1,11 +1,10 @@
 package interpreter;
 
-import interpreter.antlr.*;
+import interpreter.antlr.MineScriptBaseVisitor;
+import interpreter.antlr.MineScriptParser;
 import interpreter.exceptions.SymbolNotFoundException;
 import interpreter.types.*;
 import minescript.block.entity.TurtleBlockEntity;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.math.BlockPos;
 
@@ -262,7 +261,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     @Override
     public MSType visitAnd(MineScriptParser.AndContext ctx) {
         MSType left = visit(ctx.expression(0));
-        if (parser.getBoolean(left).getValue() == false) {
+        if (!parser.getBoolean(left).getValue()) {
             return new MSBool(false);
         }
         MSType right = visit(ctx.expression(1));
@@ -273,7 +272,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     @Override
     public MSType visitOr(MineScriptParser.OrContext ctx) {
         MSType left = visit(ctx.expression(0));
-        if (parser.getBoolean(left).getValue() == true) {
+        if (parser.getBoolean(left).getValue()) {
             return new MSBool(true);
         }
         MSType right = visit(ctx.expression(1));

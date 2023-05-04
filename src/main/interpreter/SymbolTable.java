@@ -75,13 +75,13 @@ public class SymbolTable {
     }
 
     private String getPrefixName(String name) {
-        return scopeStack.peek().stream().filter(s -> s.contains("." + name)).findFirst().get();
+        return scopeStack.peek().stream().filter(s -> s.contains("." + name)).findFirst().orElseThrow();
     }
 
     private static class Symbol {
-        String name;
-        MSTypeEnum type;
-        MSType value;
+        final String name;
+        final MSTypeEnum type;
+        final MSType value;
 
         public Symbol(String name, MSTypeEnum type, MSType value) {
             this.name = name;

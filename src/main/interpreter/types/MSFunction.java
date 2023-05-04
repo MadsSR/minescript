@@ -4,7 +4,6 @@ package interpreter.types;
 import interpreter.antlr.MineScriptParser;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 
 public class MSFunction extends MSType {
 
