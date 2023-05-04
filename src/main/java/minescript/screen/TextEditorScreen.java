@@ -10,6 +10,9 @@ import net.minecraft.client.gui.widget.EditBoxWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 public class TextEditorScreen extends BaseUIModelScreen<FlowLayout> {
     private TurtleBlockEntity turtleBlockEntity;
 
@@ -31,6 +34,14 @@ public class TextEditorScreen extends BaseUIModelScreen<FlowLayout> {
         if (turtleBlockEntity.input != null) editor.setText(turtleBlockEntity.input.getString());
         editor.mouseDown().subscribe((a,b,c) -> {
             editor.setFocused(true);
+
+            try {
+                Method m = ((Object)editor).getClass().getDeclaredMethod("moveCursor", double.class, double.class);
+                m.setAccessible(true);
+                m.invoke(editor, a + editor.getX(), b + editor.getY());
+            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
 
             return true;
         });
