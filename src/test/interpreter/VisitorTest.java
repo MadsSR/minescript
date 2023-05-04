@@ -236,14 +236,12 @@ class VisitorTest {
 
     @Test
     void visitCompComparesIntValuesAndReturnsBooleanExpectsTrue() {
-        //Initial tests for greater than and greater than or equal
         Assertions.assertTrue(((MSBool) visitor.visitComp((MineScriptParser.CompContext) getExprTreeFromString("5 > 4"))).getValue());
         Assertions.assertTrue(((MSBool) visitor.visitComp((MineScriptParser.CompContext) getExprTreeFromString("5 >= 4"))).getValue());
     }
 
     @Test
     void visitCompComparesIntValuesAndReturnsBooleanExpectsFalse() {
-        //Initial tests for less than and less than or equal
         Assertions.assertFalse(((MSBool) visitor.visitComp((MineScriptParser.CompContext) getExprTreeFromString("5 < 4"))).getValue());
         Assertions.assertFalse(((MSBool) visitor.visitComp((MineScriptParser.CompContext) getExprTreeFromString("5 <= 4"))).getValue());
     }
