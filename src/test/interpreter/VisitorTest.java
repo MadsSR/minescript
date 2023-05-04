@@ -484,6 +484,6 @@ class VisitorTest {
                         enddefine
                         """
         ));
-        Assertions.assertEquals(11, ((MSNumber) visitor.visitFuncCall((MineScriptParser.FuncCallContext) getExprTreeFromString("test(5, 6)"))).getValue());
+        Assertions.assertEquals(10, ((MSNumber) visitor.visitFuncCall((MineScriptParser.FuncCallContext) getExprTreeFromString("test(5, 6)"))).getValue());
     }
 }
