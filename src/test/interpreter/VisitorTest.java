@@ -2,8 +2,9 @@ package interpreter;
 
 import interpreter.antlr.MineScriptLexer;
 import interpreter.antlr.MineScriptParser;
-import interpreter.types.MSBool;
-import interpreter.types.MSNumber;
+import interpreter.types.*;
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,7 @@ class VisitorTest {
                 visitor.visitAssign((MineScriptParser.AssignContext) getStmtTreeFromString("x = \"hej\"\n"))
         );
     }
+
 
     @ParameterizedTest
     @ValueSource(ints = {0, 5, 10, 15})
@@ -234,14 +236,12 @@ class VisitorTest {
 
     @Test
     void visitCompComparesIntValuesAndReturnsBooleanExpectsTrue() {
-        //Initial tests for greater than and greater than or equal
         Assertions.assertTrue(((MSBool) visitor.visitComp((MineScriptParser.CompContext) getExprTreeFromString("5 > 4"))).getValue());
         Assertions.assertTrue(((MSBool) visitor.visitComp((MineScriptParser.CompContext) getExprTreeFromString("5 >= 4"))).getValue());
     }
 
     @Test
     void visitCompComparesIntValuesAndReturnsBooleanExpectsFalse() {
-        //Initial tests for less than and less than or equal
         Assertions.assertFalse(((MSBool) visitor.visitComp((MineScriptParser.CompContext) getExprTreeFromString("5 < 4"))).getValue());
         Assertions.assertFalse(((MSBool) visitor.visitComp((MineScriptParser.CompContext) getExprTreeFromString("5 <= 4"))).getValue());
     }
@@ -257,17 +257,44 @@ class VisitorTest {
     }
 
     @Test
-    void visitId() {
-    }
-
-    @Test
     void visitAddSub() {
         Assertions.assertEquals(10, ((MSNumber) visitor.visitAddSub((MineScriptParser.AddSubContext) getExprTreeFromString("5 + 5"))).getValue());
         Assertions.assertEquals(0, ((MSNumber) visitor.visitAddSub((MineScriptParser.AddSubContext) getExprTreeFromString("5 - 5"))).getValue());
     }
 
     @Test
-    void visitNumber() {
+    void visitNumberReadsNumFromInputExpectsTrue() {
+        Assertions.assertEquals(5, ((MSNumber) visitor.visitNumber((MineScriptParser.NumberContext) getExprTreeFromString("5"))).getValue());
+    }
+
+    @Test
+    void visitRelDirWithCorrectInputsExpectsTrue() {
+        MSRelDir.Direction up_direction = ((MSRelDir) visitor.visitRelDir((MineScriptParser.RelDirContext) getExprTreeFromString("up"))).getValue();
+        MSRelDir.Direction down_direction = ((MSRelDir) visitor.visitRelDir((MineScriptParser.RelDirContext) getExprTreeFromString("down"))).getValue();
+        MSRelDir.Direction left_direction = ((MSRelDir) visitor.visitRelDir((MineScriptParser.RelDirContext) getExprTreeFromString("left"))).getValue();
+        MSRelDir.Direction right_direction = ((MSRelDir) visitor.visitRelDir((MineScriptParser.RelDirContext) getExprTreeFromString("right"))).getValue();
+
+        Assertions.assertEquals(MSRelDir.Direction.UP, up_direction);
+        Assertions.assertEquals(MSRelDir.Direction.DOWN, down_direction);
+        Assertions.assertEquals(MSRelDir.Direction.LEFT, left_direction);
+        Assertions.assertEquals(MSRelDir.Direction.RIGHT, right_direction);
+    }
+
+    @Test
+    void visitAbsDirWithCorrectInputsExpectedTrue(){
+        MSAbsDir.Direction north_direction = ((MSAbsDir) visitor.visitAbsDir((MineScriptParser.AbsDirContext) getExprTreeFromString("north"))).getValue();
+        MSAbsDir.Direction south_direction = ((MSAbsDir) visitor.visitAbsDir((MineScriptParser.AbsDirContext) getExprTreeFromString("south"))).getValue();
+        MSAbsDir.Direction east_direction = ((MSAbsDir) visitor.visitAbsDir((MineScriptParser.AbsDirContext) getExprTreeFromString("east"))).getValue();
+        MSAbsDir.Direction west_direction = ((MSAbsDir) visitor.visitAbsDir((MineScriptParser.AbsDirContext) getExprTreeFromString("west"))).getValue();
+        MSAbsDir.Direction top_direction = ((MSAbsDir) visitor.visitAbsDir((MineScriptParser.AbsDirContext) getExprTreeFromString("top"))).getValue();
+        MSAbsDir.Direction bottom_direction = ((MSAbsDir) visitor.visitAbsDir((MineScriptParser.AbsDirContext) getExprTreeFromString("bottom"))).getValue();
+
+        Assertions.assertEquals(MSAbsDir.Direction.NORTH, north_direction);
+        Assertions.assertEquals(MSAbsDir.Direction.SOUTH, south_direction);
+        Assertions.assertEquals(MSAbsDir.Direction.EAST, east_direction);
+        Assertions.assertEquals(MSAbsDir.Direction.WEST, west_direction);
+        Assertions.assertEquals(MSAbsDir.Direction.TOP, top_direction);
+        Assertions.assertEquals(MSAbsDir.Direction.BOTTOM, bottom_direction);
     }
 
     @Test
