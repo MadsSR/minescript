@@ -1,7 +1,7 @@
 package interpreter.types;
 
 public class MSBool extends MSType {
-    private boolean value;
+    private final boolean value;
 
     public MSBool(boolean value) {
         super(MSTypeEnum.MSBool);

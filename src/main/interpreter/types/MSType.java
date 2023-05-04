@@ -1,7 +1,7 @@
 package interpreter.types;
 
 public abstract class MSType {
-    private MSTypeEnum type;
+    private final MSTypeEnum type;
 
     public MSType(MSTypeEnum type) {
         this.type = type;

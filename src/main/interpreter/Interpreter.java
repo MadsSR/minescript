@@ -1,12 +1,13 @@
 package interpreter;
 
+import interpreter.antlr.MineScriptLexer;
+import interpreter.antlr.MineScriptParser;
 import interpreter.types.MSMessageType;
 import minescript.block.entity.TurtleBlockEntity;
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.*;
-import interpreter.antlr.*;
-
-import java.util.Arrays;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
 
 public class Interpreter implements Runnable {
 
@@ -22,7 +23,6 @@ public class Interpreter implements Runnable {
     public void run() {
         try {
             // create a CharStream that reads from standard input
-    //        CharStream input = CharStreams.fromString(CharStreams.fromFileName("src/main/interpreter/input.minescript") + System.lineSeparator());
             CharStream input = CharStreams.fromString(program + System.lineSeparator());
             // create a lexer that feeds off of input CharStream
             MineScriptLexer lexer = new MineScriptLexer(input);

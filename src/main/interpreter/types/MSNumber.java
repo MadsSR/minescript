@@ -1,7 +1,7 @@
 package interpreter.types;
 
 public class MSNumber extends MSType {
-    private int value;
+    private final int value;
 
 
     public MSNumber(int value) {
