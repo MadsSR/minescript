@@ -13,13 +13,6 @@ public class MSFunction extends MSType {
 
     public MSFunction(String name, ArrayList<String> parameters, MineScriptParser.StatementsContext ctx) {
         super(MSTypeEnum.MSFunction);
-
-        for (MSInbuiltFunction funcName : MSInbuiltFunction.values()) {
-            if (funcName.name().equals(name)) {
-                throw new RuntimeException("Cannot redefine inbuilt function: " + name);
-            }
-        }
-
         this.name = name;
         this.parameters = parameters;
         this.ctx = ctx;
