@@ -443,7 +443,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                     var formalParams = function.getParameters();
 
                     if (formalParams.size() != actualParams.size()) {
-                        throw new RuntimeException("Cannot call function '" + id + "' because it has " + formalParams.size() + " parameters, but " + actualParams.size() + " were given");
+                        throw new RuntimeException("Cannot call function '" + id + "' because it takes " + formalParams.size() + " parameters but " + actualParams.size() + " were given");
                     }
 
                     symbolTable.enterScope();
