@@ -31,9 +31,5 @@ public class MineScript implements ModInitializer {
 		ModBlockEntities.registerBlockEntities();
 		ModBlocks.registerModBlocks();
 		MineScriptPackets.registerC2SPackets();
-
-		UIParsing.registerFactory("EditBoxWidget", parent -> new EditBoxWidget(MinecraftClient.getInstance().textRenderer, 0, 0, 400, 300, Text.of("Write MineScript code here..."), Text.of("")));
 	}
-
-
 }
