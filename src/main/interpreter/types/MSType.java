@@ -11,6 +11,10 @@ public abstract class MSType {
         return type;
     }
 
+    public String getTypeName() {
+        return type.toString().replace("MS", "").toLowerCase();
+    }
+
     public abstract boolean equals(MSType value);
 
 }
