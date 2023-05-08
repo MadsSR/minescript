@@ -426,10 +426,12 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 entity.setPosition(new BlockPos(entity.getXPosition(), entity.getYPosition(), n.getValue()));
             }
             case "Print" -> ctx.actual_parameters().expression().forEach(expressionContext -> {
-                if (expressionContext.getText().equals(visit(expressionContext).toString())) {
-                    entity.print(visit(expressionContext).toString(), MSMessageType.INFO);
+                String text = actualParams.get(ctx.actual_parameters().expression().indexOf(expressionContext)).toString();
+                String expressionId = expressionContext.getText();
+                if (expressionId.equals(text)) {
+                    entity.print(text, MSMessageType.INFO);
                 } else {
-                    entity.print(expressionContext.getText() + " is: " + visit(expressionContext).toString(), MSMessageType.INFO);
+                    entity.print(expressionId + " is: " + text, MSMessageType.INFO);
                 }
             });
             default -> {
