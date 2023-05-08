@@ -19,9 +19,7 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 
 public class StepC2SPacket {
-    public static void receive(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler,
-                               PacketByteBuf buf, PacketSender responseSender) {
-        // This code runs on the server, so you can use server-side only methods here.
+    public static void receive(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
         ServerWorld world = player.getWorld();
 
         BlockPos pos = buf.readBlockPos();
@@ -44,8 +42,7 @@ public class StepC2SPacket {
                 case EAST -> newPos = newPos.east(1);
                 case WEST -> newPos = newPos.west(1);
             }
-        }
-        else {
+        } else {
             switch (state.get(TurtleBlock.FACE)) {
                 case FLOOR -> newPos = newPos.down(1);
                 case CEILING -> newPos = newPos.up(1);

@@ -42,6 +42,4 @@ public class MSFunction extends MSType {
         }
         return false;
     }
-
-
 }
