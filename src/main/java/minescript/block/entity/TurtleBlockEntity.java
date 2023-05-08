@@ -136,10 +136,9 @@ public class TurtleBlockEntity extends BlockEntity {
         interpreterThread.start();
     }
 
-    private void stopInterpreter() {
+    private void stopInterpreterThread() {
         if (interpreterThread != null) {
-            interpreterThread.interrupt();
-            interpreterThread = null;
+            interpreterThread.stop();
         }
     }
 
@@ -193,7 +192,8 @@ public class TurtleBlockEntity extends BlockEntity {
     }
 
 
-    public String getHorizontalDirection() {
+
+    public String getHorizontalDirection(){
         BlockState state = world.getBlockState(turtlePos);
         if (state.contains(Properties.HORIZONTAL_FACING)) {
             return state.get(Properties.HORIZONTAL_FACING).toString();
@@ -201,10 +201,10 @@ public class TurtleBlockEntity extends BlockEntity {
         return "north";
     }
 
-    public String getVerticalDirection() {
+    public String getVerticalDirection(){
         BlockState state = world.getBlockState(turtlePos);
         if (state.contains(TurtleBlock.FACE)) {
-            switch (state.get(TurtleBlock.FACE)) {
+            switch(state.get(TurtleBlock.FACE)){
                 case FLOOR:
                     return "bottom";
                 case CEILING:
@@ -232,5 +232,6 @@ public class TurtleBlockEntity extends BlockEntity {
         world.setBlockState(pos, state, Block.NOTIFY_ALL);
 
         turtlePos = pos;
+
     }
 }

@@ -24,11 +24,14 @@ public class MSRelDir extends MSType {
     }
 
     @Override
-    public String toString() {
+    public String toString(){
         return direction.toString().toLowerCase();
     }
 
     public enum Direction {
-        UP, DOWN, LEFT, RIGHT
+        UP,
+        DOWN,
+        LEFT,
+        RIGHT
     }
 }

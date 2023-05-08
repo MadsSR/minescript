@@ -26,11 +26,16 @@ public class MSAbsDir extends MSType {
     }
 
     @Override
-    public String toString() {
+    public String toString(){
         return direction.toString().toLowerCase();
     }
 
     public enum Direction {
-        NORTH, SOUTH, WEST, EAST, TOP, BOTTOM
+        NORTH,
+        SOUTH,
+        WEST,
+        EAST,
+        TOP,
+        BOTTOM
     }
 }

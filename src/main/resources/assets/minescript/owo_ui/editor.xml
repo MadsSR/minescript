@@ -6,13 +6,13 @@
                     <children>
                         <EditBoxWidget id="edit-box">
                             <margins>
-                                <all>10</all>
+                                <all>15</all>
                             </margins>
                         </EditBoxWidget>
                         <button id="run-button">
-                            <text>Save and Run</text>
+                            <text>Run</text>
                             <margins>
-                                <bottom>10</bottom>
+                                <bottom>15</bottom>
                             </margins>
                         </button>
                     </children>

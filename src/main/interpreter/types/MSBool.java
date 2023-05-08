@@ -24,7 +24,6 @@ public class MSBool extends MSType {
         }
         return false;
     }
-
     @Override
     public String toString() {
         return String.valueOf(value);
