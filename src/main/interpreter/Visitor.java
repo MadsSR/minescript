@@ -1,11 +1,10 @@
 package interpreter;
 
-import interpreter.antlr.*;
+import interpreter.antlr.MineScriptBaseVisitor;
+import interpreter.antlr.MineScriptParser;
 import interpreter.exceptions.SymbolNotFoundException;
 import interpreter.types.*;
 import minescript.block.entity.TurtleBlockEntity;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.math.BlockPos;
 
@@ -207,7 +206,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 default -> throw new RuntimeException("Unknown operator: " + ctx.op.getText());
             });
         }
-        throw new RuntimeException("Cannot " + left.getClass() + " " + ctx.op.getText() + " " + right.getClass());
+        throw new RuntimeException("Cannot use '" + ctx.op.getText() + "' operator on " + left.getTypeName() + " and " + right.getTypeName());
     }
 
     @Override
@@ -215,7 +214,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         if (visit(ctx.expression()) instanceof MSNumber n) {
             return new MSNumber(-n.getValue());
         }
-        throw new RuntimeException("Cannot negate " + visit(ctx.expression()).getClass());
+        throw new RuntimeException("Cannot negate " + visit(ctx.expression()).getTypeName());
     }
 
     @Override
@@ -241,7 +240,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 default -> throw new RuntimeException("Unknown operator: " + ctx.op.getText());
             });
         }
-        throw new RuntimeException("Cannot use " + ctx.op.getText() + " on " + left.getClass() + " and " + right.getClass());
+        throw new RuntimeException("Cannot use '" + ctx.op.getText() + "' operator on " + left.getTypeName() + " and " + right.getTypeName());
     }
 
     @Override
@@ -256,13 +255,13 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
             return new MSNumber((int) Math.pow(l.getValue(), r.getValue()));
         }
 
-        throw new RuntimeException("Cannot raise " + left.getClass() + " to the power of " + right.getClass());
+        throw new RuntimeException("Cannot use '^' operator on " + left.getTypeName() + " and " + right.getTypeName());
     }
 
     @Override
     public MSType visitAnd(MineScriptParser.AndContext ctx) {
         MSType left = visit(ctx.expression(0));
-        if (parser.getBoolean(left).getValue() == false) {
+        if (!parser.getBoolean(left).getValue()) {
             return new MSBool(false);
         }
         MSType right = visit(ctx.expression(1));
@@ -273,7 +272,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     @Override
     public MSType visitOr(MineScriptParser.OrContext ctx) {
         MSType left = visit(ctx.expression(0));
-        if (parser.getBoolean(left).getValue() == true) {
+        if (parser.getBoolean(left).getValue()) {
             return new MSBool(true);
         }
         MSType right = visit(ctx.expression(1));
@@ -299,183 +298,152 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         functionCallCounter++;
 
         switch (id) {
-            case "Step":
-                // code for Step function
-                if (actualParams.size() != 1) {
-                    throw new RuntimeException("Step function expects 1 parameter");
+            case "Step" -> {
+                if (actualParams.size() != 1 || !(actualParams.get(0) instanceof MSNumber n)) {
+                    throw new RuntimeException(id + "() takes 1 argument (number) but " + actualParams.size() + " were given");
                 }
-
-                if (actualParams.get(0) instanceof MSNumber n) {
-                    // create new thread to run step function and wait for it to finish
-                    entity.step(n.getValue());
+                entity.step(n.getValue());
+            }
+            case "Turn" -> {
+                if (actualParams.size() != 1 || (!(actualParams.get(0) instanceof MSRelDir) && !(actualParams.get(0) instanceof MSAbsDir))) {
+                    throw new RuntimeException(id + "() takes 1 argument (direction) but " + actualParams.size() + " were given");
                 }
-                break;
-            case "Turn":
-                // code for Turn function
-                if (actualParams.size() != 1) {
-                    throw new RuntimeException("Turn function expects 1 parameter");
-                }
-
                 MSType dir = actualParams.get(0);
-
                 if (dir instanceof MSRelDir relDir) {
                     entity.turn(relDir.getValue());
                 } else if (dir instanceof MSAbsDir absDir) {
                     entity.turn(absDir.getValue());
                 }
-                break;
-            case "UseBlock":
-                // code for useBlock function
-                if (actualParams.size() != 1) {
-                    throw new RuntimeException("UseBlock function expects 1 parameter");
+            }
+            case "UseBlock" -> {
+                if (actualParams.size() != 1 || !(actualParams.get(0) instanceof MSBlock b)) {
+                    throw new RuntimeException(id + "() takes 1 argument (block) but " + actualParams.size() + " were given");
                 }
-
-                if (actualParams.get(0) instanceof MSBlock b) {
-                    entity.useBlock(b.getValue());
-                }
-                break;
-            case "Break":
-
-                if (actualParams.size() > 1) {
-                    throw new RuntimeException("Break function expects 1 parameter");
-                }
-
+                entity.useBlock(b.getValue());
+            }
+            case "Break" -> {
                 if (actualParams.size() == 0) {
                     retVal = new MSBool(shouldBreak);
                     break;
                 }
-
-
-                if (actualParams.get(0) instanceof MSBool b) {
-                    entity.shouldBreak = b.getValue();
-                    shouldBreak = b.getValue();
-                } else {
-                    throw new RuntimeException("Break function expects a boolean parameter");
+                if (actualParams.size() != 1 || !(actualParams.get(0) instanceof MSBool b)) {
+                    throw new RuntimeException(id + "() takes 0 or 1 argument (boolean) but " + actualParams.size() + " were given");
                 }
+                entity.shouldBreak = b.getValue();
+                shouldBreak = b.getValue();
                 retVal = new MSBool(shouldBreak);
-                break;
-            case "Roll":
-                // code for Roll function
-                break;
-            case "Peek":
+            }
+            case "Peek" -> {
+                if (actualParams.size() != 0) {
+                    throw new RuntimeException(id + "() takes 0 argument but " + actualParams.size() + " were given");
+                }
                 retVal = new MSBlock(entity.peek());
-                break;
-            case "Sqrt":
-                // code for Sqrt function
-                if (actualParams.size() == 1 && actualParams.get(0) instanceof MSNumber n) {
-                    return new MSNumber((int) Math.round(Math.sqrt(n.getValue())));
+            }
+            case "Sqrt" -> {
+                if (actualParams.size() != 1 || !(actualParams.get(0) instanceof MSNumber n)) {
+                    throw new RuntimeException(id + "() takes 1 argument (number) but " + actualParams.size() + " were given");
                 }
-                break;
-            case "Random":
-                // code for Random function
-                if (actualParams.size() != 0 && actualParams.size() != 1) {
-                    throw new RuntimeException("Random function expects 0 or 1 parameter");
-                }
-
+                retVal = new MSNumber((int) Math.round(Math.sqrt(n.getValue())));
+            }
+            case "Random" -> {
                 if (actualParams.size() == 0) {
                     retVal = new MSNumber(random.nextInt());
-                } else if (actualParams.get(0) instanceof MSNumber n) {
+                } else if (actualParams.size() == 1 && actualParams.get(0) instanceof MSNumber n) {
                     retVal = new MSNumber(random.nextInt(n.getValue()));
                 } else {
-                    throw new RuntimeException("Random function expects a number parameter");
+                    throw new RuntimeException(id + "() takes 0 or 1 argument (number) but " + actualParams.size() + " were given");
                 }
-                break;
-            case "RandomBlock":
-                // code for RandomBlock function
+            }
+            case "RandomBlock" -> {
                 if (actualParams.size() != 0) {
-                    throw new RuntimeException("RandomBlock function expects 0 parameters");
+                    throw new RuntimeException(id + "() takes 0 argument but " + actualParams.size() + " were given");
                 }
-
                 retVal = new MSBlock(Registries.BLOCK.get(random.nextInt(Registries.BLOCK.size())));
-                break;
-            case "SetSpeed":
-                // code for SetSpeed function
-                if (actualParams.size() != 1) {
-                    throw new RuntimeException("SetSpeed function expects 1 parameter");
+            }
+            case "SetSpeed" -> {
+                if (actualParams.size() != 1 || !(actualParams.get(0) instanceof MSNumber n)) {
+                    throw new RuntimeException(id + "() takes 1 argument (number) but " + actualParams.size() + " were given");
                 }
 
-                if (actualParams.get(0) instanceof MSNumber n) {
-                    entity.setSpeed(n.getValue());
+
+                entity.setSpeed(n.getValue());
+            }
+            case "GetXPosition" -> {
+                if (actualParams.size() != 0) {
+                    throw new RuntimeException(id + "() takes 0 argument but " + actualParams.size() + " were given");
                 }
-                break;
-            case "GetXPosition":
                 retVal = new MSNumber(entity.getXPosition());
-                break;
-            case "GetYPosition":
+            }
+            case "GetYPosition" -> {
+                if (actualParams.size() != 0) {
+                    throw new RuntimeException(id + "() takes 0 argument but " + actualParams.size() + " were given");
+                }
                 retVal = new MSNumber(entity.getYPosition());
-                break;
-            case "GetZPosition":
+            }
+            case "GetZPosition" -> {
+                if (actualParams.size() != 0) {
+                    throw new RuntimeException(id + "() takes 0 argument but " + actualParams.size() + " were given");
+                }
                 retVal = new MSNumber(entity.getZPosition());
-                break;
-            case "GetHorizontalDirection":
+            }
+            case "GetHorizontalDirection" -> {
+                if (actualParams.size() != 0) {
+                    throw new RuntimeException(id + "() takes 0 argument but " + actualParams.size() + " were given");
+                }
                 retVal = new MSAbsDir(entity.getHorizontalDirection());
-                break;
-            case "GetVerticalDirection":
+            }
+            case "GetVerticalDirection" -> {
+                if (actualParams.size() != 0) {
+                    throw new RuntimeException(id + "() takes 0 argument but " + actualParams.size() + " were given");
+                }
                 retVal = new MSAbsDir(entity.getVerticalDirection());
-                break;
-            case "SetCoordinates":
-                // code for SetCoordinates function
-                if (actualParams.size() != 3) {
-                    throw new RuntimeException("SetCoordinates function expects 3 parameters");
+            }
+            case "SetCoordinates" -> {
+                if (actualParams.size() != 3 ||
+                        !(actualParams.get(0) instanceof MSNumber x) ||
+                        !(actualParams.get(1) instanceof MSNumber y) ||
+                        !(actualParams.get(2) instanceof MSNumber z)) {
+                    throw new RuntimeException(id + "() takes 3 arguments (number) but " + actualParams.size() + " were given");
                 }
-
-                if (actualParams.get(0) instanceof MSNumber x && actualParams.get(1) instanceof MSNumber y && actualParams.get(2) instanceof MSNumber z) {
-                    entity.setPosition(new BlockPos(x.getValue(), y.getValue(), z.getValue()));
+                entity.setPosition(new BlockPos(x.getValue(), y.getValue(), z.getValue()));
+            }
+            case "SetXCoordinate" -> {
+                if (actualParams.size() != 1 || !(actualParams.get(0) instanceof MSNumber n)) {
+                    throw new RuntimeException(id + "() takes 1 argument (number) but " + actualParams.size() + " were given");
                 }
-                break;
-            case "SetXCoordinate":
-                // code for SetXCoordinate function
-                if (actualParams.size() != 1) {
-                    throw new RuntimeException("SetXCoordinate function expects 1 parameter");
+                entity.setPosition(new BlockPos(n.getValue(), entity.getYPosition(), entity.getZPosition()));
+            }
+            case "SetYCoordinate" -> {
+                if (actualParams.size() != 1 || !(actualParams.get(0) instanceof MSNumber n)) {
+                    throw new RuntimeException(id + "() takes 1 argument (number) but " + actualParams.size() + " were given");
                 }
-
-                if (actualParams.get(0) instanceof MSNumber n) {
-                    entity.setPosition(new BlockPos(n.getValue(), entity.getYPosition(), entity.getZPosition()));
+                entity.setPosition(new BlockPos(entity.getXPosition(), n.getValue(), entity.getZPosition()));
+            }
+            case "SetZCoordinate" -> {
+                if (actualParams.size() != 1 || !(actualParams.get(0) instanceof MSNumber n)) {
+                    throw new RuntimeException(id + "() takes 1 argument (number) but " + actualParams.size() + " were given");
                 }
-                break;
-            case "SetYCoordinate":
-                // code for SetYCoordinate function
-                if (actualParams.size() != 1) {
-                    throw new RuntimeException("SetXCoordinate function expects 1 parameter");
+                entity.setPosition(new BlockPos(entity.getXPosition(), entity.getYPosition(), n.getValue()));
+            }
+            case "Print" -> ctx.actual_parameters().expression().forEach(expressionContext -> {
+                if (expressionContext.getText().equals(visit(expressionContext).toString())) {
+                    entity.print(visit(expressionContext).toString(), MSMessageType.INFO);
+                } else {
+                    entity.print(expressionContext.getText() + " is: " + visit(expressionContext).toString(), MSMessageType.INFO);
                 }
-
-                if (actualParams.get(0) instanceof MSNumber n) {
-                    entity.setPosition(new BlockPos(entity.getXPosition(), n.getValue(), entity.getZPosition()));
-                }
-                break;
-            case "SetZCoordinate":
-                // code for SetZCoordinate function
-                if (actualParams.size() != 1) {
-                    throw new RuntimeException("SetXCoordinate function expects 1 parameter");
-                }
-
-                if (actualParams.get(0) instanceof MSNumber n) {
-                    entity.setPosition(new BlockPos(entity.getXPosition(), entity.getYPosition(), n.getValue()));
-                }
-                break;
-            case "Print":
-                ctx.actual_parameters().expression().forEach(expressionContext -> {
-                    if (expressionContext.getText().toString().equals(visit(expressionContext).toString())) {
-                        entity.print(visit(expressionContext).toString(), MSMessageType.INFO);
-                    } else {
-                        entity.print(expressionContext.getText() + " is: " + visit(expressionContext).toString(), MSMessageType.INFO);
-                    }
-                });
-                break;
-            default:
+            });
+            default -> {
                 MSType value;
-
                 try {
                     value = symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol(id));
                 } catch (SymbolNotFoundException e) {
                     throw new RuntimeException("Cannot call function '" + id + "' because it is not defined");
                 }
-
                 if (value instanceof MSFunction function) {
                     var formalParams = function.getParameters();
 
                     if (formalParams.size() != actualParams.size()) {
-                        throw new RuntimeException("Cannot call function '" + id + "' because it has " + formalParams.size() + " parameters, but " + actualParams.size() + " were given");
+                        throw new RuntimeException("Cannot call function '" + id + "' because it takes " + formalParams.size() + " parameters but " + actualParams.size() + " were given");
                     }
 
                     symbolTable.enterScope();
@@ -492,6 +460,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 } else {
                     throw new RuntimeException("Cannot call '" + id + "' because it is not a function");
                 }
+            }
         }
         if (entity != null)
             entity = entity.getTurtleEntity();

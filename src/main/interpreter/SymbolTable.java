@@ -1,6 +1,8 @@
 package interpreter;
 
 import interpreter.exceptions.SymbolNotFoundException;
+import interpreter.types.MSFunction;
+import interpreter.types.MSInbuiltFunction;
 import interpreter.types.MSTypeEnum;
 import interpreter.types.MSType;
 
@@ -27,6 +29,7 @@ public class SymbolTable {
 
     public void enterSymbol(String name, MSTypeEnum type, MSType value) {
         Symbol newSymbol = new Symbol(name, type, value);
+        checkRestrictedKeyWords(newSymbol);
 
         if (isVarInNewScope(name)) {
             Symbol oldSymbol = hashTable.get(getPrefixName(name));
@@ -42,6 +45,22 @@ public class SymbolTable {
             scopeStack.peek().add(newSymbol.name);
         }
         add(newSymbol);
+    }
+
+    private void checkRestrictedKeyWords(Symbol symbol) {
+        for (MSInbuiltFunction funcName : MSInbuiltFunction.values()) {
+            if (symbol.type == MSTypeEnum.MSFunction) {
+                if (symbol.name.equals(funcName.name())) {
+                    throw new RuntimeException("Cannot declare function with restricted name: " + funcName.name());
+                }
+                else if (symbol.value instanceof MSFunction f && f.getParameters().stream().anyMatch(p -> p.equals(funcName.name()))) {
+                    throw new RuntimeException("Cannot declare function with restricted parameter name: " + funcName.name());
+                }
+            }
+            else if (symbol.name.equals(funcName.name())){
+                throw new RuntimeException("Cannot declare variable with restricted name: " + funcName.name());
+            }
+        }
     }
 
     public Symbol retrieveSymbol(String name) {
@@ -75,19 +94,10 @@ public class SymbolTable {
     }
 
     private String getPrefixName(String name) {
-        return scopeStack.peek().stream().filter(s -> s.contains("." + name)).findFirst().get();
+        return scopeStack.peek().stream().filter(s -> s.contains("." + name)).findFirst().orElseThrow();
     }
 
-    private static class Symbol {
-        String name;
-        MSTypeEnum type;
-        MSType value;
-
-        public Symbol(String name, MSTypeEnum type, MSType value) {
-            this.name = name;
-            this.type = type;
-            this.value = value;
-        }
+    private record Symbol(String name, MSTypeEnum type, MSType value) {
     }
 }
 
