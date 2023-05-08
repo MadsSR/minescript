@@ -142,7 +142,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 default -> throw new RuntimeException("Unknown operator: " + ctx.op.getText());
             });
         }
-        throw new RuntimeException("Cannot compare " + left.getClass() + " and " + right.getClass());
+        throw new RuntimeException("Cannot compare " + left.getTypeName() + " and " + right.getTypeName());
     }
 
     @Override
@@ -201,7 +201,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 default -> throw new RuntimeException("Unknown operator: " + ctx.op.getText());
             });
         }
-        throw new RuntimeException("Cannot use '" + ctx.op.getText() + "' operator on " + left.getClass() + " and " + right.getClass());
+        throw new RuntimeException("Cannot use '" + ctx.op.getText() + "' operator on " + left.getTypeName() + " and " + right.getTypeName());
     }
 
     @Override
@@ -209,7 +209,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         if (visit(ctx.expression()) instanceof MSNumber n) {
             return new MSNumber(-n.getValue());
         }
-        throw new RuntimeException("Cannot negate " + visit(ctx.expression()).getClass());
+        throw new RuntimeException("Cannot negate " + visit(ctx.expression()).getTypeName());
     }
 
     @Override
@@ -235,7 +235,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 default -> throw new RuntimeException("Unknown operator: " + ctx.op.getText());
             });
         }
-        throw new RuntimeException("Cannot use '" + ctx.op.getText() + "' operator on " + left.getClass() + " and " + right.getClass());
+        throw new RuntimeException("Cannot use '" + ctx.op.getText() + "' operator on " + left.getTypeName() + " and " + right.getTypeName());
     }
 
     @Override
@@ -250,7 +250,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
             return new MSNumber((int) Math.pow(l.getValue(), r.getValue()));
         }
 
-        throw new RuntimeException("Cannot use '^' operator on " + left.getClass() + " and " + right.getClass());
+        throw new RuntimeException("Cannot use '^' operator on " + left.getTypeName() + " and " + right.getTypeName());
     }
 
     @Override
