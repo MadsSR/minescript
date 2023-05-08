@@ -12,10 +12,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.state.StateManager;
-import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
-import net.minecraft.state.property.Property;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -27,7 +25,7 @@ import org.jetbrains.annotations.Nullable;
 public class TurtleBlock extends BlockWithEntity implements BlockEntityProvider {
 
     public static final EnumProperty<WallMountLocation> FACE = Properties.WALL_MOUNT_LOCATION;
-    
+
     public TurtleBlock(Settings settings) {
         super(settings);
 

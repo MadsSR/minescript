@@ -3,7 +3,6 @@ package interpreter.types;
 public class MSNumber extends MSType {
     private final int value;
 
-
     public MSNumber(int value) {
         super(MSTypeEnum.MSNumber);
         this.value = value;

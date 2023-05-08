@@ -17,11 +17,11 @@ public class TextEditorScreen extends BaseUIModelScreen<FlowLayout> {
     private TurtleBlockEntity turtleBlockEntity;
 
     public TextEditorScreen(BlockEntity blockEntity) {
-//        super(FlowLayout.class, DataSource.file("../src/main/resources/assets/minescript/owo_ui/editor.xml"));
-        super(FlowLayout.class, DataSource.asset(new Identifier("minescript", "editor")));
+//        super(FlowLayout.class, DataSource.file("../src/main/resources/assets/minescript/owo_ui/editor.xml")); // For development
+        super(FlowLayout.class, DataSource.asset(new Identifier("minescript", "editor")));  // For release
 
         if (blockEntity instanceof TurtleBlockEntity turtle) {
-            turtleBlockEntity = (TurtleBlockEntity) blockEntity;
+            turtleBlockEntity = turtle;
         }
     }
 
@@ -38,7 +38,7 @@ public class TextEditorScreen extends BaseUIModelScreen<FlowLayout> {
             editor.setFocused(true);
 
             try {
-                Method m = ((Object)editor).getClass().getDeclaredMethod("moveCursor", double.class, double.class);
+                Method m = ((Object) editor).getClass().getDeclaredMethod("moveCursor", double.class, double.class);
                 m.setAccessible(true);
                 m.invoke(editor, mouseX + editor.getX(), mouseY + editor.getY());
             } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
@@ -52,7 +52,6 @@ public class TextEditorScreen extends BaseUIModelScreen<FlowLayout> {
         if (runButton == null) throw new NullPointerException("runButton is null");
         runButton.onPress(button -> {
             turtleBlockEntity.input = Text.of(editor.getText());
-            turtleBlockEntity.markDirty();
             turtleBlockEntity.startInterpreter(editor.getText());
             MinecraftClient.getInstance().setScreen(null);
         });
