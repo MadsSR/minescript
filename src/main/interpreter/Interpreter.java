@@ -22,25 +22,22 @@ public class Interpreter implements Runnable {
     @Override
     public void run() {
         try {
-            // create a CharStream that reads from standard input
+            // Create a CharStream that reads from standard input
             CharStream input = CharStreams.fromString(program + System.lineSeparator());
-            // create a lexer that feeds off of input CharStream
+            // Create a lexer that feeds off of input CharStream
             MineScriptLexer lexer = new MineScriptLexer(input);
             lexer.removeErrorListeners();
             lexer.addErrorListener(InterpreterErrorListener.INSTANCE);
-
-            // create a buffer of tokens pulled from the lexer
+            // Create a buffer of tokens pulled from the lexer
             CommonTokenStream tokens = new CommonTokenStream(lexer);
-            // create a parser that feeds off the tokens buffer
+            // Create a parser that feeds off the tokens buffer
             MineScriptParser parser = new MineScriptParser(tokens);
             parser.removeErrorListeners();
             parser.addErrorListener(InterpreterErrorListener.INSTANCE);
-            ParseTree tree = parser.program(); // begin parsing at init rule
+            ParseTree tree = parser.program(); // Begin parsing at init rule
             Visitor visitor = new Visitor(entity);
             visitor.visit(tree);
-            //System.out.println(tree.toStringTree(parser)); // print LISP-style tree
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             entity.print(e.getMessage(), MSMessageType.ERROR);
         }
     }

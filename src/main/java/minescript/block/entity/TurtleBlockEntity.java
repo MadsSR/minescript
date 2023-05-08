@@ -55,13 +55,13 @@ public class TurtleBlockEntity extends BlockEntity {
 
     public void step(int steps) {
         for (int i = 0; i < steps; i++) {
+            timeout();
 
             if (!shouldBreak && peek() != Blocks.AIR) {
                 print("Cannot move forward, block in the way", MSMessageType.WARNING);
                 return;
             }
 
-            timeout();
             PacketByteBuf buf = PacketByteBufs.create();
             buf.writeBlockPos(turtlePos);
             buf.writeInt(Block.getRawIdFromState(placingBlock.getDefaultState()));
@@ -71,8 +71,6 @@ public class TurtleBlockEntity extends BlockEntity {
             BlockState state = world.getBlockState(turtlePos);
             BlockPos oldPos = turtlePos;
 
-//            if (!state.contains(TurtleBlock.FACE) || !state.contains(Properties.HORIZONTAL_FACING))
-//                throw new RuntimeException("Property does not exist");
 
             if (state.get(TurtleBlock.FACE) == WallMountLocation.WALL) {
                 switch (state.get(Properties.HORIZONTAL_FACING)) {
@@ -165,13 +163,10 @@ public class TurtleBlockEntity extends BlockEntity {
     }
 
     public Block peek() {
-
         BlockState state = world.getBlockState(turtlePos);
-
 
         if (!state.contains(TurtleBlock.FACE) || !state.contains(Properties.HORIZONTAL_FACING))
             throw new RuntimeException("Property does not exist");
-
 
         BlockPos peekPos = null;
         if (state.get(TurtleBlock.FACE) == WallMountLocation.WALL) {
@@ -192,8 +187,7 @@ public class TurtleBlockEntity extends BlockEntity {
     }
 
 
-
-    public String getHorizontalDirection(){
+    public String getHorizontalDirection() {
         BlockState state = world.getBlockState(turtlePos);
         if (state.contains(Properties.HORIZONTAL_FACING)) {
             return state.get(Properties.HORIZONTAL_FACING).toString();
@@ -201,10 +195,10 @@ public class TurtleBlockEntity extends BlockEntity {
         return "north";
     }
 
-    public String getVerticalDirection(){
+    public String getVerticalDirection() {
         BlockState state = world.getBlockState(turtlePos);
         if (state.contains(TurtleBlock.FACE)) {
-            switch(state.get(TurtleBlock.FACE)){
+            switch (state.get(TurtleBlock.FACE)) {
                 case FLOOR:
                     return "bottom";
                 case CEILING:
@@ -232,6 +226,5 @@ public class TurtleBlockEntity extends BlockEntity {
         world.setBlockState(pos, state, Block.NOTIFY_ALL);
 
         turtlePos = pos;
-
     }
 }

@@ -48,20 +48,17 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     public MSType visitStatements(MineScriptParser.StatementsContext ctx) {
         MSType val;
 
-        if (functionCallCounter == 0)
-            symbolTable.enterScope();
+        if (functionCallCounter == 0) symbolTable.enterScope();
 
         for (MineScriptParser.StatementContext statement : ctx.statement()) {
             val = visit(statement);
             if (hasReturned) {
-                if (functionCallCounter == 0)
-                    symbolTable.exitScope();
+                if (functionCallCounter == 0) symbolTable.exitScope();
                 return val;
             }
         }
 
-        if (functionCallCounter == 0)
-            symbolTable.exitScope();
+        if (functionCallCounter == 0) symbolTable.exitScope();
 
         return null;
     }
@@ -111,8 +108,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         if (visit(ctx.expression()) instanceof MSNumber times && times.getValue() >= 0) {
             for (int i = 0; i < times.getValue(); i++) {
                 value = visit(ctx.statements());
-                if (hasReturned)
-                    return value;
+                if (hasReturned) return value;
             }
         } else {
             throw new RuntimeException("Repeat expression must be a non-negative number");
@@ -122,7 +118,6 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     }
 
     @Override
-    //Boolean visitor for boolean values
     public MSType visitBool(MineScriptParser.BoolContext ctx) {
         return new MSBool(Boolean.parseBoolean(ctx.getText()));
     }
@@ -158,7 +153,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         return new MSBool(switch (ctx.op.getText()) {
             case "is" -> left.equals(right);
             case "is not" -> !left.equals(right);
-            default -> throw new RuntimeException("Unknown operator ' '" + ctx.op.getText() + "' '");
+            default -> throw new RuntimeException("Unknown operator ' '" + ctx.op.getText() + "'");
         });
     }
 
@@ -364,8 +359,6 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 if (actualParams.size() != 1 || !(actualParams.get(0) instanceof MSNumber n)) {
                     throw new RuntimeException(id + "() takes 1 argument (number) but " + actualParams.size() + " were given");
                 }
-
-
                 entity.setSpeed(n.getValue());
             }
             case "GetXPosition" -> {
@@ -399,10 +392,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 retVal = new MSAbsDir(entity.getVerticalDirection());
             }
             case "SetCoordinates" -> {
-                if (actualParams.size() != 3 ||
-                        !(actualParams.get(0) instanceof MSNumber x) ||
-                        !(actualParams.get(1) instanceof MSNumber y) ||
-                        !(actualParams.get(2) instanceof MSNumber z)) {
+                if (actualParams.size() != 3 || !(actualParams.get(0) instanceof MSNumber x) || !(actualParams.get(1) instanceof MSNumber y) || !(actualParams.get(2) instanceof MSNumber z)) {
                     throw new RuntimeException(id + "() takes 3 arguments (number) but " + actualParams.size() + " were given");
                 }
                 entity.setPosition(new BlockPos(x.getValue(), y.getValue(), z.getValue()));
@@ -443,7 +433,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                     var formalParams = function.getParameters();
 
                     if (formalParams.size() != actualParams.size()) {
-                        throw new RuntimeException("Cannot call function '" + id + "' because it takes " + formalParams.size() + " parameters but " + actualParams.size() + " were given");
+                        throw new RuntimeException("Cannot call function '" + id + "' because it takes " + formalParams.size() + " arguments but " + actualParams.size() + " were given");
                     }
 
                     symbolTable.enterScope();
@@ -462,8 +452,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 }
             }
         }
-        if (entity != null)
-            entity = entity.getTurtleEntity();
+        if (entity != null) entity = entity.getTurtleEntity();
 
         functionCallCounter--;
         return retVal;
@@ -493,8 +482,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     private ArrayList<String> getFormalParams(MineScriptParser.Formal_paramatersContext ctx) {
         ArrayList<String> formalParams = new ArrayList<>();
 
-        if (ctx == null)
-            return formalParams;
+        if (ctx == null) return formalParams;
 
         for (var param : ctx.ID()) {
             formalParams.add(param.getText());
@@ -505,13 +493,11 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     private ArrayList<MSType> getActualParams(MineScriptParser.Actual_parametersContext ctx) {
         ArrayList<MSType> actualParams = new ArrayList<>();
 
-        if (ctx == null)
-            return actualParams;
+        if (ctx == null) return actualParams;
 
         for (var param : ctx.expression()) {
             actualParams.add(visit(param));
         }
         return actualParams;
     }
-
 }
