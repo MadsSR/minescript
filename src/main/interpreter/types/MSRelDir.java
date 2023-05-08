@@ -24,7 +24,7 @@ public class MSRelDir extends MSType {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return direction.toString().toLowerCase();
     }
 

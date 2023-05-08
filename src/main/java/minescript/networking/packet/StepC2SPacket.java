@@ -3,13 +3,9 @@ package minescript.networking.packet;
 import interpreter.types.MSMessageType;
 import minescript.block.custom.TurtleBlock;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
-import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.enums.WallMountLocation;
-import net.minecraft.command.argument.BlockStateArgument;
-import net.minecraft.command.argument.BlockStateArgumentType;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
@@ -21,7 +17,7 @@ import net.minecraft.util.math.BlockPos;
 public class StepC2SPacket {
     public static void receive(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler,
                                PacketByteBuf buf, PacketSender responseSender) {
-        // This code runs on the server, so you can use server-side only methods here.
+        // This code runs on the server
         ServerWorld world = player.getWorld();
 
         BlockPos pos = buf.readBlockPos();

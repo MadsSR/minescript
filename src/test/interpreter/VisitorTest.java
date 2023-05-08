@@ -268,6 +268,16 @@ class VisitorTest {
     }
 
     @Test
+    void visitNumberWithCorrectInputExpectedTrue(){
+        Assertions.assertEquals(5, ((MSNumber) visitor.visitNumber((MineScriptParser.NumberContext) getExprTreeFromString("5"))).getValue());
+    }
+
+    @Test
+    void visitNumberWithIncorrectInputExpectedTrue(){
+        Assertions.assertThrows(RuntimeException.class, () -> visitor.visitNumber((MineScriptParser.NumberContext) getExprTreeFromString("abc")));
+    }
+
+    @Test
     void visitRelDirWithCorrectInputsExpectsTrue() {
         MSRelDir.Direction up_direction = ((MSRelDir) visitor.visitRelDir((MineScriptParser.RelDirContext) getExprTreeFromString("up"))).getValue();
         MSRelDir.Direction down_direction = ((MSRelDir) visitor.visitRelDir((MineScriptParser.RelDirContext) getExprTreeFromString("down"))).getValue();
