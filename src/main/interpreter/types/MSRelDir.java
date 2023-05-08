@@ -29,6 +29,9 @@ public class MSRelDir extends MSType {
     }
 
     public enum Direction {
-        UP, DOWN, LEFT, RIGHT
+        UP,
+        DOWN,
+        LEFT,
+        RIGHT
     }
 }
