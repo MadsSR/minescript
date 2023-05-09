@@ -67,4 +67,10 @@ class VisitorUnitTest {
         Mockito.when(mockBoolContext.getText()).thenReturn("false");
         Assertions.assertFalse(((MSBool) visitor.visitBool(mockBoolContext)).getValue());
     }
+
+    @Test
+    void visitBoolPassStringExpectedFalse() {
+        Mockito.when(mockBoolContext.getText()).thenReturn("abc");
+        Assertions.assertFalse(((MSBool) visitor.visitBool(mockBoolContext)).getValue());
+    }
 }

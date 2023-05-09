@@ -217,11 +217,6 @@ class VisitorIntegrationTest {
     }
 
     @Test
-    void visitBoolPassExceptions() {
-        Assertions.assertThrows(RuntimeException.class, () -> visitor.visitBool((MineScriptParser.BoolContext) getExprTreeFromString("abc")));
-    }
-
-    @Test
     void visitCompComparesIntValuesAndReturnsBooleanExpectsTrue() {
         Assertions.assertTrue(((MSBool) visitor.visitComp((MineScriptParser.CompContext) getExprTreeFromString("5 > 4"))).getValue());
         Assertions.assertTrue(((MSBool) visitor.visitComp((MineScriptParser.CompContext) getExprTreeFromString("5 >= 4"))).getValue());
