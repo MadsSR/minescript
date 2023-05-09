@@ -12,7 +12,6 @@ public class MSFunction extends MSType {
     private final MineScriptParser.StatementsContext ctx;
 
     public MSFunction(String name, ArrayList<String> parameters, MineScriptParser.StatementsContext ctx) {
-        super(MSTypeEnum.MSFunction);
         this.name = name;
         this.parameters = parameters;
         this.ctx = ctx;
@@ -28,11 +27,6 @@ public class MSFunction extends MSType {
 
     public MineScriptParser.StatementsContext getCtx() {
         return ctx;
-    }
-
-    @Override
-    public MSTypeEnum getType() {
-        return MSTypeEnum.MSFunction;
     }
 
     @Override

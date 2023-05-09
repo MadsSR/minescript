@@ -5,13 +5,7 @@ public class MSNumber extends MSType {
 
 
     public MSNumber(int value) {
-        super(MSTypeEnum.MSNumber);
         this.value = value;
-    }
-
-    @Override
-    public MSTypeEnum getType() {
-        return MSTypeEnum.MSNumber;
     }
 
     public int getValue() {

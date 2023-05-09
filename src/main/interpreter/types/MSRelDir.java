@@ -4,7 +4,6 @@ public class MSRelDir extends MSType {
     private final Direction direction;
 
     public MSRelDir(String direction) {
-        super(MSTypeEnum.MSRelDir);
         switch (direction) {
             case "left" -> this.direction = Direction.LEFT;
             case "right" -> this.direction = Direction.RIGHT;

@@ -4,7 +4,6 @@ public class MSAbsDir extends MSType {
     private final Direction direction;
 
     public MSAbsDir(String direction) {
-        super(MSTypeEnum.MSAbsDir);
         switch (direction) {
             case "north" -> this.direction = Direction.NORTH;
             case "south" -> this.direction = Direction.SOUTH;

@@ -68,7 +68,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         String id = ctx.ID().getText();
         MSType value = visit(ctx.expression());
 
-        symbolTable.enterSymbol(id, value.getType(), value);
+        symbolTable.enterSymbol(id, value);
 
         return null;
     }
@@ -142,7 +142,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 default -> throw new RuntimeException("Unknown operator: " + ctx.op.getText());
             });
         }
-        throw new RuntimeException("Cannot compare " + left.getClass() + " and " + right.getClass());
+        throw new RuntimeException("Cannot compare " + left.getTypeName() + " and " + right.getTypeName());
     }
 
     @Override
@@ -443,7 +443,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                     // Bind actual params to formal params
                     for (int i = 0; i < formalParams.size(); i++) {
                         formalParams.set(i, id + "." + formalParams.get(i));
-                        symbolTable.enterSymbol(formalParams.get(i), actualParams.get(i).getType(), actualParams.get(i));
+                        symbolTable.enterSymbol(formalParams.get(i), actualParams.get(i));
                     }
 
                     retVal = visit(function.getCtx());
@@ -466,7 +466,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         String id = ctx.ID().getText();
         var statementsCtx = ctx.statements();
         MSFunction function = new MSFunction(id, formalParams, statementsCtx);
-        symbolTable.enterSymbol(id, function.getType(), function);
+        symbolTable.enterSymbol(id, function);
 
         return null;
     }
