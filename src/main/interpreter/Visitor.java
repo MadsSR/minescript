@@ -416,15 +416,34 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 }
                 entity.setPosition(new BlockPos(entity.getXPosition(), entity.getYPosition(), n.getValue()));
             }
-            case "Print" -> ctx.actual_parameters().expression().forEach(expressionContext -> {
-                String text = actualParams.get(ctx.actual_parameters().expression().indexOf(expressionContext)).toString();
-                String expressionId = expressionContext.getText();
-                if (expressionId.equals(text)) {
-                    entity.print(text, MSMessageType.INFO);
-                } else {
-                    entity.print(expressionId + " is: " + text, MSMessageType.INFO);
+            case "Print" -> {
+                if (actualParams.size() == 0) {
+                    throw new RuntimeException(id + "() takes at least 1 argument but 0 were given");
                 }
-            });
+                ctx.actual_parameters().expression().forEach(expressionContext -> {
+                    MSType type = actualParams.get(ctx.actual_parameters().expression().indexOf(expressionContext));
+                    String expressionId = expressionContext.getText();
+                    String text;
+                    MSMessageType messageType;
+
+                    if (type == null) {
+                        text = "null";
+                        messageType = MSMessageType.WARNING;
+                    } else if (type instanceof MSFunction function) {
+                        text = function.getTypeName();
+                        messageType = MSMessageType.INFO;
+                    } else {
+                        text = type.toString();
+                        messageType = MSMessageType.INFO;
+                    }
+
+                    if (expressionId.equals(text)) {
+                        entity.print(text, messageType);
+                    } else {
+                        entity.print(expressionId + " is: " + text, messageType);
+                    }
+                });
+            }
             default -> {
                 MSType value;
                 try {
