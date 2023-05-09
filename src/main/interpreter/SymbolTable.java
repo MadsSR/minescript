@@ -3,7 +3,6 @@ package interpreter;
 import interpreter.exceptions.SymbolNotFoundException;
 import interpreter.types.MSFunction;
 import interpreter.types.MSInbuiltFunction;
-import interpreter.types.MSTypeEnum;
 import interpreter.types.MSType;
 
 import java.util.*;
@@ -27,14 +26,14 @@ public class SymbolTable {
         scopeStack.pop();
     }
 
-    public void enterSymbol(String name, MSTypeEnum type, MSType value) {
-        Symbol newSymbol = new Symbol(name, type, value);
+    public void enterSymbol(String name, MSType value) {
+        Symbol newSymbol = new Symbol(name, value);
         checkRestrictedKeyWords(newSymbol);
 
         if (isVarInNewScope(name)) {
             Symbol oldSymbol = hashTable.get(getPrefixName(name));
             delete(oldSymbol.name);
-            Symbol prefixSymbol = new Symbol(oldSymbol.name, type, value);
+            Symbol prefixSymbol = new Symbol(oldSymbol.name, value);
             add(prefixSymbol);
             return;
         }
@@ -49,11 +48,11 @@ public class SymbolTable {
 
     private void checkRestrictedKeyWords(Symbol symbol) {
         for (MSInbuiltFunction funcName : MSInbuiltFunction.values()) {
-            if (symbol.type == MSTypeEnum.MSFunction) {
+            if (symbol.value instanceof MSFunction f) {
                 if (symbol.name.equals(funcName.name())) {
                     throw new RuntimeException("Cannot declare function with restricted name: " + funcName.name());
                 }
-                else if (symbol.value instanceof MSFunction f && f.getParameters().stream().anyMatch(p -> p.equals(funcName.name()))) {
+                else if (f.getParameters().stream().anyMatch(p -> p.equals(funcName.name()))) {
                     throw new RuntimeException("Cannot declare function with restricted parameter name: " + funcName.name());
                 }
             }
@@ -97,7 +96,7 @@ public class SymbolTable {
         return scopeStack.peek().stream().filter(s -> s.contains("." + name)).findFirst().orElseThrow();
     }
 
-    private record Symbol(String name, MSTypeEnum type, MSType value) {
+    private record Symbol(String name, MSType value) {
     }
 }
 

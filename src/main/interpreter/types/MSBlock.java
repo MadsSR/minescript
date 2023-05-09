@@ -9,15 +9,13 @@ public class MSBlock extends MSType {
     private final Block block;
 
     public MSBlock(String id) {
-        super(MSTypeEnum.MSBlock);
         block = Registries.BLOCK.get(new Identifier(id.toLowerCase().replace("minecraft:", "")));
         if (block == Blocks.AIR && !id.equals("minecraft:air")) {
-            throw new IllegalArgumentException("Block " + id + " does not exist");
+            throw new IllegalArgumentException("Block '" + id + "' does not exist");
         }
     }
 
     public MSBlock(Block block) {
-        super(MSTypeEnum.MSBlock);
         this.block = block;
     }
 
@@ -37,5 +35,4 @@ public class MSBlock extends MSType {
         }
         return false;
     }
-    
 }
