@@ -273,23 +273,6 @@ class VisitorIntegrationTest {
     }
 
     @Test
-    void visitAbsDirWithCorrectInputsExpectedTrue(){
-        MSAbsDir.Direction north_direction = ((MSAbsDir) visitor.visitAbsDir((MineScriptParser.AbsDirContext) getExprTreeFromString("north"))).getValue();
-        MSAbsDir.Direction south_direction = ((MSAbsDir) visitor.visitAbsDir((MineScriptParser.AbsDirContext) getExprTreeFromString("south"))).getValue();
-        MSAbsDir.Direction east_direction = ((MSAbsDir) visitor.visitAbsDir((MineScriptParser.AbsDirContext) getExprTreeFromString("east"))).getValue();
-        MSAbsDir.Direction west_direction = ((MSAbsDir) visitor.visitAbsDir((MineScriptParser.AbsDirContext) getExprTreeFromString("west"))).getValue();
-        MSAbsDir.Direction top_direction = ((MSAbsDir) visitor.visitAbsDir((MineScriptParser.AbsDirContext) getExprTreeFromString("top"))).getValue();
-        MSAbsDir.Direction bottom_direction = ((MSAbsDir) visitor.visitAbsDir((MineScriptParser.AbsDirContext) getExprTreeFromString("bottom"))).getValue();
-
-        Assertions.assertEquals(MSAbsDir.Direction.NORTH, north_direction);
-        Assertions.assertEquals(MSAbsDir.Direction.SOUTH, south_direction);
-        Assertions.assertEquals(MSAbsDir.Direction.EAST, east_direction);
-        Assertions.assertEquals(MSAbsDir.Direction.WEST, west_direction);
-        Assertions.assertEquals(MSAbsDir.Direction.TOP, top_direction);
-        Assertions.assertEquals(MSAbsDir.Direction.BOTTOM, bottom_direction);
-    }
-
-    @Test
     void visitParenExpr() {
         String input = "(10-3)\n";
         Assertions.assertEquals(7, ((MSNumber) visitor.visitParenExpr((MineScriptParser.ParenExprContext) getExprTreeFromString(input))).getValue());

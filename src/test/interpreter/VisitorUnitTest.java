@@ -1,5 +1,6 @@
 package interpreter;
 
+import interpreter.types.MSAbsDir;
 import interpreter.types.MSBool;
 import interpreter.utils.MockTerminalNode;
 import interpreter.antlr.MineScriptParser;
@@ -35,6 +36,9 @@ class VisitorUnitTest {
 
     @Mock
     MineScriptParser.BoolContext mockBoolContext;
+
+    @Mock
+    MineScriptParser.AbsDirContext mockAbsDirContext;
 
     @ParameterizedTest
     @ValueSource(ints = {-1000, -10, 0, 10, 1000})
@@ -72,5 +76,12 @@ class VisitorUnitTest {
     void visitBoolPassStringExpectedFalse() {
         Mockito.when(mockBoolContext.getText()).thenReturn("abc");
         Assertions.assertFalse(((MSBool) visitor.visitBool(mockBoolContext)).getValue());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"north", "south", "east", "west", "top", "bottom"})
+    void visitAbsDirWithCorrectInputsExpectedTrue(String value){
+        Mockito.when(mockAbsDirContext.ABSDIR()).thenReturn(new MockTerminalNode(value));
+        Assertions.assertEquals(((MSAbsDir) visitor.visitAbsDir(mockAbsDirContext)).getValue(), new MSAbsDir(value).getValue());
     }
 }
