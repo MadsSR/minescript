@@ -12,20 +12,21 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Visitor extends MineScriptBaseVisitor<MSType> {
-    private final SymbolTable symbolTable = new SymbolTable();
     private final ExpressionParser parser = new ExpressionParser();
     private final Random random = new Random(System.currentTimeMillis());
+    private final SymbolTable symbolTable;
     private boolean hasReturned = false;
     private int functionCallCounter = 0;
     private TurtleBlockEntity entity;
     private boolean shouldBreak = true;
 
-    public Visitor(TurtleBlockEntity entity) {
+    public Visitor(TurtleBlockEntity entity, SymbolTable symbolTable) {
+        this.symbolTable = symbolTable;
         this.entity = entity;
     }
 
-    public Visitor() {
-        this.entity = null;
+    public Visitor(SymbolTable symbolTable) {
+        this.symbolTable = symbolTable;
     }
 
     @Override

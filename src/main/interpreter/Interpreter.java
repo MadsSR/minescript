@@ -35,7 +35,7 @@ public class Interpreter implements Runnable {
             parser.removeErrorListeners();
             parser.addErrorListener(InterpreterErrorListener.INSTANCE);
             ParseTree tree = parser.program(); // Begin parsing at init rule
-            Visitor visitor = new Visitor(entity);
+            Visitor visitor = new Visitor(entity, new SymbolTable());
             visitor.visit(tree);
         } catch (Exception e) {
             entity.print(e.getMessage(), MSMessageType.ERROR);

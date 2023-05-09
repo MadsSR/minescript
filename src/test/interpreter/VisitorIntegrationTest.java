@@ -1,24 +1,22 @@
 package interpreter;
 
-import interpreter.antlr.MineScriptLexer;
 import interpreter.antlr.MineScriptParser;
 import interpreter.types.*;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class VisitorTest {
-    private final Visitor visitor = new Visitor();
+import static interpreter.utils.TreeFromString.*;
 
+class VisitorIntegrationTest {
+    private final SymbolTable symbolTable = new SymbolTable();
+    private final Visitor visitor = new Visitor(symbolTable);
 
     @ParameterizedTest
     @ValueSource(ints = {-1000, -10, 0, 10, 1000})
     void visitAssignReturnsCorrectNumbers(int value) {
+
         visitor.visitAssign((MineScriptParser.AssignContext) getStmtTreeFromString("x = " + value + "\n"));
         Assertions.assertEquals(value, ((MSNumber) visitor.visitId((MineScriptParser.IdContext) getExprTreeFromString("x"))).getValue());
     }
@@ -37,7 +35,6 @@ class VisitorTest {
                 visitor.visitAssign((MineScriptParser.AssignContext) getStmtTreeFromString("x = \"hej\"\n"))
         );
     }
-
 
     @ParameterizedTest
     @ValueSource(ints = {0, 5, 10, 15})
@@ -220,16 +217,6 @@ class VisitorTest {
     }
 
     @Test
-    void visitBoolPassTrueExpectedTrue() {
-        Assertions.assertTrue(((MSBool) visitor.visitBool((MineScriptParser.BoolContext) getExprTreeFromString("true"))).getValue());
-    }
-
-    @Test
-    void visitBoolPassFalseExpectedFalse() {
-        Assertions.assertFalse(((MSBool) visitor.visitBool((MineScriptParser.BoolContext) getExprTreeFromString("false"))).getValue());
-    }
-
-    @Test
     void visitBoolPassExceptions() {
         Assertions.assertThrows(RuntimeException.class, () -> visitor.visitBool((MineScriptParser.BoolContext) getExprTreeFromString("abc")));
     }
@@ -398,18 +385,6 @@ class VisitorTest {
         Assertions.assertFalse(((MSBool) visitor.visitAnd((MineScriptParser.AndContext) getExprTreeFromString("true and false"))).getValue());
         Assertions.assertFalse(((MSBool) visitor.visitAnd((MineScriptParser.AndContext) getExprTreeFromString("false and true"))).getValue());
         Assertions.assertFalse(((MSBool) visitor.visitAnd((MineScriptParser.AndContext) getExprTreeFromString("false and false"))).getValue());
-    }
-
-    private MineScriptParser.ExpressionContext getExprTreeFromString(String input) {
-        var lexer = new MineScriptLexer(CharStreams.fromString(input));
-        var parser = new MineScriptParser(new CommonTokenStream(lexer));
-        return parser.expression();
-    }
-
-    private MineScriptParser.StatementContext getStmtTreeFromString(String input) {
-        var lexer = new MineScriptLexer(CharStreams.fromString(input));
-        var parser = new MineScriptParser(new CommonTokenStream(lexer));
-        return parser.statement();
     }
 
     @Test
