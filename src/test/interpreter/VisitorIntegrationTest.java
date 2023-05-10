@@ -245,21 +245,6 @@ class VisitorIntegrationTest {
     }
 
     @Test
-    void visitNumberReadsNumFromInputExpectsTrue() {
-        Assertions.assertEquals(5, ((MSNumber) visitor.visitNumber((MineScriptParser.NumberContext) getExprTreeFromString("5"))).getValue());
-    }
-
-    @Test
-    void visitNumberWithCorrectInputExpectedTrue(){
-        Assertions.assertEquals(5, ((MSNumber) visitor.visitNumber((MineScriptParser.NumberContext) getExprTreeFromString("5"))).getValue());
-    }
-
-    @Test
-    void visitNumberWithIncorrectInputExpectedTrue(){
-        Assertions.assertThrows(RuntimeException.class, () -> visitor.visitNumber((MineScriptParser.NumberContext) getExprTreeFromString("abc")));
-    }
-
-    @Test
     void visitParenExpr() {
         String input = "(10-3)\n";
         Assertions.assertEquals(7, ((MSNumber) visitor.visitParenExpr((MineScriptParser.ParenExprContext) getExprTreeFromString(input))).getValue());

@@ -220,7 +220,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
 
     @Override
     public MSType visitNumber(MineScriptParser.NumberContext ctx) {
-        return new MSNumber(Integer.parseInt(ctx.getText()));
+        return new MSNumber(Integer.parseInt(ctx.NUMBER().getText()));
     }
 
     @Override
