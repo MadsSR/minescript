@@ -48,7 +48,16 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     public MSType visitStatements(MineScriptParser.StatementsContext ctx) {
         MSType val;
 
+
+
         if (functionCallCounter == 0) symbolTable.enterScope();
+
+        for (MineScriptParser.StatementContext statement : ctx.statement()) {
+            if (statement instanceof MineScriptParser.FuncDeclContext) {
+                visit(statement);
+            }
+        }
+
 
         for (MineScriptParser.StatementContext statement : ctx.statement()) {
             val = visit(statement);
