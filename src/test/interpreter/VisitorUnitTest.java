@@ -22,22 +22,17 @@ class VisitorUnitTest {
     private final SymbolTable symbolTable = new SymbolTable();
     private final Visitor visitor = new Visitor(symbolTable);
 
-    @Spy
-    Visitor spyVisitor = visitor;
-    @Mock
-    MineScriptParser.AssignContext mockAssignContext;
-    @Mock
-    MineScriptParser.ExpressionContext mockExpressionContext;
-    @Mock
-    MineScriptParser.BoolContext mockBoolContext;
-    @Mock
-    MineScriptParser.AbsDirContext mockAbsDirContext;
-    @Mock
-    MineScriptParser.RelDirContext mockRelDirContext;
+    @Spy Visitor spyVisitor = visitor;
+    @Mock MineScriptParser.AssignContext mockAssignContext;
+    @Mock MineScriptParser.ExpressionContext mockExpressionContext;
+    @Mock MineScriptParser.BoolContext mockBoolContext;
+    @Mock MineScriptParser.AbsDirContext mockAbsDirContext;
+    @Mock MineScriptParser.RelDirContext mockRelDirContext;
+    @Mock MineScriptParser.NumberContext mockNumberContext;
 
     @ParameterizedTest
     @ValueSource(ints = {-1000, -10, 0, 10, 1000})
-    void visitAssignStoresCorrectNumbers(int value) {
+    void visitAssignStoresCorrectNumber(int value) {
         // Mock functions ID(), expression(), and visit()
         Mockito.when(mockAssignContext.ID()).thenReturn(new MockTerminalNode("varName"));
         Mockito.when(mockAssignContext.expression()).thenReturn(mockExpressionContext);
@@ -68,22 +63,35 @@ class VisitorUnitTest {
     }
 
     @Test
-    void visitBoolPassStringReturnsFalse() {
+    void visitBoolPassRandomStringReturnsFalse() {
         Mockito.when(mockBoolContext.getText()).thenReturn("abc");
         Assertions.assertFalse(((MSBool) visitor.visitBool(mockBoolContext)).getValue());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"north", "south", "east", "west", "top", "bottom"})
-    void visitAbsDirWithCorrectInputsReturnsTrue(String value){
+    void visitAbsDirValidInputReturnsAbsDir(String value){
         Mockito.when(mockAbsDirContext.ABSDIR()).thenReturn(new MockTerminalNode(value));
         Assertions.assertEquals(((MSAbsDir) visitor.visitAbsDir(mockAbsDirContext)).getValue(), new MSAbsDir(value).getValue());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"up", "down", "left", "right"})
-    void visitRelDirWithCorrectInputsReturnsTrue(String value) {
+    void visitRelDirValidInputReturnsRelDir(String value) {
         Mockito.when(mockRelDirContext.RELDIR()).thenReturn(new MockTerminalNode(value));
         Assertions.assertEquals(((MSRelDir) visitor.visitRelDir(mockRelDirContext)).getValue(), new MSRelDir(value).getValue());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {-1000, -10, 0, 10, 1000})
+    void visitNumberValidInputReturnsNumber(int value) {
+        Mockito.when(mockNumberContext.NUMBER()).thenReturn(new MockTerminalNode(String.valueOf(value)));
+        Assertions.assertEquals(((MSNumber) visitor.visitNumber(mockNumberContext)).getValue(), new MSNumber(value).getValue());
+    }
+
+    @Test
+    void visitNumberInvalidInputThrowsIllegalArgumentException(){
+        Mockito.when(mockNumberContext.NUMBER()).thenReturn(new MockTerminalNode("abc"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> visitor.visitNumber(mockNumberContext));
     }
 }
