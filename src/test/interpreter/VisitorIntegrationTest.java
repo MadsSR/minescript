@@ -260,19 +260,6 @@ class VisitorIntegrationTest {
     }
 
     @Test
-    void visitRelDirWithCorrectInputsExpectsTrue() {
-        MSRelDir.Direction up_direction = ((MSRelDir) visitor.visitRelDir((MineScriptParser.RelDirContext) getExprTreeFromString("up"))).getValue();
-        MSRelDir.Direction down_direction = ((MSRelDir) visitor.visitRelDir((MineScriptParser.RelDirContext) getExprTreeFromString("down"))).getValue();
-        MSRelDir.Direction left_direction = ((MSRelDir) visitor.visitRelDir((MineScriptParser.RelDirContext) getExprTreeFromString("left"))).getValue();
-        MSRelDir.Direction right_direction = ((MSRelDir) visitor.visitRelDir((MineScriptParser.RelDirContext) getExprTreeFromString("right"))).getValue();
-
-        Assertions.assertEquals(MSRelDir.Direction.UP, up_direction);
-        Assertions.assertEquals(MSRelDir.Direction.DOWN, down_direction);
-        Assertions.assertEquals(MSRelDir.Direction.LEFT, left_direction);
-        Assertions.assertEquals(MSRelDir.Direction.RIGHT, right_direction);
-    }
-
-    @Test
     void visitParenExpr() {
         String input = "(10-3)\n";
         Assertions.assertEquals(7, ((MSNumber) visitor.visitParenExpr((MineScriptParser.ParenExprContext) getExprTreeFromString(input))).getValue());

@@ -1,11 +1,8 @@
 package interpreter;
 
-import interpreter.types.MSAbsDir;
-import interpreter.types.MSBool;
+import interpreter.types.*;
 import interpreter.utils.MockTerminalNode;
 import interpreter.antlr.MineScriptParser;
-import interpreter.types.MSNumber;
-import interpreter.types.MSType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,18 +24,16 @@ class VisitorUnitTest {
 
     @Spy
     Visitor spyVisitor = visitor;
-
     @Mock
     MineScriptParser.AssignContext mockAssignContext;
-
     @Mock
     MineScriptParser.ExpressionContext mockExpressionContext;
-
     @Mock
     MineScriptParser.BoolContext mockBoolContext;
-
     @Mock
     MineScriptParser.AbsDirContext mockAbsDirContext;
+    @Mock
+    MineScriptParser.RelDirContext mockRelDirContext;
 
     @ParameterizedTest
     @ValueSource(ints = {-1000, -10, 0, 10, 1000})
@@ -61,27 +56,34 @@ class VisitorUnitTest {
     }
 
     @Test
-    void visitBoolPassTrueExpectedTrue() {
+    void visitBoolPassTrueReturnsTrue() {
         Mockito.when(mockBoolContext.getText()).thenReturn("true");
         Assertions.assertTrue(((MSBool) visitor.visitBool(mockBoolContext)).getValue());
     }
 
     @Test
-    void visitBoolPassFalseExpectedFalse() {
+    void visitBoolPassFalseReturnsFalse() {
         Mockito.when(mockBoolContext.getText()).thenReturn("false");
         Assertions.assertFalse(((MSBool) visitor.visitBool(mockBoolContext)).getValue());
     }
 
     @Test
-    void visitBoolPassStringExpectedFalse() {
+    void visitBoolPassStringReturnsFalse() {
         Mockito.when(mockBoolContext.getText()).thenReturn("abc");
         Assertions.assertFalse(((MSBool) visitor.visitBool(mockBoolContext)).getValue());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"north", "south", "east", "west", "top", "bottom"})
-    void visitAbsDirWithCorrectInputsExpectedTrue(String value){
+    void visitAbsDirWithCorrectInputsReturnsTrue(String value){
         Mockito.when(mockAbsDirContext.ABSDIR()).thenReturn(new MockTerminalNode(value));
         Assertions.assertEquals(((MSAbsDir) visitor.visitAbsDir(mockAbsDirContext)).getValue(), new MSAbsDir(value).getValue());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"up", "down", "left", "right"})
+    void visitRelDirWithCorrectInputsReturnsTrue(String value) {
+        Mockito.when(mockRelDirContext.RELDIR()).thenReturn(new MockTerminalNode(value));
+        Assertions.assertEquals(((MSRelDir) visitor.visitRelDir(mockRelDirContext)).getValue(), new MSRelDir(value).getValue());
     }
 }
