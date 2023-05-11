@@ -15,6 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import static interpreter.utils.TreeFromString.getExprTreeFromString;
+
 @ExtendWith(MockitoExtension.class)
 class VisitorUnitTest {
     private final SymbolTable symbolTable = new SymbolTable();
@@ -28,6 +30,7 @@ class VisitorUnitTest {
     @Mock private MineScriptParser.RelDirContext mockRelDirContext;
     @Mock private MineScriptParser.NumberContext mockNumberContext;
     @Mock private MineScriptParser.IdContext mockIdContext;
+    @Mock private MineScriptParser.NegContext mockNegContext;
 
     @ParameterizedTest
     @ValueSource(ints = {-1000, -10, 0, 10, 1000})
@@ -51,12 +54,30 @@ class VisitorUnitTest {
 
     @ParameterizedTest
     @ValueSource(ints = {-1000, -10, 0, 10, 1000})
+    void visitNegNegatesNumber(int value) {
+        Mockito.when(mockNegContext.expression()).thenReturn(mockExpressionContext);
+        Mockito.when(spyVisitor.visit(mockExpressionContext)).thenReturn(new MSNumber(value));
+
+        MSType result = spyVisitor.visitNeg(mockNegContext);
+        Assertions.assertTrue(result.equals(new MSNumber(-value)));
+    }
+
+    @Test
+    void visitNegInvalidTypeThrowsRuntimeException() {
+        Mockito.when(mockNegContext.expression()).thenReturn(mockExpressionContext);
+        Mockito.when(spyVisitor.visit(mockExpressionContext)).thenReturn(new MSBool(false));
+
+        Assertions.assertThrows(RuntimeException.class, () -> spyVisitor.visitNeg(mockNegContext));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {-1000, -10, 0, 10, 1000})
     void visitIdValidIdReturnsValue(int value) {
         Mockito.when(mockIdContext.ID()).thenReturn(new MockTerminalNode("varName"));
         symbolTable.enterSymbol("varName", new MSNumber(value));
 
         MSType result = spyVisitor.visitId(mockIdContext);
-        Assertions.assertEquals(((MSNumber) result).getValue(), value);
+        Assertions.assertTrue(result.equals(new MSNumber(value)));
     }
 
     @Test
@@ -68,26 +89,34 @@ class VisitorUnitTest {
     @Test
     void visitBoolPassTrueReturnsTrue() {
         Mockito.when(mockBoolContext.getText()).thenReturn("true");
-        Assertions.assertTrue(((MSBool) spyVisitor.visitBool(mockBoolContext)).getValue());
+
+        MSType result = spyVisitor.visitBool(mockBoolContext);
+        Assertions.assertTrue(((MSBool) result).getValue());
     }
 
     @Test
     void visitBoolPassFalseReturnsFalse() {
         Mockito.when(mockBoolContext.getText()).thenReturn("false");
-        Assertions.assertFalse(((MSBool) spyVisitor.visitBool(mockBoolContext)).getValue());
+
+        MSType result = spyVisitor.visitBool(mockBoolContext);
+        Assertions.assertFalse(((MSBool) result).getValue());
     }
 
     @Test
     void visitBoolPassRandomStringReturnsFalse() {
         Mockito.when(mockBoolContext.getText()).thenReturn("abc");
-        Assertions.assertFalse(((MSBool) spyVisitor.visitBool(mockBoolContext)).getValue());
+
+        MSType result = spyVisitor.visitBool(mockBoolContext);
+        Assertions.assertFalse(((MSBool) result).getValue());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"north", "south", "east", "west", "top", "bottom"})
     void visitAbsDirValidInputReturnsAbsDir(String value){
         Mockito.when(mockAbsDirContext.ABSDIR()).thenReturn(new MockTerminalNode(value));
-        Assertions.assertEquals(((MSAbsDir) spyVisitor.visitAbsDir(mockAbsDirContext)).getValue(), new MSAbsDir(value).getValue());
+
+        MSType result = spyVisitor.visitAbsDir(mockAbsDirContext);
+        Assertions.assertTrue(result.equals(new MSAbsDir(value)));
     }
 
     @Test
@@ -100,7 +129,9 @@ class VisitorUnitTest {
     @ValueSource(strings = {"up", "down", "left", "right"})
     void visitRelDirValidInputReturnsRelDir(String value) {
         Mockito.when(mockRelDirContext.RELDIR()).thenReturn(new MockTerminalNode(value));
-        Assertions.assertEquals(((MSRelDir) spyVisitor.visitRelDir(mockRelDirContext)).getValue(), new MSRelDir(value).getValue());
+
+        MSType result = spyVisitor.visitRelDir(mockRelDirContext);
+        Assertions.assertTrue(result.equals(new MSRelDir(value)));
     }
 
     @Test
@@ -113,7 +144,9 @@ class VisitorUnitTest {
     @ValueSource(ints = {-1000, -10, 0, 10, 1000})
     void visitNumberValidInputReturnsNumber(int value) {
         Mockito.when(mockNumberContext.NUMBER()).thenReturn(new MockTerminalNode(String.valueOf(value)));
-        Assertions.assertEquals(((MSNumber) spyVisitor.visitNumber(mockNumberContext)).getValue(), new MSNumber(value).getValue());
+
+        MSType result = spyVisitor.visitNumber(mockNumberContext);
+        Assertions.assertTrue(result.equals(new MSNumber(value)));
     }
 
     @Test

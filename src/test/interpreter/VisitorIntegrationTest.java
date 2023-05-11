@@ -287,12 +287,6 @@ class VisitorIntegrationTest {
     }
 
     @Test
-    void visitNegNegativeNumber() {
-        Assertions.assertEquals(-5, ((MSNumber) visitor.visitNeg((MineScriptParser.NegContext) getExprTreeFromString("-5"))).getValue());
-        Assertions.assertEquals(-3335, ((MSNumber) visitor.visitNeg((MineScriptParser.NegContext) getExprTreeFromString("-3335"))).getValue());
-    }
-
-    @Test
     void visitNegExpr() {
         Assertions.assertEquals(-10, ((MSNumber) visitor.visitNeg((MineScriptParser.NegContext) getExprTreeFromString("-(5 + 5)"))).getValue());
         Assertions.assertEquals(-1, ((MSNumber) visitor.visitNeg((MineScriptParser.NegContext) getExprTreeFromString("-(5 / 5)"))).getValue());
@@ -302,11 +296,6 @@ class VisitorIntegrationTest {
     void visitNegId() {
         visitor.visitAssign((MineScriptParser.AssignContext) getStmtTreeFromString("x = 5\n"));
         Assertions.assertEquals(-5, ((MSNumber) visitor.visitNeg((MineScriptParser.NegContext) getExprTreeFromString("-x"))).getValue());
-    }
-
-    @Test
-    void visitNegStringThrowsException() {
-        Assertions.assertThrows(RuntimeException.class, () -> visitor.visitNeg((MineScriptParser.NegContext) getExprTreeFromString("-unknown")));
     }
 
     @Test
