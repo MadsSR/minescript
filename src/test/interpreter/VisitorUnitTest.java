@@ -1,21 +1,19 @@
 package interpreter;
 
+import interpreter.antlr.MineScriptParser;
 import interpreter.types.*;
 import interpreter.utils.MockTerminalNode;
-import interpreter.antlr.MineScriptParser;
-import net.minecraft.block.*;
-import net.minecraft.util.Identifier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.*;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.concurrent.atomic.AtomicReference;
-
-import static interpreter.utils.TreeFromString.getExprTreeFromString;
 
 @ExtendWith(MockitoExtension.class)
 class VisitorUnitTest {
@@ -31,6 +29,7 @@ class VisitorUnitTest {
     @Mock private MineScriptParser.NumberContext mockNumberContext;
     @Mock private MineScriptParser.IdContext mockIdContext;
     @Mock private MineScriptParser.NegContext mockNegContext;
+    @Mock private MineScriptParser.NotExprContext mockNotExprContext;
 
     @ParameterizedTest
     @ValueSource(ints = {-1000, -10, 0, 10, 1000})
@@ -50,6 +49,42 @@ class VisitorUnitTest {
         // Assert that the symbol value is equal to the initial assign value, and assert that result is null
         Assertions.assertTrue(mockValue.get().equals(new MSNumber(value)));
         Assertions.assertNull(result);
+    }
+
+    @Test
+    void visitNotExprValidBoolReturnsNegatedBool() {
+        Mockito.when(mockNotExprContext.expression()).thenReturn(mockExpressionContext);
+        Mockito.when(spyVisitor.visit(mockExpressionContext)).thenReturn(new MSBool(false));
+
+        MSType result = spyVisitor.visitNotExpr(mockNotExprContext);
+        Assertions.assertTrue(result.equals(new MSBool(true)));
+    }
+
+    @Test
+    void visitNotExprPassZeroReturnsTrue() {
+        Mockito.when(mockNotExprContext.expression()).thenReturn(mockExpressionContext);
+        Mockito.when(spyVisitor.visit(mockExpressionContext)).thenReturn(new MSNumber(0));
+
+        MSType result = spyVisitor.visitNotExpr(mockNotExprContext);
+        Assertions.assertTrue(result.equals(new MSBool(true)));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {-1000, -100, 100, 1000})
+    void visitNotExprPassNonZeroNumberReturnsFalse(int value) {
+        Mockito.when(mockNotExprContext.expression()).thenReturn(mockExpressionContext);
+        Mockito.when(spyVisitor.visit(mockExpressionContext)).thenReturn(new MSNumber(value));
+
+        MSType result = spyVisitor.visitNotExpr(mockNotExprContext);
+        Assertions.assertTrue(result.equals(new MSBool(false)));
+    }
+
+    @Test
+    void visitNotExprInvalidTypeThrowsRuntimeException() {
+        Mockito.when(mockNotExprContext.expression()).thenReturn(mockExpressionContext);
+        Mockito.when(spyVisitor.visit(mockExpressionContext)).thenReturn(new MSRelDir("right"));
+
+        Assertions.assertThrows(RuntimeException.class, () -> spyVisitor.visitNotExpr(mockNotExprContext));
     }
 
     @ParameterizedTest
