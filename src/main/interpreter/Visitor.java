@@ -16,7 +16,6 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     private final ExpressionParser parser = new ExpressionParser();
     private final Random random = new Random(System.currentTimeMillis());
     private boolean hasReturned = false;
-    private int functionCallCounter = 0;
     private TurtleBlockEntity entity;
     private boolean shouldBreak = true;
 
@@ -38,6 +37,9 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
 
         for (MineScriptParser.StatementContext statement : ctx.statement()) {
             if (!(statement instanceof MineScriptParser.FuncDeclContext)) {
+                if (hasReturned) {
+                    return null;
+                }
                 visit(statement);
             }
         }
@@ -46,19 +48,28 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
 
     @Override
     public MSType visitStatements(MineScriptParser.StatementsContext ctx) {
-        MSType val;
+        MSType val = null;
 
-        if (functionCallCounter == 0) symbolTable.enterScope();
+        if (!(ctx.getParent() instanceof MineScriptParser.FuncDeclContext)){
+            symbolTable.enterScope();
+        }
 
         for (MineScriptParser.StatementContext statement : ctx.statement()) {
+            if (!hasReturned){
             val = visit(statement);
+            }
+
             if (hasReturned) {
-                if (functionCallCounter == 0) symbolTable.exitScope();
+                if (!(ctx.getParent() instanceof MineScriptParser.FuncDeclContext)){
+                    symbolTable.enterScope();
+                }
                 return val;
             }
         }
 
-        if (functionCallCounter == 0) symbolTable.exitScope();
+        if (!(ctx.getParent() instanceof MineScriptParser.FuncDeclContext)){
+            symbolTable.exitScope();
+        }
 
         return null;
     }
@@ -277,9 +288,6 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
 
     @Override
     public MSType visitReturn(MineScriptParser.ReturnContext ctx) {
-        if (functionCallCounter == 0) {
-            throw new RuntimeException("Cannot return outside of define block");
-        }
         MSType retVal = visit(ctx.expression());
         hasReturned = true;
         return retVal;
@@ -290,7 +298,6 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         var id = ctx.ID().getText();
         ArrayList<MSType> actualParams = getActualParams(ctx.actual_parameters());
         MSType retVal = null;
-        functionCallCounter++;
 
         switch (id) {
             case "Step" -> {
@@ -464,7 +471,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                         formalParams.set(i, id + "." + formalParams.get(i));
                         symbolTable.enterSymbol(formalParams.get(i), actualParams.get(i));
                     }
-
+                    hasReturned = false;
                     retVal = visit(function.getCtx());
                     hasReturned = false;
                     symbolTable.exitScope();
@@ -475,7 +482,6 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         }
         if (entity != null) entity = entity.getTurtleEntity();
 
-        functionCallCounter--;
         return retVal;
     }
 
