@@ -39,18 +39,20 @@ public class TextEditorScreen extends BaseUIModelScreen<FlowLayout> {
         editor.mouseDown().subscribe((mouseX, mouseY, button) -> {
             editor.setFocused(true);
 
+            // Moves the cursor to the mouse position
             try {
                 // Method m = ((Object) editor).getClass().getDeclaredMethod("moveCursor", double.class, double.class); // For development
                 Method m = ((Object) editor).getClass().getDeclaredMethod("method_44404", double.class, double.class); // For release
                 m.setAccessible(true);
                 m.invoke(editor, mouseX + editor.getX(), mouseY + editor.getY());
             } catch (Exception e) {
+                // Loops through all methods until one works (this is used because the method name is obfuscated)
                 var methods = ((Object) editor).getClass().getDeclaredMethods();
                 for (Method method : methods) {
                     try {
                         method.setAccessible(true);
                         method.invoke(editor, mouseX + editor.getX(), mouseY + editor.getY());
-                        return true;
+                        break;
                     } catch (Exception ignored) {
                     }
                 }
