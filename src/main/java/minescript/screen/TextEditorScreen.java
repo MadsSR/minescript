@@ -1,6 +1,5 @@
 package minescript.screen;
 
-import interpreter.types.MSMessageType;
 import io.wispforest.owo.ui.base.BaseUIModelScreen;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
@@ -10,10 +9,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.EditBoxWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
+
 
 public class TextEditorScreen extends BaseUIModelScreen<FlowLayout> {
     private TurtleBlockEntity turtleBlockEntity;
