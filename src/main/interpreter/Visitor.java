@@ -22,24 +22,30 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     private TurtleBlockEntity entity;
     private boolean shouldBreak = true;
 
+    /*Constructor for starting the visitor with a turtle*/
     public Visitor(TurtleBlockEntity entity) {
         this.entity = entity;
     }
 
+    /*Constructor for starting the visitor without a turtle*/
     public Visitor() {
         this.entity = null;
     }
 
     @Override
     public MSType visitProgram(MineScriptParser.ProgramContext ctx) {
+        /*Initial run of the code written in the turtle, this handles forward referencing*/
         for (MineScriptParser.StatementContext statement : ctx.statement()) {
             if (statement instanceof MineScriptParser.FuncDeclContext) {
                 visit(statement);
             }
         }
 
+        /*Runs the rest of the code after the functions have been identified*/
         for (MineScriptParser.StatementContext statement : ctx.statement()) {
+            /*Runs everything except function declarations*/
             if (!(statement instanceof MineScriptParser.FuncDeclContext)) {
+                /*If a return has been made in the outermost scope, it stops the program*/
                 if (hasReturned) {
                     return null;
                 }
