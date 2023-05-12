@@ -1,10 +1,10 @@
 package interpreter;
 
-import com.ibm.icu.impl.Assert;
 import interpreter.antlr.MineScriptParser;
-import interpreter.types.*;
+import interpreter.types.MSBool;
+import interpreter.types.MSNumber;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -13,66 +13,6 @@ import static interpreter.utils.TreeFromString.*;
 class VisitorIntegrationTest {
     private final SymbolTable symbolTable = new SymbolTable();
     private final Visitor visitor = new Visitor(symbolTable);
-
-    // Scoping tests
-    @Test
-    void visitWhileLocalScopeInnerAccessReturnsValue() {
-        int value = 123;
-        String input = """
-                i = 0
-                a = 0
-                while (i < 1) do
-                    x = %d
-                    a = x + 1
-                    i = i + 1
-                endwhile
-                """.formatted(value);
-
-        Assertions.assertDoesNotThrow(() -> visitor.visit(getProgTreeFromString(input)));
-        Assertions.assertEquals(1, ((MSNumber) symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol("i"))).getValue());
-        Assertions.assertEquals(value + 1, ((MSNumber) symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol("a"))).getValue());
-    }
-
-    @Test
-    void visitWhileLocalScopeOuterAccessThrowsRuntimeException() {
-        String input = """
-                i = 0
-                while (i < 1) do
-                    x = 123
-                    i = i + 1
-                endwhile
-                a = x
-                """;
-
-        Assertions.assertThrows(RuntimeException.class, () -> visitor.visit(getProgTreeFromString(input)));
-    }
-
-    @Test
-    void visitIfLocalScopeInnerAccessReturnsValue() {
-        int value = 123;
-        String input = """
-                a = 0
-                if (true) do
-                    x = %d
-                    a = x + 1
-                endif
-                """.formatted(value);
-
-        Assertions.assertDoesNotThrow(() -> visitor.visit(getProgTreeFromString(input)));
-        Assertions.assertEquals(value + 1, ((MSNumber) symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol("a"))).getValue());
-    }
-
-    @Test
-    void visitIfLocalScopeOuterAccessThrowsRuntimeException() {
-        String input = """
-                if (true) do
-                    x = 123
-                endif
-                a = x
-                """;
-
-        Assertions.assertThrows(RuntimeException.class, () -> visitor.visit(getProgTreeFromString(input)));
-    }
 
     @ParameterizedTest
     @ValueSource(ints = {-1000, -10, 0, 10, 1000})
@@ -397,7 +337,7 @@ class VisitorIntegrationTest {
     void visitFuncCallNoFormalParamsNoActualParamReturnsValue() {
         visitor.visitFuncDecl((MineScriptParser.FuncDeclContext) getStmtTreeFromString(
                 """
-                        define test() do 
+                        define test() do
                             return 5
                         enddefine
                         """
@@ -409,7 +349,7 @@ class VisitorIntegrationTest {
     void visitFuncCallNoFormalParamsOneActualParamThrowsException() {
         visitor.visitFuncDecl((MineScriptParser.FuncDeclContext) getStmtTreeFromString(
                 """
-                        define test() do 
+                        define test() do
                             return 5
                         enddefine
                         """
@@ -421,7 +361,7 @@ class VisitorIntegrationTest {
     void visitFuncCallOneFormalParamsNoActualParamsThrowsException() {
         visitor.visitFuncDecl((MineScriptParser.FuncDeclContext) getStmtTreeFromString(
                 """
-                        define test(x) do 
+                        define test(x) do
                             return 5
                         enddefine
                         """
@@ -433,7 +373,7 @@ class VisitorIntegrationTest {
     void visitFuncCallOneFormalParamOneActualParamReturnsVariable() {
         visitor.visitFuncDecl((MineScriptParser.FuncDeclContext) getStmtTreeFromString(
                 """
-                        define test(x) do 
+                        define test(x) do
                             return x
                         enddefine
                         """
@@ -445,7 +385,7 @@ class VisitorIntegrationTest {
     void visitFuncCallOneFormalParamMultipleActualParamsThrowsException() {
         visitor.visitFuncDecl((MineScriptParser.FuncDeclContext) getStmtTreeFromString(
                 """
-                        define test(x) do 
+                        define test(x) do
                             return x
                         enddefine
                         """
@@ -457,7 +397,7 @@ class VisitorIntegrationTest {
     void visitFuncCallMultipleFormalParamsOneActualParamThrowsException() {
         visitor.visitFuncDecl((MineScriptParser.FuncDeclContext) getStmtTreeFromString(
                 """
-                        define test(x, y) do 
+                        define test(x, y) do
                             return x
                         enddefine
                         """
@@ -469,12 +409,103 @@ class VisitorIntegrationTest {
     void visitFuncCallMultipleFormalParamsMultipleActualParamsReturnsValue() {
         visitor.visitFuncDecl((MineScriptParser.FuncDeclContext) getStmtTreeFromString(
                 """
-                        define test(x, y) do 
+                        define test(x, y) do
                             z = x + y
                             return z
                         enddefine
                         """
         ));
         Assertions.assertEquals(11, ((MSNumber) visitor.visitFuncCall((MineScriptParser.FuncCallContext) getExprTreeFromString("test(5, 6)"))).getValue());
+    }
+
+
+    /*** SCOPING TESTS ***/
+
+
+
+    @Test
+    void visitRepeatLocalScopeInnerAccessReturnsValue() {
+        int value = 123;
+        String input = """
+                a = 0
+                repeat (1) do
+                    x = %d
+                    a = x + 1
+                endrepeat
+                """.formatted(value);
+
+        Assertions.assertDoesNotThrow(() -> visitor.visit(getProgTreeFromString(input)));
+        Assertions.assertEquals(value + 1, ((MSNumber) symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol("a"))).getValue());
+    }
+
+    @Test
+    void visitRepeatLocalScopeOuterAccessThrowsRuntimeException() {
+        String input = """
+                repeat (1) do
+                    x = 123
+                endrepeat
+                a = x
+                """;
+
+        Assertions.assertThrows(RuntimeException.class, () -> visitor.visit(getProgTreeFromString(input)));
+    }
+
+    @Test
+    void visitWhileLocalScopeInnerAccessReturnsValue() {
+        int value = 123;
+        String input = """
+                i = 0
+                a = 0
+                while (i < 1) do
+                    x = %d
+                    a = x + 1
+                    i = i + 1
+                endwhile
+                """.formatted(value);
+
+        Assertions.assertDoesNotThrow(() -> visitor.visit(getProgTreeFromString(input)));
+        Assertions.assertEquals(1, ((MSNumber) symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol("i"))).getValue());
+        Assertions.assertEquals(value + 1, ((MSNumber) symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol("a"))).getValue());
+    }
+
+    @Test
+    void visitWhileLocalScopeOuterAccessThrowsRuntimeException() {
+        String input = """
+                i = 0
+                while (i < 1) do
+                    x = 123
+                    i = i + 1
+                endwhile
+                a = x
+                """;
+
+        Assertions.assertThrows(RuntimeException.class, () -> visitor.visit(getProgTreeFromString(input)));
+    }
+
+    @Test
+    void visitIfLocalScopeInnerAccessReturnsValue() {
+        int value = 123;
+        String input = """
+                a = 0
+                if (true) do
+                    x = %d
+                    a = x + 1
+                endif
+                """.formatted(value);
+
+        Assertions.assertDoesNotThrow(() -> visitor.visit(getProgTreeFromString(input)));
+        Assertions.assertEquals(value + 1, ((MSNumber) symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol("a"))).getValue());
+    }
+
+    @Test
+    void visitIfLocalScopeOuterAccessThrowsRuntimeException() {
+        String input = """
+                if (true) do
+                    x = 123
+                endif
+                a = x
+                """;
+
+        Assertions.assertThrows(RuntimeException.class, () -> visitor.visit(getProgTreeFromString(input)));
     }
 }
