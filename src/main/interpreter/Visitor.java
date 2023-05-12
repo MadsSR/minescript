@@ -15,21 +15,22 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 public class Visitor extends MineScriptBaseVisitor<MSType> {
-    private final SymbolTable symbolTable = new SymbolTable();
     private final ExpressionParser parser = new ExpressionParser();
     private final Random random = new Random(System.currentTimeMillis());
+    private final SymbolTable symbolTable;
     private boolean hasReturned = false;
     private TurtleBlockEntity entity;
     private boolean shouldBreak = true;
 
     /*Constructor for starting the visitor with a turtle*/
-    public Visitor(TurtleBlockEntity entity) {
+    public Visitor(TurtleBlockEntity entity, SymbolTable symbolTable) {
+        this.symbolTable = symbolTable;
         this.entity = entity;
     }
 
     /*Constructor for starting the visitor without a turtle*/
-    public Visitor() {
-        this.entity = null;
+    public Visitor(SymbolTable symbolTable) {
+        this.symbolTable = symbolTable;
     }
 
     @Override
@@ -256,7 +257,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
 
     @Override
     public MSType visitNumber(MineScriptParser.NumberContext ctx) {
-        return new MSNumber(Integer.parseInt(ctx.getText()));
+        return new MSNumber(Integer.parseInt(ctx.NUMBER().getText()));
     }
 
     @Override
@@ -505,29 +506,27 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                     throw new RuntimeException("Cannot call function '" + id + "' because it is not defined");
                 }
                 /*Checks if the id is a function, otherwise throw an error*/
-                if (value instanceof MSFunction function) {
-                    var formalParams = function.getParameters();
-
-                    if (formalParams.size() != actualParams.size()) {
-                        throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{formalParams.size()}, "", actualParams));
-                    }
-
-                    symbolTable.enterScope();
-
-                    /*Bind actual params to formal params*/
-                    for (int i = 0; i < formalParams.size(); i++) {
-                        formalParams.set(i, id + "." + formalParams.get(i));
-                        symbolTable.enterSymbol(formalParams.get(i), actualParams.get(i));
-                    }
-                    /*hasReturned is set to false before visiting the function ctx in case this has been set to true at an earlier state*/
-                    hasReturned = false;
-                    retVal = visit(function.getCtx());
-                    /*hasReturned is set to false after visiting the function ctx since it possibly was just used to return from the function*/
-                    hasReturned = false;
-                    symbolTable.exitScope();
-                } else {
+                if (!(value instanceof MSFunction function)) {
                     throw new RuntimeException("Cannot call '" + id + "' because it is not a function");
                 }
+                var formalParams = function.getParameters();
+
+                if (formalParams.size() != actualParams.size()) {
+                    throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{formalParams.size()}, "", actualParams));
+                }
+                symbolTable.enterScope();
+
+                /*Bind actual params to formal params*/
+                for (int i = 0; i < formalParams.size(); i++) {
+                    formalParams.set(i, id + "." + formalParams.get(i));
+                    symbolTable.enterSymbol(formalParams.get(i), actualParams.get(i));
+                }
+                /*hasReturned is set to false before visiting the function ctx in case this has been set to true at an earlier state*/
+                hasReturned = false;
+                retVal = visit(function.getCtx());
+                /*hasReturned is set to false after visiting the function ctx since it possibly was just used to return from the function*/
+                hasReturned = false;
+                symbolTable.exitScope();
             }
         }
         if (entity != null) entity = entity.getTurtleEntity();
