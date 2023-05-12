@@ -419,8 +419,58 @@ class VisitorIntegrationTest {
     }
 
 
-    /*** SCOPING TESTS ***/
+    /*
+     * SCOPING TESTS
+     * these following tests are for checking that the scoping rules are working as expected.
+     * */
 
+    @Test
+    void funcLocalParamBeforeGlobal() {
+        int value1 = 123, value2 = 456;
+        String input = """
+                a = %d
+                define test(a) do
+                    a = a + 1
+                    return a
+                enddefine
+                
+                b = test(%d)
+                """.formatted(value1, value2);
+
+        visitor.visit(getProgTreeFromString(input));
+        Assertions.assertEquals(value2 + 1, ((MSNumber) symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol("b"))).getValue());
+    }
+
+    @Test
+    void funcLocalScopeOuterAccessThrowsRuntimeException() {
+        String input = """
+                define test() do
+                    x = 123
+                enddefine
+                
+                test()
+                a = x
+                """;
+
+        Assertions.assertThrows(RuntimeException.class, () -> visitor.visit(getProgTreeFromString(input)));
+    }
+
+    @Test
+    void funcLocalScopeInnerAccessReturnsValue() {
+        int value = 123;
+        String input = """
+                a = 0
+                define test() do
+                    x = %d
+                    a = x + 1
+                enddefine
+                
+                test()
+                """.formatted(value);
+
+        visitor.visit(getProgTreeFromString(input));
+        Assertions.assertEquals(value + 1, ((MSNumber) symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol("a"))).getValue());
+    }
 
 
     @Test
