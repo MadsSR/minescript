@@ -17,4 +17,10 @@ public class TreeFromString {
         var parser = new MineScriptParser(new CommonTokenStream(lexer));
         return parser.statement();
     }
+
+    public static MineScriptParser.ProgramContext getProgTreeFromString(String input) {
+        var lexer = new MineScriptLexer(CharStreams.fromString(input));
+        var parser = new MineScriptParser(new CommonTokenStream(lexer));
+        return parser.program();
+    }
 }

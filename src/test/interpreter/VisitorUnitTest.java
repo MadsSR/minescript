@@ -47,7 +47,7 @@ class VisitorUnitTest {
         Assertions.assertDoesNotThrow(() -> mockValue.set(symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol("varName"))));
 
         // Assert that the symbol value is equal to the initial assign value, and assert that result is null
-        Assertions.assertTrue(mockValue.get().equals(new MSNumber(value)));
+        Assertions.assertEquals(value, ((MSNumber) mockValue.get()).getValue());
         Assertions.assertNull(result);
     }
 
@@ -57,7 +57,7 @@ class VisitorUnitTest {
         Mockito.when(spyVisitor.visit(mockExpressionContext)).thenReturn(new MSBool(false));
 
         MSType result = spyVisitor.visitNotExpr(mockNotExprContext);
-        Assertions.assertTrue(result.equals(new MSBool(true)));
+        Assertions.assertTrue(((MSBool) result).getValue());
     }
 
     @Test
@@ -66,7 +66,7 @@ class VisitorUnitTest {
         Mockito.when(spyVisitor.visit(mockExpressionContext)).thenReturn(new MSNumber(0));
 
         MSType result = spyVisitor.visitNotExpr(mockNotExprContext);
-        Assertions.assertTrue(result.equals(new MSBool(true)));
+        Assertions.assertTrue(((MSBool) result).getValue());
     }
 
     @ParameterizedTest
@@ -76,7 +76,7 @@ class VisitorUnitTest {
         Mockito.when(spyVisitor.visit(mockExpressionContext)).thenReturn(new MSNumber(value));
 
         MSType result = spyVisitor.visitNotExpr(mockNotExprContext);
-        Assertions.assertTrue(result.equals(new MSBool(false)));
+        Assertions.assertFalse(((MSBool) result).getValue());
     }
 
     @Test
@@ -94,7 +94,7 @@ class VisitorUnitTest {
         Mockito.when(spyVisitor.visit(mockExpressionContext)).thenReturn(new MSNumber(value));
 
         MSType result = spyVisitor.visitNeg(mockNegContext);
-        Assertions.assertTrue(result.equals(new MSNumber(-value)));
+        Assertions.assertEquals(-value, ((MSNumber) result).getValue());
     }
 
     @Test
@@ -112,7 +112,7 @@ class VisitorUnitTest {
         symbolTable.enterSymbol("varName", new MSNumber(value));
 
         MSType result = spyVisitor.visitId(mockIdContext);
-        Assertions.assertTrue(result.equals(new MSNumber(value)));
+        Assertions.assertEquals(value, ((MSNumber) result).getValue());
     }
 
     @Test
@@ -151,7 +151,7 @@ class VisitorUnitTest {
         Mockito.when(mockAbsDirContext.ABSDIR()).thenReturn(new MockTerminalNode(value));
 
         MSType result = spyVisitor.visitAbsDir(mockAbsDirContext);
-        Assertions.assertTrue(result.equals(new MSAbsDir(value)));
+        Assertions.assertEquals(new MSAbsDir(value).getValue(), ((MSAbsDir) result).getValue());
     }
 
     @Test
@@ -166,7 +166,7 @@ class VisitorUnitTest {
         Mockito.when(mockRelDirContext.RELDIR()).thenReturn(new MockTerminalNode(value));
 
         MSType result = spyVisitor.visitRelDir(mockRelDirContext);
-        Assertions.assertTrue(result.equals(new MSRelDir(value)));
+        Assertions.assertEquals(new MSRelDir(value).getValue(), ((MSRelDir) result).getValue());
     }
 
     @Test
@@ -181,7 +181,7 @@ class VisitorUnitTest {
         Mockito.when(mockNumberContext.NUMBER()).thenReturn(new MockTerminalNode(String.valueOf(value)));
 
         MSType result = spyVisitor.visitNumber(mockNumberContext);
-        Assertions.assertTrue(result.equals(new MSNumber(value)));
+        Assertions.assertEquals(value, ((MSNumber) result).getValue());
     }
 
     @Test
