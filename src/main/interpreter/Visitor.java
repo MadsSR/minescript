@@ -94,9 +94,11 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     public MSType visitAssign(MineScriptParser.AssignContext ctx) {
         String id = ctx.ID().getText();
         MSType value = visit(ctx.expression());
+        /*Null check in case of assignment to function that doesn't return*/
         if (value == null) {
             throw new IllegalArgumentException("Cannot assign '" + id + "' to null");
         }
+        /*Throws error if the id is restricted*/
         symbolTable.enterSymbol(id, value);
 
         return null;
@@ -106,6 +108,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     public MSType visitWhile(MineScriptParser.WhileContext ctx) {
         MSType value = null;
 
+        /*Also checks for the returned state in case a return has been called inside the loop body*/
         while (parser.getBoolean(visit(ctx.expression())).getValue() && !hasReturned) {
             value = visit(ctx.statements());
         }
@@ -115,14 +118,14 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
 
     @Override
     public MSType visitIf(MineScriptParser.IfContext ctx) {
-        // Handle if and else if
+        /*Handle if and else if*/
         for (var expression : ctx.expression()) {
             if (parser.getBoolean(visit(expression)).getValue()) {
                 return visit(ctx.statements(ctx.expression().indexOf(expression)));
             }
         }
 
-        // Handle else
+        /*Handle else*/
         if (ctx.expression().size() < ctx.statements().size()) {
             return visit(ctx.statements(ctx.statements().size() - 1));
         }
@@ -134,9 +137,11 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     public MSType visitRepeat(MineScriptParser.RepeatContext ctx) {
         MSType value = null;
 
+        /*Checks a number has been typed, and it's 0 or over*/
         if (visit(ctx.expression()) instanceof MSNumber times && times.getValue() >= 0) {
             for (int i = 0; i < times.getValue(); i++) {
                 value = visit(ctx.statements());
+                /*Like the while in case a return is called in the body the loop stops*/
                 if (hasReturned) return value;
             }
         } else {
@@ -162,6 +167,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         MSType left = visit(ctx.expression(0));
         MSType right = visit(ctx.expression(1));
 
+        /*Check that both sides are numbers otherwise throw an error*/
         if (left instanceof MSNumber l && right instanceof MSNumber r) {
             return new MSBool(switch (ctx.op.getText()) {
                 case "<" -> l.getValue() < r.getValue();
@@ -191,6 +197,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         String id = ctx.ID().getText();
         MSType value;
 
+        /*Attempt to find the id from the symbol table and retrieve the value, otherwise throw an error*/
         try {
             value = symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol(id));
         } catch (SymbolNotFoundException e) {
@@ -223,6 +230,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         MSType left = visit(ctx.expression(0));
         MSType right = visit(ctx.expression(1));
 
+        /*Check that both sides are numbers otherwise throw an error*/
         if (left instanceof MSNumber l && right instanceof MSNumber r) {
             return new MSNumber(switch (ctx.op.getText()) {
                 case "+" -> l.getValue() + r.getValue();
@@ -256,6 +264,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         MSType left = visit(ctx.expression(0));
         MSType right = visit(ctx.expression(1));
 
+        /*Check that both sides are numbers otherwise throw an error*/
         if (left instanceof MSNumber l && right instanceof MSNumber r) {
             return new MSNumber(switch (ctx.op.getText()) {
                 case "*" -> l.getValue() * r.getValue();
@@ -273,6 +282,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         MSType right = visit(ctx.expression(1));
 
         if (left instanceof MSNumber l && right instanceof MSNumber r) {
+            /*Check if the exponent is negative*/
             if (r.getValue() < 0) {
                 throw new RuntimeException("Cannot raise to negative power");
             }
@@ -284,7 +294,9 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
 
     @Override
     public MSType visitAnd(MineScriptParser.AndContext ctx) {
+        /*Handles and with short-circuit, that's why the left side is handled first*/
         MSType left = visit(ctx.expression(0));
+        /*If the left part is false, it returns without the need to evaluate the right side*/
         if (!parser.getBoolean(left).getValue()) {
             return new MSBool(false);
         }
@@ -295,6 +307,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
 
     @Override
     public MSType visitOr(MineScriptParser.OrContext ctx) {
+        /*Handles or with short-circuit, much like in the visitAnd method*/
         MSType left = visit(ctx.expression(0));
         if (parser.getBoolean(left).getValue()) {
             return new MSBool(true);
@@ -307,6 +320,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     @Override
     public MSType visitReturn(MineScriptParser.ReturnContext ctx) {
         MSType retVal = visit(ctx.expression());
+        /*Changes the bool that stops most things from proceeding*/
         hasReturned = true;
         if (retVal == null) {
             throw new RuntimeException("Return expression must not be null");
@@ -320,18 +334,22 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         ArrayList<MSType> actualParams = getActualParams(ctx.actual_parameters());
         MSType retVal = null;
 
+        /*Checks actual params for functions that do not return, since minescript uses pass by value, as these would not work*/
         if (actualParams.stream().anyMatch(Objects::isNull)) {
             throw new RuntimeException(id + "() cannot take null as an argument");
         }
 
+        /*Switch if the function is a built-in function, otherwise default checks for functions in the symbol table*/
         switch (id) {
             case "Step" -> {
+                /*Checks if the function got 1 parameter and that parameter is a number, otherwise throws an error*/
                 if (actualParams.size() != 1 || !(actualParams.get(0) instanceof MSNumber n)) {
                     throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{1}, "number", actualParams));
                 }
                 entity.step(n.getValue());
             }
             case "Turn" -> {
+                /*Checks if the function got 1 parameter and that parameter is a direction, otherwise throws an error*/
                 if (actualParams.size() != 1 || (!(actualParams.get(0) instanceof MSRelDir) && !(actualParams.get(0) instanceof MSAbsDir))) {
                     throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{1}, "direction", actualParams));
                 }
@@ -343,6 +361,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 }
             }
             case "UseBlock" -> {
+                /*Checks if the function got 1 parameter and that parameter is a block, otherwise throws an error*/
                 if (actualParams.size() != 1 || !(actualParams.get(0) instanceof MSBlock b)) {
                     throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{1}, "block", actualParams));
                 }
@@ -373,8 +392,10 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 retVal = new MSNumber((int) Math.round(Math.sqrt(n.getValue())));
             }
             case "Random" -> {
+                /*If no parameter is used returns a random unbounded int*/
                 if (actualParams.size() == 0) {
                     retVal = new MSNumber(random.nextInt());
+                /*If 1 parameter is used returns a random int between 0 and the parameter*/
                 } else if (actualParams.size() == 1 && actualParams.get(0) instanceof MSNumber n) {
                     retVal = new MSNumber(random.nextInt(n.getValue()));
                 } else {
@@ -477,11 +498,13 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
             }
             default -> {
                 MSType value;
+                /*Check the symbol table for the id, otherwise throw an error*/
                 try {
                     value = symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol(id));
                 } catch (SymbolNotFoundException e) {
                     throw new RuntimeException("Cannot call function '" + id + "' because it is not defined");
                 }
+                /*Checks if the id is a function, otherwise throw an error*/
                 if (value instanceof MSFunction function) {
                     var formalParams = function.getParameters();
 
@@ -491,13 +514,15 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
 
                     symbolTable.enterScope();
 
-                    // Bind actual params to formal params
+                    /*Bind actual params to formal params*/
                     for (int i = 0; i < formalParams.size(); i++) {
                         formalParams.set(i, id + "." + formalParams.get(i));
                         symbolTable.enterSymbol(formalParams.get(i), actualParams.get(i));
                     }
+                    /*hasReturned is set to false before visiting the function ctx in case this has been set to true at an earlier state*/
                     hasReturned = false;
                     retVal = visit(function.getCtx());
+                    /*hasReturned is set to false after visiting the function ctx since it possibly was just used to return from the function*/
                     hasReturned = false;
                     symbolTable.exitScope();
                 } else {
@@ -531,6 +556,10 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         return null;
     }
 
+    /**
+     * @param ctx Formal parameters context
+     * @return List of formal parameters
+     */
     private ArrayList<String> getFormalParams(MineScriptParser.Formal_paramatersContext ctx) {
         ArrayList<String> formalParams = new ArrayList<>();
 
@@ -542,6 +571,10 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         return formalParams;
     }
 
+    /**
+     * @param ctx Actual parameters context
+     * @return List of actual parameters
+     */
     private ArrayList<MSType> getActualParams(MineScriptParser.Actual_parametersContext ctx) {
         ArrayList<MSType> actualParams = new ArrayList<>();
 
