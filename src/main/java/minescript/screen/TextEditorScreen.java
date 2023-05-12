@@ -1,5 +1,6 @@
 package minescript.screen;
 
+import interpreter.types.MSMessageType;
 import io.wispforest.owo.ui.base.BaseUIModelScreen;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
@@ -12,6 +13,7 @@ import net.minecraft.util.Identifier;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 public class TextEditorScreen extends BaseUIModelScreen<FlowLayout> {
     private TurtleBlockEntity turtleBlockEntity;
@@ -38,13 +40,21 @@ public class TextEditorScreen extends BaseUIModelScreen<FlowLayout> {
             editor.setFocused(true);
 
             try {
-                Method m = ((Object) editor).getClass().getDeclaredMethod("moveCursor", double.class, double.class);
+                // Method m = ((Object) editor).getClass().getDeclaredMethod("moveCursor", double.class, double.class); // For development
+                Method m = ((Object) editor).getClass().getDeclaredMethod("method_44404", double.class, double.class); // For release
                 m.setAccessible(true);
                 m.invoke(editor, mouseX + editor.getX(), mouseY + editor.getY());
-            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                throw new RuntimeException(e);
+            } catch (Exception e) {
+                var methods = ((Object) editor).getClass().getDeclaredMethods();
+                for (Method method : methods) {
+                    try {
+                        method.setAccessible(true);
+                        method.invoke(editor, mouseX + editor.getX(), mouseY + editor.getY());
+                        return true;
+                    } catch (Exception ignored) {
+                    }
+                }
             }
-
             return true;
         });
 
