@@ -476,27 +476,25 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 } catch (SymbolNotFoundException e) {
                     throw new RuntimeException("Cannot call function '" + id + "' because it is not defined");
                 }
-                if (value instanceof MSFunction function) {
-                    var formalParams = function.getParameters();
-
-                    if (formalParams.size() != actualParams.size()) {
-                        throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{formalParams.size()}, "", actualParams));
-                    }
-
-                    symbolTable.enterScope();
-
-                    // Bind actual params to formal params
-                    for (int i = 0; i < formalParams.size(); i++) {
-                        formalParams.set(i, id + "." + formalParams.get(i));
-                        symbolTable.enterSymbol(formalParams.get(i), actualParams.get(i));
-                    }
-                    hasReturned = false;
-                    retVal = visit(function.getCtx());
-                    hasReturned = false;
-                    symbolTable.exitScope();
-                } else {
+                if (!(value instanceof MSFunction function)) {
                     throw new RuntimeException("Cannot call '" + id + "' because it is not a function");
                 }
+                var formalParams = function.getParameters();
+
+                if (formalParams.size() != actualParams.size()) {
+                    throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{formalParams.size()}, "", actualParams));
+                }
+                symbolTable.enterScope();
+
+                // Bind actual params to formal params
+                for (int i = 0; i < formalParams.size(); i++) {
+                    formalParams.set(i, id + "." + formalParams.get(i));
+                    symbolTable.enterSymbol(formalParams.get(i), actualParams.get(i));
+                }
+                hasReturned = false;
+                retVal = visit(function.getCtx());
+                hasReturned = false;
+                symbolTable.exitScope();
             }
         }
         if (entity != null) entity = entity.getTurtleEntity();
