@@ -20,16 +20,22 @@ public class SymbolTable {
     }
 
     public void exitScope() {
+        /*Removes everything in the current scope from the hashtable*/
         for (String symbolName : scopeStack.peek()) {
             delete(symbolName);
         }
         scopeStack.pop();
     }
 
+    /**
+     * @param name id of symbol to enter
+     * @param value value of symbol to enter
+     */
     public void enterSymbol(String name, MSType value) {
         Symbol newSymbol = new Symbol(name, value);
         checkRestrictedKeyWords(newSymbol);
 
+        /*If the variable is already in the current scope, update it*/
         if (isVarInNewScope(name)) {
             Symbol oldSymbol = hashTable.get(getPrefixName(name));
             delete(oldSymbol.name);
@@ -38,6 +44,7 @@ public class SymbolTable {
             return;
         }
 
+        /*If the variable is already in the symbol table, update it*/
         if (hashTable.containsKey(name)) {
             delete(newSymbol.name);
         } else {
@@ -46,6 +53,9 @@ public class SymbolTable {
         add(newSymbol);
     }
 
+    /**
+     * @param symbol symbol to check for restricted keywords
+     */
     private void checkRestrictedKeyWords(Symbol symbol) {
         for (MSInbuiltFunction funcName : MSInbuiltFunction.values()) {
             if (symbol.value instanceof MSFunction f) {
@@ -62,6 +72,10 @@ public class SymbolTable {
         }
     }
 
+    /**
+     * @param name id of the variable
+     * @return symbol from the hash table
+     */
     public Symbol retrieveSymbol(String name) {
         if (isVarInNewScope(name)) {
             return hashTable.get(getPrefixName(name));
@@ -72,14 +86,24 @@ public class SymbolTable {
         }
     }
 
+    /**
+     * @param symbol symbol to retrieve value of
+     * @return value of the symbol
+     */
     public MSType retrieveSymbolValue(Symbol symbol) {
         return symbol.value;
     }
 
+    /**
+     * @param name id of the variable
+     */
     private void delete(String name) {
         hashTable.remove(name);
     }
 
+    /**
+     * @param symbol symbol to add to the symbol table
+     */
     private void add(Symbol symbol) {
         hashTable.put(symbol.name, symbol);
     }
@@ -92,6 +116,10 @@ public class SymbolTable {
         return scopeStack.peek().stream().anyMatch(s -> s.endsWith("." + name));
     }
 
+    /**
+     * @param name id of the variable
+     * @return prefix of the variable
+     */
     private String getPrefixName(String name) {
         return scopeStack.peek().stream().filter(s -> s.contains("." + name)).findFirst().orElseThrow();
     }
