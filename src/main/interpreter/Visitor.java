@@ -9,14 +9,16 @@ import net.minecraft.registry.Registries;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class Visitor extends MineScriptBaseVisitor<MSType> {
     private final ExpressionParser parser = new ExpressionParser();
     private final Random random = new Random(System.currentTimeMillis());
     private final SymbolTable symbolTable;
     private boolean hasReturned = false;
-    private int functionCallCounter = 0;
     private TurtleBlockEntity entity;
     private boolean shouldBreak = true;
 
@@ -39,6 +41,9 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
 
         for (MineScriptParser.StatementContext statement : ctx.statement()) {
             if (!(statement instanceof MineScriptParser.FuncDeclContext)) {
+                if (hasReturned) {
+                    return null;
+                }
                 visit(statement);
             }
         }
@@ -47,19 +52,35 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
 
     @Override
     public MSType visitStatements(MineScriptParser.StatementsContext ctx) {
-        MSType val;
+        MSType val = null;
 
-        if (functionCallCounter == 0) symbolTable.enterScope();
+        if (!(ctx.getParent() instanceof MineScriptParser.FuncDeclContext)){
+            symbolTable.enterScope();
+        }
 
         for (MineScriptParser.StatementContext statement : ctx.statement()) {
+            if (statement instanceof MineScriptParser.FuncDeclContext) {
+                visit(statement);
+            }
+        }
+
+
+        for (MineScriptParser.StatementContext statement : ctx.statement()) {
+            if (!hasReturned){
             val = visit(statement);
+            }
+
             if (hasReturned) {
-                if (functionCallCounter == 0) symbolTable.exitScope();
+                if (!(ctx.getParent() instanceof MineScriptParser.FuncDeclContext)){
+                    symbolTable.enterScope();
+                }
                 return val;
             }
         }
 
-        if (functionCallCounter == 0) symbolTable.exitScope();
+        if (!(ctx.getParent() instanceof MineScriptParser.FuncDeclContext)){
+            symbolTable.exitScope();
+        }
 
         return null;
     }
@@ -68,7 +89,9 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     public MSType visitAssign(MineScriptParser.AssignContext ctx) {
         String id = ctx.ID().getText();
         MSType value = visit(ctx.expression());
-
+        if (value == null) {
+            throw new IllegalArgumentException("Cannot assign '" + id + "' to null");
+        }
         symbolTable.enterSymbol(id, value);
 
         return null;
@@ -278,11 +301,11 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
 
     @Override
     public MSType visitReturn(MineScriptParser.ReturnContext ctx) {
-        if (functionCallCounter == 0) {
-            throw new RuntimeException("Cannot return outside of define block");
-        }
         MSType retVal = visit(ctx.expression());
         hasReturned = true;
+        if (retVal == null) {
+            throw new RuntimeException("Return expression must not be null");
+        }
         return retVal;
     }
 
@@ -291,18 +314,21 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         var id = ctx.ID().getText();
         ArrayList<MSType> actualParams = getActualParams(ctx.actual_parameters());
         MSType retVal = null;
-        functionCallCounter++;
+
+        if (actualParams.stream().anyMatch(Objects::isNull)) {
+            throw new RuntimeException(id + "() cannot take null as an argument");
+        }
 
         switch (id) {
             case "Step" -> {
                 if (actualParams.size() != 1 || !(actualParams.get(0) instanceof MSNumber n)) {
-                    throw new RuntimeException(id + "() takes 1 argument (number) but " + actualParams.size() + " were given");
+                    throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{1}, "number", actualParams));
                 }
                 entity.step(n.getValue());
             }
             case "Turn" -> {
                 if (actualParams.size() != 1 || (!(actualParams.get(0) instanceof MSRelDir) && !(actualParams.get(0) instanceof MSAbsDir))) {
-                    throw new RuntimeException(id + "() takes 1 argument (direction) but " + actualParams.size() + " were given");
+                    throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{1}, "direction", actualParams));
                 }
                 MSType dir = actualParams.get(0);
                 if (dir instanceof MSRelDir relDir) {
@@ -313,7 +339,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
             }
             case "UseBlock" -> {
                 if (actualParams.size() != 1 || !(actualParams.get(0) instanceof MSBlock b)) {
-                    throw new RuntimeException(id + "() takes 1 argument (block) but " + actualParams.size() + " were given");
+                    throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{1}, "block", actualParams));
                 }
                 entity.useBlock(b.getValue());
             }
@@ -323,7 +349,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                     break;
                 }
                 if (actualParams.size() != 1 || !(actualParams.get(0) instanceof MSBool b)) {
-                    throw new RuntimeException(id + "() takes 0 or 1 argument (boolean) but " + actualParams.size() + " were given");
+                    throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{1}, "bool", actualParams));
                 }
                 entity.shouldBreak = b.getValue();
                 shouldBreak = b.getValue();
@@ -331,13 +357,13 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
             }
             case "Peek" -> {
                 if (actualParams.size() != 0) {
-                    throw new RuntimeException(id + "() takes 0 argument but " + actualParams.size() + " were given");
+                    throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{0}, "", actualParams));
                 }
                 retVal = new MSBlock(entity.peek());
             }
             case "Sqrt" -> {
                 if (actualParams.size() != 1 || !(actualParams.get(0) instanceof MSNumber n)) {
-                    throw new RuntimeException(id + "() takes 1 argument (number) but " + actualParams.size() + " were given");
+                    throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{1}, "number", actualParams));
                 }
                 retVal = new MSNumber((int) Math.round(Math.sqrt(n.getValue())));
             }
@@ -347,72 +373,72 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 } else if (actualParams.size() == 1 && actualParams.get(0) instanceof MSNumber n) {
                     retVal = new MSNumber(random.nextInt(n.getValue()));
                 } else {
-                    throw new RuntimeException(id + "() takes 0 or 1 argument (number) but " + actualParams.size() + " were given");
+                    throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{0, 1}, "number", actualParams));
                 }
             }
             case "RandomBlock" -> {
                 if (actualParams.size() != 0) {
-                    throw new RuntimeException(id + "() takes 0 argument but " + actualParams.size() + " were given");
+                    throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{0}, "", actualParams));
                 }
                 retVal = new MSBlock(Registries.BLOCK.get(random.nextInt(Registries.BLOCK.size())));
             }
             case "SetSpeed" -> {
                 if (actualParams.size() != 1 || !(actualParams.get(0) instanceof MSNumber n)) {
-                    throw new RuntimeException(id + "() takes 1 argument (number) but " + actualParams.size() + " were given");
+                    throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{1}, "number", actualParams));
                 }
                 entity.setSpeed(n.getValue());
             }
             case "GetXPosition" -> {
                 if (actualParams.size() != 0) {
-                    throw new RuntimeException(id + "() takes 0 argument but " + actualParams.size() + " were given");
+                    throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{0}, "", actualParams));
                 }
                 retVal = new MSNumber(entity.getXPosition());
             }
             case "GetYPosition" -> {
                 if (actualParams.size() != 0) {
-                    throw new RuntimeException(id + "() takes 0 argument but " + actualParams.size() + " were given");
+                    throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{0}, "", actualParams));
                 }
                 retVal = new MSNumber(entity.getYPosition());
             }
             case "GetZPosition" -> {
                 if (actualParams.size() != 0) {
-                    throw new RuntimeException(id + "() takes 0 argument but " + actualParams.size() + " were given");
+                    throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{0}, "", actualParams));
                 }
                 retVal = new MSNumber(entity.getZPosition());
             }
             case "GetHorizontalDirection" -> {
                 if (actualParams.size() != 0) {
-                    throw new RuntimeException(id + "() takes 0 argument but " + actualParams.size() + " were given");
+                    throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{0}, "", actualParams));
                 }
                 retVal = new MSAbsDir(entity.getHorizontalDirection());
             }
             case "GetVerticalDirection" -> {
                 if (actualParams.size() != 0) {
-                    throw new RuntimeException(id + "() takes 0 argument but " + actualParams.size() + " were given");
+                    throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{0}, "", actualParams));
                 }
                 retVal = new MSAbsDir(entity.getVerticalDirection());
             }
             case "SetCoordinates" -> {
                 if (actualParams.size() != 3 || !(actualParams.get(0) instanceof MSNumber x) || !(actualParams.get(1) instanceof MSNumber y) || !(actualParams.get(2) instanceof MSNumber z)) {
-                    throw new RuntimeException(id + "() takes 3 arguments (number) but " + actualParams.size() + " were given");
+                    throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{3}, "number", actualParams));
                 }
                 entity.setPosition(new BlockPos(x.getValue(), y.getValue(), z.getValue()));
             }
             case "SetXCoordinate" -> {
                 if (actualParams.size() != 1 || !(actualParams.get(0) instanceof MSNumber n)) {
-                    throw new RuntimeException(id + "() takes 1 argument (number) but " + actualParams.size() + " were given");
+                    throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{1}, "number", actualParams));
                 }
                 entity.setPosition(new BlockPos(n.getValue(), entity.getYPosition(), entity.getZPosition()));
             }
             case "SetYCoordinate" -> {
                 if (actualParams.size() != 1 || !(actualParams.get(0) instanceof MSNumber n)) {
-                    throw new RuntimeException(id + "() takes 1 argument (number) but " + actualParams.size() + " were given");
+                    throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{1}, "number", actualParams));
                 }
                 entity.setPosition(new BlockPos(entity.getXPosition(), n.getValue(), entity.getZPosition()));
             }
             case "SetZCoordinate" -> {
                 if (actualParams.size() != 1 || !(actualParams.get(0) instanceof MSNumber n)) {
-                    throw new RuntimeException(id + "() takes 1 argument (number) but " + actualParams.size() + " were given");
+                    throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{1}, "number", actualParams));
                 }
                 entity.setPosition(new BlockPos(entity.getXPosition(), entity.getYPosition(), n.getValue()));
             }
@@ -451,32 +477,29 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 } catch (SymbolNotFoundException e) {
                     throw new RuntimeException("Cannot call function '" + id + "' because it is not defined");
                 }
-                if (value instanceof MSFunction function) {
-                    var formalParams = function.getParameters();
-
-                    if (formalParams.size() != actualParams.size()) {
-                        throw new RuntimeException("Cannot call function '" + id + "' because it takes " + formalParams.size() + " arguments but " + actualParams.size() + " were given");
-                    }
-
-                    symbolTable.enterScope();
-
-                    // Bind actual params to formal params
-                    for (int i = 0; i < formalParams.size(); i++) {
-                        formalParams.set(i, id + "." + formalParams.get(i));
-                        symbolTable.enterSymbol(formalParams.get(i), actualParams.get(i));
-                    }
-
-                    retVal = visit(function.getCtx());
-                    hasReturned = false;
-                    symbolTable.exitScope();
-                } else {
+                if (!(value instanceof MSFunction function)) {
                     throw new RuntimeException("Cannot call '" + id + "' because it is not a function");
                 }
+                var formalParams = function.getParameters();
+
+                if (formalParams.size() != actualParams.size()) {
+                    throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{formalParams.size()}, "", actualParams));
+                }
+                symbolTable.enterScope();
+
+                // Bind actual params to formal params
+                for (int i = 0; i < formalParams.size(); i++) {
+                    formalParams.set(i, id + "." + formalParams.get(i));
+                    symbolTable.enterSymbol(formalParams.get(i), actualParams.get(i));
+                }
+                hasReturned = false;
+                retVal = visit(function.getCtx());
+                hasReturned = false;
+                symbolTable.exitScope();
             }
         }
         if (entity != null) entity = entity.getTurtleEntity();
 
-        functionCallCounter--;
         return retVal;
     }
 
@@ -521,5 +544,43 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
             actualParams.add(visit(param));
         }
         return actualParams;
+    }
+
+    /**
+     * @param id             Function name
+     * @param argumentsCount Possible number of arguments
+     * @param paramTypes     Expected parameter types
+     * @param actualParams   Actual parameters
+     * @return Error message
+     */
+    private String getFuncCallErrorMessage(String id, int[] argumentsCount, String paramTypes, ArrayList<MSType> actualParams) {
+        StringBuilder message = new StringBuilder(id + "() takes ");
+        argumentsCount = Arrays.stream(argumentsCount).sorted().toArray();
+        if (argumentsCount.length == 0) {
+            message.append("no arguments");
+        } else {
+            for (int i = 0; i < argumentsCount.length; i++) {
+                if (i > 0 && i == argumentsCount.length - 1) {
+                    message.append(" or ");
+                } else if (i > 0) {
+                    message.append(", ");
+                }
+                message.append(argumentsCount[i]);
+            }
+            message.append(" argument");
+            if (argumentsCount[argumentsCount.length - 1] != 1) {
+                message.append("s");
+            }
+            if (!paramTypes.equals(""))
+                message.append(" (").append(paramTypes).append(")");
+        }
+        message.append(" but ").append(actualParams.size()).append(" were given");
+
+        String types = actualParams.stream().map(MSType::getTypeName).collect(Collectors.joining(", "));
+        if (!types.isEmpty()) {
+            types = " of type " + types;
+        }
+        message.append(types);
+        return message.toString();
     }
 }
