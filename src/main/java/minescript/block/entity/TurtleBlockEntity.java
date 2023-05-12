@@ -53,6 +53,9 @@ public class TurtleBlockEntity extends BlockEntity {
     public static void tick(World world, BlockPos pos, BlockState state, TurtleBlockEntity entity) {
     }
 
+    /**
+     * @param steps The amount of steps to move forward
+     */
     public void step(int steps) {
         for (int i = 0; i < steps; i++) {
             timeout();
@@ -91,6 +94,19 @@ public class TurtleBlockEntity extends BlockEntity {
         }
     }
 
+    /**
+     * @param speed The speed to set the turtle to
+     *              <p>
+     *              1 = 500ms
+     *              <p>
+     *              2 = 400ms
+     *              <p>
+     *              3 = 300ms
+     *              <p>
+     *              4 = 200ms
+     *              <p>
+     *              5 = 100ms
+     */
     public void setSpeed(int speed) {
         if (speed < 1 || speed > 5) {
             throw new RuntimeException("Speed must be between 1 and 5");
@@ -98,10 +114,16 @@ public class TurtleBlockEntity extends BlockEntity {
         this.actionDelay = 600 - speed * 100;
     }
 
+    /**
+     * @param block The block to placed by the turtle
+     */
     public void useBlock(Block block) {
         placingBlock = block;
     }
 
+    /**
+     * @param direction The relative direction to turn the turtle
+     */
     public void turn(MSRelDir.Direction direction) {
         timeout();
         PacketByteBuf buf = PacketByteBufs.create();
@@ -111,6 +133,9 @@ public class TurtleBlockEntity extends BlockEntity {
         ClientPlayNetworking.send(MineScriptPackets.TURN_RELDIR_ID, buf);
     }
 
+    /**
+     * @param direction The absolute direction to turn the turtle
+     */
     public void turn(MSAbsDir.Direction direction) {
         timeout();
         PacketByteBuf buf = PacketByteBufs.create();
@@ -120,6 +145,10 @@ public class TurtleBlockEntity extends BlockEntity {
         ClientPlayNetworking.send(MineScriptPackets.TURN_ABSDIR_ID, buf);
     }
 
+    /**
+     * @param msg The message to print
+     * @param type The type of message to print (ERROR, WARNING, INFO)
+     */
     public void print(String msg, MSMessageType type) {
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeString(msg);
@@ -129,15 +158,12 @@ public class TurtleBlockEntity extends BlockEntity {
 
     }
 
+    /**
+     * @param program The program to run (from turtle terminal)
+     */
     public void startInterpreter(String program) {
         interpreterThread = new Thread(new Interpreter(program, this));
         interpreterThread.start();
-    }
-
-    private void stopInterpreterThread() {
-        if (interpreterThread != null) {
-            interpreterThread.stop();
-        }
     }
 
     private void timeout() {
@@ -162,6 +188,9 @@ public class TurtleBlockEntity extends BlockEntity {
         return turtlePos.getZ();
     }
 
+    /**
+     * @return The block in front of the turtle
+     */
     public Block peek() {
         BlockState state = world.getBlockState(turtlePos);
 
@@ -187,6 +216,9 @@ public class TurtleBlockEntity extends BlockEntity {
     }
 
 
+    /**
+     * @return The horizontal direction the turtle is facing
+     */
     public String getHorizontalDirection() {
         BlockState state = world.getBlockState(turtlePos);
         if (state.contains(Properties.HORIZONTAL_FACING)) {
@@ -195,6 +227,11 @@ public class TurtleBlockEntity extends BlockEntity {
         return "north";
     }
 
+    /**
+     * @return The vertical direction the turtle is facing
+     *        <p>
+     *            If the turtle is facing a wall, it will return the direction the turtle is facing horizontally
+     */
     public String getVerticalDirection() {
         BlockState state = world.getBlockState(turtlePos);
         if (state.contains(TurtleBlock.FACE)) {
@@ -211,6 +248,9 @@ public class TurtleBlockEntity extends BlockEntity {
         return "north";
     }
 
+    /**
+     * @param pos The position to move the turtle to
+     */
     public void setPosition(BlockPos pos) {
         timeout();
 
