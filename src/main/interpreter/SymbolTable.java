@@ -8,7 +8,7 @@ import interpreter.types.MSType;
 import java.util.*;
 
 public class SymbolTable {
-    private final Map<String, Symbol> hashTable = new HashMap<>();
+    private final Map<String, Symbol> hashMap = new HashMap<>();
     private final Stack<ArrayList<String>> scopeStack = new Stack<>();
 
     public SymbolTable() {
@@ -31,14 +31,14 @@ public class SymbolTable {
         checkRestrictedKeyWords(newSymbol);
 
         if (isVarInNewScope(name)) {
-            Symbol oldSymbol = hashTable.get(getPrefixName(name));
+            Symbol oldSymbol = hashMap.get(getPrefixName(name));
             delete(oldSymbol.name);
             Symbol prefixSymbol = new Symbol(oldSymbol.name, value);
             add(prefixSymbol);
             return;
         }
 
-        if (hashTable.containsKey(name)) {
+        if (hashMap.containsKey(name)) {
             delete(newSymbol.name);
         } else {
             scopeStack.peek().add(newSymbol.name);
@@ -64,9 +64,9 @@ public class SymbolTable {
 
     public Symbol retrieveSymbol(String name) {
         if (isVarInNewScope(name)) {
-            return hashTable.get(getPrefixName(name));
-        } else if (hashTable.containsKey(name)) {
-            return hashTable.get(name);
+            return hashMap.get(getPrefixName(name));
+        } else if (hashMap.containsKey(name)) {
+            return hashMap.get(name);
         } else {
             throw new SymbolNotFoundException("Could not find symbol in symbol table: " + name);
         }
@@ -77,11 +77,11 @@ public class SymbolTable {
     }
 
     private void delete(String name) {
-        hashTable.remove(name);
+        hashMap.remove(name);
     }
 
     private void add(Symbol symbol) {
-        hashTable.put(symbol.name, symbol);
+        hashMap.put(symbol.name, symbol);
     }
 
     /**

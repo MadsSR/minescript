@@ -15,19 +15,20 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 public class Visitor extends MineScriptBaseVisitor<MSType> {
-    private final SymbolTable symbolTable = new SymbolTable();
     private final ExpressionParser parser = new ExpressionParser();
     private final Random random = new Random(System.currentTimeMillis());
+    private final SymbolTable symbolTable;
     private boolean hasReturned = false;
     private TurtleBlockEntity entity;
     private boolean shouldBreak = true;
 
-    public Visitor(TurtleBlockEntity entity) {
+    public Visitor(TurtleBlockEntity entity, SymbolTable symbolTable) {
+        this.symbolTable = symbolTable;
         this.entity = entity;
     }
 
-    public Visitor() {
-        this.entity = null;
+    public Visitor(SymbolTable symbolTable) {
+        this.symbolTable = symbolTable;
     }
 
     @Override
@@ -242,7 +243,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
 
     @Override
     public MSType visitNumber(MineScriptParser.NumberContext ctx) {
-        return new MSNumber(Integer.parseInt(ctx.getText()));
+        return new MSNumber(Integer.parseInt(ctx.NUMBER().getText()));
     }
 
     @Override
