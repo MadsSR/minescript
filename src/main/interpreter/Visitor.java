@@ -26,9 +26,9 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     private final SymbolTable symbolTable;
     private boolean hasReturned = false;
 
-    private Block placingBlock = Blocks.AIR;
-    private boolean shouldBreak = true;
-    private int turtleDelay = 500;
+    private Block placingBlock;
+    private boolean shouldBreak;
+    private int turtleDelay;
     private MinecraftServer server;
     private ServerWorld world;
     private BlockPos pos;
@@ -36,6 +36,9 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     /*Constructor for starting the visitor with a turtle*/
     public Visitor(MinecraftServer server, ServerWorld world, BlockPos pos, SymbolTable symbolTable) {
         this.symbolTable = symbolTable;
+        this.placingBlock = Blocks.AIR;
+        this.shouldBreak = true;
+        this.turtleDelay = 500;
         this.server = server;
         this.world = world;
         this.pos = pos;
