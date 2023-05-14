@@ -100,6 +100,6 @@ public class TextEditor extends EditBoxWidget implements GreedyInputComponent {
     @Override
     public void update(float delta, int mouseX, int mouseY) {
         super.update(delta, mouseX, mouseY);
-        this.cursorStyle(this.overflows() && mouseX >= this.getX() + this.width - 9 ? CursorStyle.NONE : CursorStyle.TEXT);
+        this.cursorStyle(this.overflows() && mouseX >= this.getX() + this.width ? CursorStyle.NONE : CursorStyle.TEXT);
     }
 }
