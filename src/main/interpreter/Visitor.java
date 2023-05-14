@@ -4,14 +4,20 @@ import interpreter.antlr.MineScriptBaseVisitor;
 import interpreter.antlr.MineScriptParser;
 import interpreter.exceptions.SymbolNotFoundException;
 import interpreter.types.*;
-import minescript.block.entity.TurtleBlockEntity;
+import minescript.network.TurtleCommands;
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.registry.Registries;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class Visitor extends MineScriptBaseVisitor<MSType> {
@@ -19,13 +25,20 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     private final Random random = new Random(System.currentTimeMillis());
     private final SymbolTable symbolTable;
     private boolean hasReturned = false;
-    private TurtleBlockEntity entity;
+
+    private Block placingBlock = Blocks.AIR;
     private boolean shouldBreak = true;
+    private int turtleDelay = 500;
+    private MinecraftServer server;
+    private ServerWorld world;
+    private BlockPos pos;
 
     /*Constructor for starting the visitor with a turtle*/
-    public Visitor(TurtleBlockEntity entity, SymbolTable symbolTable) {
+    public Visitor(MinecraftServer server, ServerWorld world, BlockPos pos, SymbolTable symbolTable) {
         this.symbolTable = symbolTable;
-        this.entity = entity;
+        this.server = server;
+        this.world = world;
+        this.pos = pos;
     }
 
     /*Constructor for starting the visitor without a turtle*/
@@ -347,36 +360,64 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 if (actualParams.size() != 1 || !(actualParams.get(0) instanceof MSNumber n)) {
                     throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{1}, "number", actualParams));
                 }
-                entity.step(n.getValue());
+
+                AtomicBoolean skip = new AtomicBoolean(false);
+                CompletableFuture<BlockPos> future = CompletableFuture.completedFuture(pos);
+
+                for (int i = 0; i < n.getValue(); i++)  {
+                    future = future.thenComposeAsync(prevPos -> {
+                        if (!shouldBreak && TurtleCommands.peek(world, prevPos) != Blocks.AIR) {
+                            TurtleCommands.print(server, "Cannot move forward, block in the way", MSMessageType.WARNING);
+                            skip.set(true);
+
+                            return CompletableFuture.completedFuture(prevPos);
+                        }
+
+                        return TurtleCommands.step(server, world, placingBlock, prevPos);
+                    });
+                    timeout(turtleDelay);
+
+                    if (skip.get()) {
+                        break;
+                    }
+                }
+
+                pos = future.join();
             }
             case "Turn" -> {
                 /*Checks if the function got 1 parameter and that parameter is a direction, otherwise throws an error*/
                 if (actualParams.size() != 1 || (!(actualParams.get(0) instanceof MSRelDir) && !(actualParams.get(0) instanceof MSAbsDir))) {
                     throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{1}, "direction", actualParams));
                 }
+
                 MSType dir = actualParams.get(0);
+
                 if (dir instanceof MSRelDir relDir) {
-                    entity.turn(relDir.getValue());
+                    TurtleCommands.turn(server, world, pos, relDir.getValue());
                 } else if (dir instanceof MSAbsDir absDir) {
-                    entity.turn(absDir.getValue());
+                    TurtleCommands.turn(server, world, pos, absDir.getValue());
                 }
+
+                timeout(turtleDelay);
             }
             case "UseBlock" -> {
                 /*Checks if the function got 1 parameter and that parameter is a block, otherwise throws an error*/
                 if (actualParams.size() != 1 || !(actualParams.get(0) instanceof MSBlock b)) {
                     throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{1}, "block", actualParams));
                 }
-                entity.useBlock(b.getValue());
+
+                placingBlock = b.getValue();
             }
             case "Break" -> {
                 if (actualParams.size() == 0) {
                     retVal = new MSBool(shouldBreak);
                     break;
                 }
+
                 if (actualParams.size() != 1 || !(actualParams.get(0) instanceof MSBool b)) {
                     throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{1}, "bool", actualParams));
                 }
-                entity.shouldBreak = b.getValue();
+
                 shouldBreak = b.getValue();
                 retVal = new MSBool(shouldBreak);
             }
@@ -384,12 +425,14 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 if (actualParams.size() != 0) {
                     throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{0}, "", actualParams));
                 }
-                retVal = new MSBlock(entity.peek());
+
+                retVal = new MSBlock(TurtleCommands.peek(world, pos));
             }
             case "Sqrt" -> {
                 if (actualParams.size() != 1 || !(actualParams.get(0) instanceof MSNumber n)) {
                     throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{1}, "number", actualParams));
                 }
+
                 retVal = new MSNumber((int) Math.round(Math.sqrt(n.getValue())));
             }
             case "Random" -> {
@@ -407,72 +450,104 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 if (actualParams.size() != 0) {
                     throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{0}, "", actualParams));
                 }
+
                 retVal = new MSBlock(Registries.BLOCK.get(random.nextInt(Registries.BLOCK.size())));
             }
             case "SetSpeed" -> {
                 if (actualParams.size() != 1 || !(actualParams.get(0) instanceof MSNumber n)) {
                     throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{1}, "number", actualParams));
                 }
-                entity.setSpeed(n.getValue());
+
+                if (n.getValue() < 1 || n.getValue() > 10) {
+                    throw new RuntimeException("Cannot set speed to " + n.getValue() + ", must be between 1 and 10");
+                }
+
+                this.turtleDelay = 550 - n.getValue() * 50;
             }
             case "GetXPosition" -> {
                 if (actualParams.size() != 0) {
                     throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{0}, "", actualParams));
                 }
-                retVal = new MSNumber(entity.getXPosition());
+
+                retVal = new MSNumber(pos.getX());
             }
             case "GetYPosition" -> {
                 if (actualParams.size() != 0) {
                     throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{0}, "", actualParams));
                 }
-                retVal = new MSNumber(entity.getYPosition());
+
+                retVal = new MSNumber(pos.getY());
             }
             case "GetZPosition" -> {
                 if (actualParams.size() != 0) {
                     throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{0}, "", actualParams));
                 }
-                retVal = new MSNumber(entity.getZPosition());
+
+                retVal = new MSNumber(pos.getZ());
             }
             case "GetHorizontalDirection" -> {
                 if (actualParams.size() != 0) {
                     throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{0}, "", actualParams));
                 }
-                retVal = new MSAbsDir(entity.getHorizontalDirection());
+
+                retVal = new MSAbsDir(TurtleCommands.getHorizontalDirection(world, pos));
             }
             case "GetVerticalDirection" -> {
                 if (actualParams.size() != 0) {
                     throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{0}, "", actualParams));
                 }
-                retVal = new MSAbsDir(entity.getVerticalDirection());
+
+                retVal = new MSAbsDir(TurtleCommands.getVerticalDirection(world, pos));
             }
             case "SetCoordinates" -> {
                 if (actualParams.size() != 3 || !(actualParams.get(0) instanceof MSNumber x) || !(actualParams.get(1) instanceof MSNumber y) || !(actualParams.get(2) instanceof MSNumber z)) {
                     throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{3}, "number", actualParams));
                 }
-                entity.setPosition(new BlockPos(x.getValue(), y.getValue(), z.getValue()));
+
+                CompletableFuture<BlockPos> future = CompletableFuture.completedFuture(pos);
+                future = future.thenComposeAsync(prevPos -> TurtleCommands.setPosition(server, world, prevPos, new BlockPos(x.getValue(), y.getValue(), z.getValue())));
+
+                pos = future.join();
+                timeout(turtleDelay);
             }
             case "SetXCoordinate" -> {
                 if (actualParams.size() != 1 || !(actualParams.get(0) instanceof MSNumber n)) {
                     throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{1}, "number", actualParams));
                 }
-                entity.setPosition(new BlockPos(n.getValue(), entity.getYPosition(), entity.getZPosition()));
+
+                CompletableFuture<BlockPos> future = CompletableFuture.completedFuture(pos);
+                future = future.thenComposeAsync(prevPos -> TurtleCommands.setPosition(server, world, prevPos, new BlockPos(n.getValue(), pos.getY(), pos.getZ())));
+
+                pos = future.join();
+                timeout(turtleDelay);
             }
             case "SetYCoordinate" -> {
                 if (actualParams.size() != 1 || !(actualParams.get(0) instanceof MSNumber n)) {
                     throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{1}, "number", actualParams));
                 }
-                entity.setPosition(new BlockPos(entity.getXPosition(), n.getValue(), entity.getZPosition()));
+
+                CompletableFuture<BlockPos> future = CompletableFuture.completedFuture(pos);
+                future = future.thenComposeAsync(prevPos -> TurtleCommands.setPosition(server, world, prevPos, new BlockPos(pos.getX(), n.getValue(), pos.getZ())));
+
+                pos = future.join();
+                timeout(turtleDelay);
             }
             case "SetZCoordinate" -> {
                 if (actualParams.size() != 1 || !(actualParams.get(0) instanceof MSNumber n)) {
                     throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{1}, "number", actualParams));
                 }
-                entity.setPosition(new BlockPos(entity.getXPosition(), entity.getYPosition(), n.getValue()));
+
+                CompletableFuture<BlockPos> future = CompletableFuture.completedFuture(pos);
+                future = future.thenComposeAsync(prevPos -> TurtleCommands.setPosition(server, world, prevPos, new BlockPos(pos.getX(), pos.getY(), n.getValue())));
+
+                pos = future.join();
+                timeout(turtleDelay);
             }
             case "Print" -> {
                 if (actualParams.size() == 0) {
                     throw new RuntimeException(id + "() takes at least 1 argument but 0 were given");
                 }
+
                 ctx.actual_parameters().expression().forEach(expressionContext -> {
                     MSType type = actualParams.get(ctx.actual_parameters().expression().indexOf(expressionContext));
                     String expressionId = expressionContext.getText();
@@ -491,29 +566,33 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                     }
 
                     if (expressionId.equals(text)) {
-                        entity.print(text, messageType);
+                        TurtleCommands.print(server, text, messageType);
                     } else {
-                        entity.print(expressionId + " is: " + text, messageType);
+                        TurtleCommands.print(server, expressionId + " is: " + text, messageType);
                     }
                 });
             }
             default -> {
                 MSType value;
+
                 /*Check the symbol table for the id, otherwise throw an error*/
                 try {
                     value = symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol(id));
                 } catch (SymbolNotFoundException e) {
                     throw new RuntimeException("Cannot call function '" + id + "' because it is not defined");
                 }
+
                 /*Checks if the id is a function, otherwise throw an error*/
                 if (!(value instanceof MSFunction function)) {
                     throw new RuntimeException("Cannot call '" + id + "' because it is not a function");
                 }
+
                 var formalParams = function.getParameters();
 
                 if (formalParams.size() != actualParams.size()) {
                     throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{formalParams.size()}, "", actualParams));
                 }
+
                 symbolTable.enterScope();
 
                 /*Bind actual params to formal params*/
@@ -521,15 +600,16 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                     formalParams.set(i, id + "." + formalParams.get(i));
                     symbolTable.enterSymbol(formalParams.get(i), actualParams.get(i));
                 }
+
                 /*hasReturned is set to false before visiting the function ctx in case this has been set to true at an earlier state*/
                 hasReturned = false;
                 retVal = visit(function.getCtx());
+
                 /*hasReturned is set to false after visiting the function ctx since it possibly was just used to return from the function*/
                 hasReturned = false;
                 symbolTable.exitScope();
             }
         }
-        if (entity != null) entity = entity.getTurtleEntity();
 
         return retVal;
     }
@@ -621,5 +701,13 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         }
         message.append(types);
         return message.toString();
+    }
+
+    private void timeout(int millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

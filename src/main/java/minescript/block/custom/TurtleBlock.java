@@ -2,15 +2,14 @@ package minescript.block.custom;
 
 import minescript.block.entity.ModBlockEntities;
 import minescript.block.entity.TurtleBlockEntity;
-import minescript.screen.TextEditorScreen;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.enums.WallMountLocation;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
@@ -50,8 +49,11 @@ public class TurtleBlock extends BlockWithEntity implements BlockEntityProvider 
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos,
                               PlayerEntity player, Hand hand, BlockHitResult hit) {
-        if (world.isClient && hand == Hand.MAIN_HAND) {
-            MinecraftClient.getInstance().setScreen(new TextEditorScreen(world.getBlockEntity(pos)));
+        if (!world.isClient && world.getBlockEntity(pos) instanceof TurtleBlockEntity entity) {
+            NamedScreenHandlerFactory screenHandlerFactory = state.createScreenHandlerFactory(world, pos);
+
+            if (screenHandlerFactory != null)
+                player.openHandledScreen(screenHandlerFactory);
         }
 
         return ActionResult.SUCCESS;
@@ -73,5 +75,4 @@ public class TurtleBlock extends BlockWithEntity implements BlockEntityProvider 
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
         builder.add(Properties.HORIZONTAL_FACING, FACE);
     }
-
 }
