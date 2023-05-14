@@ -39,7 +39,7 @@ public class TextEditor extends EditBoxWidget implements GreedyInputComponent {
                 indentText.append("\n");
             }
 
-            this.editBox.setSelecting(true);
+            this.editBox.setSelecting(false);
             this.editBox.replaceSelection(indentText.toString());
             return true;
         }
@@ -102,5 +102,4 @@ public class TextEditor extends EditBoxWidget implements GreedyInputComponent {
         super.update(delta, mouseX, mouseY);
         this.cursorStyle(this.overflows() && mouseX >= this.getX() + this.width - 9 ? CursorStyle.NONE : CursorStyle.TEXT);
     }
-
 }
