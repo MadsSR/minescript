@@ -63,6 +63,7 @@ public class TurtleCommands {
     public static CompletableFuture<BlockPos> setPosition(MinecraftServer server, ServerWorld world, BlockPos pos, BlockPos newPos) {
         CompletableFuture<BlockPos> future = new CompletableFuture<>();
 
+        // Execute on main thread
         server.executeSync(() -> {
             TurtleBlockEntity entity = (TurtleBlockEntity) world.getBlockEntity(pos);
             assert entity != null;
@@ -89,6 +90,7 @@ public class TurtleCommands {
      * @param direction The relative direction to turn
      */
     public static void turn(MinecraftServer server, ServerWorld world, BlockPos pos, MSRelDir.Direction direction) {
+        // Execute on main thread
         server.executeSync(() -> {
             BlockState state = world.getBlockState(pos);
             Direction facing = state.get(Properties.HORIZONTAL_FACING);
@@ -134,6 +136,7 @@ public class TurtleCommands {
      * @param direction The absolute direction to turn
      */
     public static void turn(MinecraftServer server, ServerWorld world, BlockPos pos, MSAbsDir.Direction direction) {
+        // Execute on main thread
         server.executeSync(() -> {
             BlockState state = world.getBlockState(pos);
 
@@ -174,27 +177,6 @@ public class TurtleCommands {
         return world.getBlockState(peekPos).getBlock();
     }
 
-    /**
-     * @param state The state of the turtle
-     * @param pos   The position of the turtle
-     * @return The position in front of the turtle
-     */
-    private static BlockPos getBlockPosInFront(BlockState state, BlockPos pos) {
-        if (state.get(TurtleBlock.FACE) == WallMountLocation.WALL) {
-            switch (state.get(Properties.HORIZONTAL_FACING)) {
-                case NORTH -> pos = pos.north(1);
-                case SOUTH -> pos = pos.south(1);
-                case EAST -> pos = pos.east(1);
-                case WEST -> pos = pos.west(1);
-            }
-        } else {
-            switch (state.get(TurtleBlock.FACE)) {
-                case FLOOR -> pos = pos.down(1);
-                case CEILING -> pos = pos.up(1);
-            }
-        }
-        return pos;
-    }
 
     /**
      * @param world The world instance
@@ -249,13 +231,35 @@ public class TurtleCommands {
 
         Text msgText = Text.of(message);
 
-        // Execute on the main thread
+        // Execute on main thread
         server.executeSync(() -> {
             // Send the message to all players
             for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
                 player.sendMessage(msgText, false);
             }
         });
+    }
+
+    /**
+     * @param state The state of the turtle
+     * @param pos   The position of the turtle
+     * @return The position in front of the turtle
+     */
+    private static BlockPos getBlockPosInFront(BlockState state, BlockPos pos) {
+        if (state.get(TurtleBlock.FACE) == WallMountLocation.WALL) {
+            switch (state.get(Properties.HORIZONTAL_FACING)) {
+                case NORTH -> pos = pos.north(1);
+                case SOUTH -> pos = pos.south(1);
+                case EAST -> pos = pos.east(1);
+                case WEST -> pos = pos.west(1);
+            }
+        } else {
+            switch (state.get(TurtleBlock.FACE)) {
+                case FLOOR -> pos = pos.down(1);
+                case CEILING -> pos = pos.up(1);
+            }
+        }
+        return pos;
     }
 
 }

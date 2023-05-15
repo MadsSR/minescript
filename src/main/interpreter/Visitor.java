@@ -33,7 +33,12 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     private ServerWorld world;
     private BlockPos pos;
 
-    /*Constructor for starting the visitor with a turtle*/
+    /**
+     * @param server      The server instance
+     * @param world       The world instance
+     * @param pos         The position of the turtle
+     * @param symbolTable The symbol table of interpreter
+     */
     public Visitor(MinecraftServer server, ServerWorld world, BlockPos pos, SymbolTable symbolTable) {
         this.symbolTable = symbolTable;
         this.placingBlock = Blocks.AIR;
@@ -44,7 +49,9 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         this.pos = pos;
     }
 
-    /*Constructor for starting the visitor without a turtle*/
+    /**
+     * @param symbolTable The symbol table of interpreter
+     */
     public Visitor(SymbolTable symbolTable) {
         this.symbolTable = symbolTable;
     }
@@ -76,7 +83,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     public MSType visitStatements(MineScriptParser.StatementsContext ctx) {
         MSType val = null;
 
-        if (!(ctx.getParent() instanceof MineScriptParser.FuncDeclContext)){
+        if (!(ctx.getParent() instanceof MineScriptParser.FuncDeclContext)) {
             symbolTable.enterScope();
         }
 
@@ -88,19 +95,19 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
 
 
         for (MineScriptParser.StatementContext statement : ctx.statement()) {
-            if (!hasReturned){
-            val = visit(statement);
+            if (!hasReturned) {
+                val = visit(statement);
             }
 
             if (hasReturned) {
-                if (!(ctx.getParent() instanceof MineScriptParser.FuncDeclContext)){
+                if (!(ctx.getParent() instanceof MineScriptParser.FuncDeclContext)) {
                     symbolTable.enterScope();
                 }
                 return val;
             }
         }
 
-        if (!(ctx.getParent() instanceof MineScriptParser.FuncDeclContext)){
+        if (!(ctx.getParent() instanceof MineScriptParser.FuncDeclContext)) {
             symbolTable.exitScope();
         }
 
@@ -367,7 +374,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 AtomicBoolean skip = new AtomicBoolean(false);
                 CompletableFuture<BlockPos> future = CompletableFuture.completedFuture(pos);
 
-                for (int i = 0; i < n.getValue(); i++)  {
+                for (int i = 0; i < n.getValue(); i++) {
                     future = future.thenComposeAsync(prevPos -> {
                         if (!shouldBreak && TurtleCommands.peek(world, prevPos) != Blocks.AIR) {
                             TurtleCommands.print(server, "Cannot move forward, block in the way", MSMessageType.WARNING);
@@ -442,7 +449,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 /*If no parameter is used returns a random unbounded int*/
                 if (actualParams.size() == 0) {
                     retVal = new MSNumber(random.nextInt());
-                /*If 1 parameter is used returns a random int between 0 and the parameter*/
+                    /*If 1 parameter is used returns a random int between 0 and the parameter*/
                 } else if (actualParams.size() == 1 && actualParams.get(0) instanceof MSNumber n) {
                     retVal = new MSNumber(random.nextInt(n.getValue()));
                 } else {
@@ -670,10 +677,10 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
 
     /**
      * @param id             Function name
-     * @param argumentsCount Possible number of arguments
+     * @param argumentsCount Possible number of arguments. Each index represents a possible number of arguments
      * @param paramTypes     Expected parameter types
      * @param actualParams   Actual parameters
-     * @return Error message
+     * @return String containing the error message
      */
     private String getFuncCallErrorMessage(String id, int[] argumentsCount, String paramTypes, ArrayList<MSType> actualParams) {
         StringBuilder message = new StringBuilder(id + "() takes ");
@@ -706,6 +713,9 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         return message.toString();
     }
 
+    /**
+     * @param millis Time to wait in milliseconds
+     */
     private void timeout(int millis) {
         try {
             Thread.sleep(millis);
