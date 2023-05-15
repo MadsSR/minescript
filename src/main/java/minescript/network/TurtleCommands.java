@@ -43,6 +43,7 @@ public class TurtleCommands {
                 }
             }
 
+            // world.breakBlock(entity.turtlePos, true);
             world.setBlockState(entity.turtlePos, state, Block.NOTIFY_ALL);
             world.setBlockState(oldPos, placingBlock.getDefaultState(), Block.NOTIFY_ALL);
 
