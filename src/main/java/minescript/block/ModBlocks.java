@@ -14,7 +14,7 @@ import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 
 public class ModBlocks {
-    public static final Block TURTLE_BLOCK = registerBlock("turtle_block", new TurtleBlock(FabricBlockSettings.copyOf(Blocks.MANGROVE_WOOD)));
+    public static final Block TURTLE_BLOCK = registerBlock("turtle_block", new TurtleBlock(FabricBlockSettings.copyOf(Blocks.IRON_BLOCK).strength(5.0f).requiresTool()));
 
     private static Block registerBlockWithoutBlockItem(String name, Block block){
         return Registry.register(Registries.BLOCK, new Identifier(MineScript.MOD_ID, name), block);
