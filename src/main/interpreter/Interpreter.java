@@ -3,20 +3,26 @@ package interpreter;
 import interpreter.antlr.MineScriptLexer;
 import interpreter.antlr.MineScriptParser;
 import interpreter.types.MSMessageType;
-import minescript.block.entity.TurtleBlockEntity;
+import minescript.network.TurtleCommands;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.math.BlockPos;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 public class Interpreter implements Runnable {
-
-    private static TurtleBlockEntity entity;
+    private static MinecraftServer server;
+    private static ServerWorld world;
+    private static BlockPos turtlePos;
     private static String program;
 
-    public Interpreter(String program, TurtleBlockEntity entity) {
+    public Interpreter(String program, MinecraftServer server, ServerWorld world, BlockPos pos) {
         Interpreter.program = program;
-        Interpreter.entity = entity;
+        Interpreter.server = server;
+        Interpreter.world = world;
+        Interpreter.turtlePos = pos;
     }
 
     @Override
@@ -35,10 +41,10 @@ public class Interpreter implements Runnable {
             parser.removeErrorListeners();
             parser.addErrorListener(InterpreterErrorListener.INSTANCE);
             ParseTree tree = parser.program(); // Begin parsing at init rule
-            Visitor visitor = new Visitor(entity, new SymbolTable());
+            Visitor visitor = new Visitor(server, world, turtlePos, new SymbolTable());
             visitor.visit(tree);
         } catch (Exception e) {
-            entity.print(e.getMessage(), MSMessageType.ERROR);
+            TurtleCommands.print(server, e.getMessage(), MSMessageType.ERROR);
         }
     }
 }
