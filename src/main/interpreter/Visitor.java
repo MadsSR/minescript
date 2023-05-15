@@ -493,14 +493,14 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                     throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{0}, "", actualParams));
                 }
 
-                retVal = new MSAbsDir(TurtleCommands.getHorizontalDirection(world, pos));
+                retVal = TurtleCommands.getHorizontalDirection(world, pos);
             }
             case "GetVerticalDirection" -> {
                 if (actualParams.size() != 0) {
                     throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{0}, "", actualParams));
                 }
 
-                retVal = new MSAbsDir(TurtleCommands.getVerticalDirection(world, pos));
+                retVal = TurtleCommands.getVerticalDirection(world, pos);
             }
             case "SetCoordinates" -> {
                 if (actualParams.size() != 3 || !(actualParams.get(0) instanceof MSNumber x) || !(actualParams.get(1) instanceof MSNumber y) || !(actualParams.get(2) instanceof MSNumber z)) {

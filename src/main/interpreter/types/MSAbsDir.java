@@ -14,6 +14,9 @@ public class MSAbsDir extends MSType {
             default -> throw new IllegalArgumentException("Invalid direction: " + direction);
         }
     }
+    public MSAbsDir(Direction direction) {
+        this.direction = direction;
+    }
 
     public Direction getValue() {
         return direction;
