@@ -1,5 +1,6 @@
 package minescript.screen;
 
+import io.netty.buffer.ByteBuf;
 import minescript.MineScript;
 import minescript.block.entity.TurtleBlockEntity;
 import minescript.network.MineScriptPackets;
@@ -8,9 +9,13 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Arrays;
 
 public class TextEditorScreenHandler extends ScreenHandler {
     private String inputText;
@@ -35,18 +40,21 @@ public class TextEditorScreenHandler extends ScreenHandler {
     }
 
     private void handleSetInputText(StartInterpreterMessage message) {
-        this.inputText = message.message;
+        int length = message.length;
+        String text = message.buf.readString(length);
+        this.inputText = text;
         assert entity != null;
-        entity.setTurtleInput(message.message);
+        entity.setTurtleInput(text);
 
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeBlockPos(entity.getPos());
-        buf.writeString(message.message);
+        buf.writeInt(length);
+        buf.writeString(text, text.length());
 
         ClientPlayNetworking.send(MineScriptPackets.START_INTERPRETER_ID, buf);
     }
 
-    public record StartInterpreterMessage(String message) {}
+    public record StartInterpreterMessage(int length, PacketByteBuf buf) {}
 
     @Override
     public ItemStack quickMove(PlayerEntity player, int slot) {

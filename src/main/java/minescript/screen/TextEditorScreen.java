@@ -1,15 +1,23 @@
 package minescript.screen;
 
+import io.netty.buffer.ByteBuf;
+import io.wispforest.owo.client.screens.ScreenInternals;
 import io.wispforest.owo.ui.base.BaseUIModelHandledScreen;
 import io.wispforest.owo.ui.base.BaseUIModelScreen;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.gui.widget.EditBoxWidget;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TextEditorScreen extends BaseUIModelHandledScreen<FlowLayout, TextEditorScreenHandler> {
 
@@ -54,7 +62,11 @@ public class TextEditorScreen extends BaseUIModelHandledScreen<FlowLayout, TextE
         var runButton = rootComponent.childById(ButtonComponent.class, "run-button");
         if (runButton == null) throw new NullPointerException("runButton is null");
         runButton.onPress(button -> {
-            handler.sendMessage(new TextEditorScreenHandler.StartInterpreterMessage(editor.getText()));
+            String text = editor.getText();
+            PacketByteBuf buf = PacketByteBufs.create();
+            buf.writeString(text, text.length());
+
+            handler.sendMessage(new TextEditorScreenHandler.StartInterpreterMessage(text.length(), buf));
             this.close();
         });
     }
