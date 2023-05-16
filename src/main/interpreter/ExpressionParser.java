@@ -25,5 +25,4 @@ public class ExpressionParser extends MineScriptBaseVisitor<Object> {
             throw new RuntimeException("Condition must be a bool");
         }
     }
-
 }
