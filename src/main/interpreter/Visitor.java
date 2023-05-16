@@ -12,6 +12,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
@@ -26,6 +27,8 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     private final SymbolTable symbolTable;
     private boolean hasReturned = false;
 
+    private final BigInteger INT_MAX = BigInteger.valueOf(Integer.MAX_VALUE);
+    private final BigInteger INT_MIN = BigInteger.valueOf(Integer.MIN_VALUE);
     private Block placingBlock;
     private boolean shouldBreak;
     private int turtleDelay;
@@ -212,7 +215,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         return new MSBool(switch (ctx.op.getText()) {
             case "is" -> left.equals(right);
             case "is not" -> !left.equals(right);
-            default -> throw new RuntimeException("Unknown operator ' '" + ctx.op.getText() + "'");
+            default -> throw new RuntimeException("Unknown operator: " + ctx.op.getText());
         });
     }
 
@@ -254,15 +257,11 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         MSType left = visit(ctx.expression(0));
         MSType right = visit(ctx.expression(1));
 
-        /*Check that both sides are numbers otherwise throw an error*/
-        if (left instanceof MSNumber l && right instanceof MSNumber r) {
-            return new MSNumber(switch (ctx.op.getText()) {
-                case "+" -> l.getValue() + r.getValue();
-                case "-" -> l.getValue() - r.getValue();
-                default -> throw new RuntimeException("Unknown operator: " + ctx.op.getText());
-            });
+        if (!(left instanceof MSNumber l) || !(right instanceof MSNumber r)) {
+            throw new RuntimeException("Cannot use '" + ctx.op.getText() + "' operator on " + left.getTypeName() + " and " + right.getTypeName());
         }
-        throw new RuntimeException("Cannot use '" + ctx.op.getText() + "' operator on " + left.getTypeName() + " and " + right.getTypeName());
+
+        return calculateArithmeticExpression(l, r, ctx.op.getText());
     }
 
     @Override
@@ -280,7 +279,11 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
 
     @Override
     public MSType visitNumber(MineScriptParser.NumberContext ctx) {
-        return new MSNumber(Integer.parseInt(ctx.NUMBER().getText()));
+        try {
+            return new MSNumber(Integer.parseInt(ctx.NUMBER().getText()));
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("Number (" + ctx.NUMBER().getText() + ") is not within the range. Number range from " + INT_MIN + " to " + INT_MAX);
+        }
     }
 
     @Override
@@ -289,15 +292,11 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         MSType right = visit(ctx.expression(1));
 
         /*Check that both sides are numbers otherwise throw an error*/
-        if (left instanceof MSNumber l && right instanceof MSNumber r) {
-            return new MSNumber(switch (ctx.op.getText()) {
-                case "*" -> l.getValue() * r.getValue();
-                case "/" -> l.getValue() / r.getValue();
-                case "%" -> l.getValue() % r.getValue();
-                default -> throw new RuntimeException("Unknown operator: " + ctx.op.getText());
-            });
+        if (!(left instanceof MSNumber l) || !(right instanceof MSNumber r)) {
+            throw new RuntimeException("Cannot use '" + ctx.op.getText() + "' operator on " + left.getTypeName() + " and " + right.getTypeName());
         }
-        throw new RuntimeException("Cannot use '" + ctx.op.getText() + "' operator on " + left.getTypeName() + " and " + right.getTypeName());
+
+        return calculateArithmeticExpression(l, r, ctx.op.getText());
     }
 
     @Override
@@ -305,15 +304,15 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         MSType left = visit(ctx.expression(0));
         MSType right = visit(ctx.expression(1));
 
-        if (left instanceof MSNumber l && right instanceof MSNumber r) {
-            /*Check if the exponent is negative*/
-            if (r.getValue() < 0) {
-                throw new RuntimeException("Cannot raise to negative power");
-            }
-            return new MSNumber((int) Math.pow(l.getValue(), r.getValue()));
+        if (!(left instanceof MSNumber l) || !(right instanceof MSNumber r)) {
+            throw new RuntimeException("Cannot use '^' operator on " + left.getTypeName() + " and " + right.getTypeName());
+        }
+        if (r.getValue() < 0) {
+            throw new RuntimeException("Cannot raise to negative power");
         }
 
-        throw new RuntimeException("Cannot use '^' operator on " + left.getTypeName() + " and " + right.getTypeName());
+        return calculateArithmeticExpression(l, r, "^");
+
     }
 
     @Override
@@ -676,6 +675,37 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     }
 
     /**
+     * @param left     the left side of the expression
+     * @param right    the right side of the expression
+     * @param operator the operator to use
+     * @return the result of the expression
+     * @throws RuntimeException if the result is too big or too small to be an int
+     */
+    private MSNumber calculateArithmeticExpression(MSNumber left, MSNumber right, String operator) {
+        // Convert to BigIntegers to avoid overflow
+        BigInteger leftBig = BigInteger.valueOf(left.getValue());
+        BigInteger rightBig = BigInteger.valueOf(right.getValue());
+        BigInteger result = switch (operator) {
+            case "+" -> leftBig.add(rightBig);
+            case "-" -> leftBig.subtract(rightBig);
+            case "*" -> leftBig.multiply(rightBig);
+            case "/" -> leftBig.divide(rightBig);
+            case "%" -> leftBig.mod(rightBig);
+            case "^" -> leftBig.pow(rightBig.intValue());
+            default -> throw new RuntimeException("Unknown operator: " + operator);
+        };
+
+        // Check if the result is in the range of an int
+        if (result.compareTo(INT_MAX) > 0) {
+            throw new RuntimeException("Result of '" + leftBig + " " + operator + " " + rightBig + "' is too big. Maximum number is " + Integer.MAX_VALUE);
+        } else if (result.compareTo(INT_MIN) < 0) {
+            throw new RuntimeException("Result of '" + leftBig + " " + operator + " " + rightBig + "' is too small. Minimum number is " + Integer.MIN_VALUE);
+        }
+        return new MSNumber(result.intValue());
+
+    }
+
+    /**
      * @param id             Function name
      * @param argumentsCount Possible number of arguments. Each index represents a possible number of arguments
      * @param paramTypes     Expected parameter types
@@ -700,8 +730,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
             if (argumentsCount[argumentsCount.length - 1] != 1) {
                 message.append("s");
             }
-            if (!paramTypes.equals(""))
-                message.append(" (").append(paramTypes).append(")");
+            if (!paramTypes.equals("")) message.append(" (").append(paramTypes).append(")");
         }
         message.append(" but ").append(actualParams.size()).append(" were given");
 
