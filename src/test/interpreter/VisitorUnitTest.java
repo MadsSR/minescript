@@ -4,8 +4,6 @@ import interpreter.antlr.MineScriptParser;
 import interpreter.types.*;
 import interpreter.utils.MockTerminalNode;
 import interpreter.utils.MockToken;
-import org.antlr.v4.runtime.Token;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +16,6 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,7 +35,7 @@ class VisitorUnitTest {
     @Mock private MineScriptParser.NegContext mockNegContext;
     @Mock private MineScriptParser.NotExprContext mockNotExprContext;
     @Mock private MineScriptParser.AddSubContext mockAddSubContext;
-
+    @Mock private MineScriptParser.OrContext mockOrContext;
 
 
     @ParameterizedTest
@@ -277,4 +274,18 @@ class VisitorUnitTest {
         }
     }
 
+    @ParameterizedTest
+    @CsvSource({"false, false", "false, true", "true, false", "true, true"})
+    void visitOrValidInputReturnsOrValue(boolean value1, boolean value2) {
+        Mockito.when(mockOrContext.expression(0)).thenReturn(mockExpressionContext1);
+        Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSBool(value1));
+
+        if (!value1) {
+            Mockito.when(mockOrContext.expression(1)).thenReturn(mockExpressionContext2);
+            Mockito.when(spyVisitor.visit(mockExpressionContext2)).thenReturn(new MSBool(value2));
+        }
+
+        MSType result = spyVisitor.visitOr(mockOrContext);
+        Assertions.assertEquals(value1 || value2, ((MSBool) result).getValue());
+    }
 }
