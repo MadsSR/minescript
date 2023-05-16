@@ -185,8 +185,8 @@ class VisitorUnitTest {
     }
 
     @Test
-    void visitNumberInvalidInputThrowsIllegalArgumentException(){
+    void visitNumberInvalidInputThrowsRuntimeException(){
         Mockito.when(mockNumberContext.NUMBER()).thenReturn(new MockTerminalNode("abc"));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> spyVisitor.visitNumber(mockNumberContext));
+        Assertions.assertThrows(RuntimeException.class, () -> spyVisitor.visitNumber(mockNumberContext));
     }
 }
