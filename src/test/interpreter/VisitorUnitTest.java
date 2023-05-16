@@ -67,7 +67,7 @@ class VisitorUnitTest {
         // Mock functions ID(), expression(), and visit()
         Mockito.when(mockAssignContext.ID()).thenReturn(new MockTerminalNode("varName"));
         Mockito.when(mockAssignContext.expression()).thenReturn(mockExpressionContext1);
-        Mockito.when(spyVisitor.visit(mockExpressionContext)).thenReturn(new MSBool(value));
+        Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSBool(value));
 
         // Call the visitAssign method on the spy
         MSType result = spyVisitor.visitAssign(mockAssignContext);
@@ -87,7 +87,7 @@ class VisitorUnitTest {
         // Mock functions ID(), expression(), and visit()
         Mockito.when(mockAssignContext.ID()).thenReturn(new MockTerminalNode("varName"));
         Mockito.when(mockAssignContext.expression()).thenReturn(mockExpressionContext1);
-        Mockito.when(spyVisitor.visit(mockExpressionContext)).thenReturn(new MSRelDir(value.toString().toLowerCase()));
+        Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSRelDir(value.toString().toLowerCase()));
 
         // Call the visitAssign method on the spy
         MSType result = spyVisitor.visitAssign(mockAssignContext);
@@ -107,7 +107,7 @@ class VisitorUnitTest {
         // Mock functions ID(), expression(), and visit()
         Mockito.when(mockAssignContext.ID()).thenReturn(new MockTerminalNode("varName"));
         Mockito.when(mockAssignContext.expression()).thenReturn(mockExpressionContext1);
-        Mockito.when(spyVisitor.visit(mockExpressionContext)).thenReturn(new MSAbsDir(value.toString().toLowerCase()));
+        Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSAbsDir(value.toString().toLowerCase()));
 
         // Call the visitAssign method on the spy
         MSType result = spyVisitor.visitAssign(mockAssignContext);
