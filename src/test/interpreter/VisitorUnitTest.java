@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -58,6 +58,66 @@ class VisitorUnitTest {
 
         // Assert that the symbol value is equal to the initial assign value, and assert that result is null
         Assertions.assertEquals(value, ((MSNumber) mockValue.get()).getValue());
+        Assertions.assertNull(result);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void visitAssignStoresCorrectBoolean(boolean value) {
+        // Mock functions ID(), expression(), and visit()
+        Mockito.when(mockAssignContext.ID()).thenReturn(new MockTerminalNode("varName"));
+        Mockito.when(mockAssignContext.expression()).thenReturn(mockExpressionContext1);
+        Mockito.when(spyVisitor.visit(mockExpressionContext)).thenReturn(new MSBool(value));
+
+        // Call the visitAssign method on the spy
+        MSType result = spyVisitor.visitAssign(mockAssignContext);
+
+        // Initialize mock value and assert that no exceptions are thrown when value is retrieved
+        AtomicReference<MSType> mockValue = new AtomicReference<>();
+        Assertions.assertDoesNotThrow(() -> mockValue.set(symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol("varName"))));
+
+        // Assert that the symbol value is equal to the initial assign value, and assert that result is null
+        Assertions.assertEquals(value, ((MSBool) mockValue.get()).getValue());
+        Assertions.assertNull(result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(MSRelDir.Direction.class)
+    void visitAssignStoresCorrectRelDir(MSRelDir.Direction value) {
+        // Mock functions ID(), expression(), and visit()
+        Mockito.when(mockAssignContext.ID()).thenReturn(new MockTerminalNode("varName"));
+        Mockito.when(mockAssignContext.expression()).thenReturn(mockExpressionContext1);
+        Mockito.when(spyVisitor.visit(mockExpressionContext)).thenReturn(new MSRelDir(value.toString().toLowerCase()));
+
+        // Call the visitAssign method on the spy
+        MSType result = spyVisitor.visitAssign(mockAssignContext);
+
+        // Initialize mock value and assert that no exceptions are thrown when value is retrieved
+        AtomicReference<MSType> mockValue = new AtomicReference<>();
+        Assertions.assertDoesNotThrow(() -> mockValue.set(symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol("varName"))));
+
+        // Assert that the symbol value is equal to the initial assign value, and assert that result is null
+        Assertions.assertEquals(value, ((MSRelDir) mockValue.get()).getValue());
+        Assertions.assertNull(result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(MSAbsDir.Direction.class)
+    void visitAssignStoresCorrectAbsDir(MSAbsDir.Direction value) {
+        // Mock functions ID(), expression(), and visit()
+        Mockito.when(mockAssignContext.ID()).thenReturn(new MockTerminalNode("varName"));
+        Mockito.when(mockAssignContext.expression()).thenReturn(mockExpressionContext1);
+        Mockito.when(spyVisitor.visit(mockExpressionContext)).thenReturn(new MSAbsDir(value.toString().toLowerCase()));
+
+        // Call the visitAssign method on the spy
+        MSType result = spyVisitor.visitAssign(mockAssignContext);
+
+        // Initialize mock value and assert that no exceptions are thrown when value is retrieved
+        AtomicReference<MSType> mockValue = new AtomicReference<>();
+        Assertions.assertDoesNotThrow(() -> mockValue.set(symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol("varName"))));
+
+        // Assert that the symbol value is equal to the initial assign value, and assert that result is null
+        Assertions.assertEquals(value, ((MSAbsDir) mockValue.get()).getValue());
         Assertions.assertNull(result);
     }
 
