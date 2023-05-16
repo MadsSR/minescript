@@ -2,6 +2,9 @@ package minescript.block.custom;
 
 import minescript.block.entity.ModBlockEntities;
 import minescript.block.entity.TurtleBlockEntity;
+import minescript.network.MineScriptPackets;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
@@ -9,6 +12,7 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.enums.WallMountLocation;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.EnumProperty;
@@ -24,7 +28,7 @@ import org.jetbrains.annotations.Nullable;
 public class TurtleBlock extends BlockWithEntity implements BlockEntityProvider {
 
     public static final EnumProperty<WallMountLocation> FACE = Properties.WALL_MOUNT_LOCATION;
-    
+
     public TurtleBlock(Settings settings) {
         super(settings);
 
@@ -49,7 +53,7 @@ public class TurtleBlock extends BlockWithEntity implements BlockEntityProvider 
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos,
                               PlayerEntity player, Hand hand, BlockHitResult hit) {
-        if (!world.isClient && world.getBlockEntity(pos) instanceof TurtleBlockEntity entity) {
+        if (!world.isClient && world.getBlockEntity(pos) instanceof TurtleBlockEntity) {
             NamedScreenHandlerFactory screenHandlerFactory = state.createScreenHandlerFactory(world, pos);
 
             if (screenHandlerFactory != null)
@@ -57,6 +61,21 @@ public class TurtleBlock extends BlockWithEntity implements BlockEntityProvider 
         }
 
         return ActionResult.SUCCESS;
+    }
+
+    @Override
+    public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
+        if (!state.isOf(newState.getBlock()) && !moved) {
+            BlockEntity blockEntity = world.getBlockEntity(pos);
+
+            if (blockEntity instanceof TurtleBlockEntity entity) {
+                PacketByteBuf buf = PacketByteBufs.create();
+                buf.writeBlockPos(entity.getPos());
+
+                ClientPlayNetworking.send(MineScriptPackets.STOP_INTERPRETER_ID, buf);
+            }
+            super.onStateReplaced(state, world, pos, newState, moved);
+        }
     }
 
     @Nullable
