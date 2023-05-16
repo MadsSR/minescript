@@ -43,7 +43,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         this.symbolTable = symbolTable;
         this.placingBlock = Blocks.AIR;
         this.shouldBreak = true;
-        this.turtleDelay = 500;
+        this.turtleDelay = 200;
         this.server = server;
         this.world = world;
         this.pos = pos;
@@ -472,7 +472,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                     throw new RuntimeException("Cannot set speed to " + n.getValue() + ", must be between 1 and 10");
                 }
 
-                this.turtleDelay = 550 - n.getValue() * 50;
+                this.turtleDelay = 200 - n.getValue() * 20;
             }
             case "GetXPosition" -> {
                 if (actualParams.size() != 0) {

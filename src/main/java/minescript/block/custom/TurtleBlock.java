@@ -65,7 +65,7 @@ public class TurtleBlock extends BlockWithEntity implements BlockEntityProvider 
 
     @Override
     public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-        if (!state.isOf(newState.getBlock()) && !moved) {
+        if (!moved && !state.isOf(newState.getBlock())) {
             BlockEntity blockEntity = world.getBlockEntity(pos);
 
             if (blockEntity instanceof TurtleBlockEntity entity) {
@@ -74,8 +74,8 @@ public class TurtleBlock extends BlockWithEntity implements BlockEntityProvider 
 
                 ClientPlayNetworking.send(MineScriptPackets.STOP_INTERPRETER_ID, buf);
             }
-            super.onStateReplaced(state, world, pos, newState, moved);
         }
+        super.onStateReplaced(state, world, pos, newState, moved);
     }
 
     @Nullable
