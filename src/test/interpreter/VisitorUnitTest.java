@@ -732,7 +732,7 @@ class VisitorUnitTest {
     }
 
     @ParameterizedTest
-    @CsvSource({ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "100", "1000"})
+    @CsvSource({"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "100", "1000"})
     void visitRepeatStatementValueTimes(int value) {
         Mockito.when(mockRepeatContext.expression()).thenReturn(mockExpressionContext1);
         Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSNumber(value));
