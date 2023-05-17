@@ -375,7 +375,11 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
 
                 for (int i = 0; i < n.getValue(); i++) {
                     future = future.thenComposeAsync(prevPos -> {
-                        if (!shouldBreak && TurtleCommands.peek(world, prevPos) != Blocks.AIR) {
+                        if(skip.get()) {
+                            return CompletableFuture.completedFuture(prevPos);
+                        }
+
+                        if (!skip.get() && !shouldBreak && TurtleCommands.peek(world, prevPos) != Blocks.AIR) {
                             TurtleCommands.print(server, "Cannot move forward, block in the way", MSMessageType.WARNING);
                             skip.set(true);
 
