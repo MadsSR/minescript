@@ -317,7 +317,7 @@ class VisitorUnitTest {
             "rel,left,right,is", "rel,up,down,is not", "rel,left,left,is not", "rel,right,right,is",
             "abs,north,south,is", "abs,east,west,is not", "abs,top,bottom,is not", "abs,north,north,is",
             "bool,false,false,is", "bool,false,true,is not", "bool,true,false,is not", "bool,true,true,is"})
-    void visitIsIsNotDirectionReturnsCorrectBool(String type, String left, String right, String operator) {
+    void visitIsIsNotCorrectTypesReturnsCorrectBool(String type, String left, String right, String operator) {
         mockIsIsNotContext.op = new MockToken(operator);
         Mockito.when(mockIsIsNotContext.expression(0)).thenReturn(mockExpressionContext1);
         Mockito.when(mockIsIsNotContext.expression(1)).thenReturn(mockExpressionContext2);
