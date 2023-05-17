@@ -60,23 +60,13 @@ class VisitorUnitTest {
         Assertions.assertTrue(((MSBool) result).getValue());
     }
 
-    @Test
-    void visitNotExprPassZeroReturnsTrue() {
-        Mockito.when(mockNotExprContext.expression()).thenReturn(mockExpressionContext);
-        Mockito.when(spyVisitor.visit(mockExpressionContext)).thenReturn(new MSNumber(0));
-
-        MSType result = spyVisitor.visitNotExpr(mockNotExprContext);
-        Assertions.assertTrue(((MSBool) result).getValue());
-    }
-
     @ParameterizedTest
-    @ValueSource(ints = {-1000, -100, 100, 1000})
-    void visitNotExprPassNonZeroNumberReturnsFalse(int value) {
+    @ValueSource(ints = {-1000, -100, 0, 100, 1000})
+    void visitNotExprPassNumberThrowsRuntimeException(int value) {
         Mockito.when(mockNotExprContext.expression()).thenReturn(mockExpressionContext);
         Mockito.when(spyVisitor.visit(mockExpressionContext)).thenReturn(new MSNumber(value));
 
-        MSType result = spyVisitor.visitNotExpr(mockNotExprContext);
-        Assertions.assertFalse(((MSBool) result).getValue());
+        Assertions.assertThrows(RuntimeException.class, () -> spyVisitor.visitNotExpr(mockNotExprContext));
     }
 
     @Test
