@@ -22,7 +22,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class Visitor extends MineScriptBaseVisitor<MSType> {
-    private final ExpressionParser parser = new ExpressionParser();
     private final Random random = new Random(System.currentTimeMillis());
     private final SymbolTable symbolTable;
     private boolean hasReturned = false;
@@ -136,9 +135,12 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         MSType value = null;
 
         /*Also checks for the returned state in case a return has been called inside the loop body*/
-        while (parser.getBoolean(visit(ctx.expression())).getValue() && !hasReturned) {
+        while (visit(ctx.expression()) instanceof MSBool c && c.getValue() && !hasReturned) {
             value = visit(ctx.statements());
         }
+
+        if (!(visit(ctx.expression()) instanceof MSBool))
+            throw new RuntimeException("While condition must be a boolean");
 
         return value;
     }
@@ -147,7 +149,12 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
     public MSType visitIf(MineScriptParser.IfContext ctx) {
         /*Handle if and else if*/
         for (var expression : ctx.expression()) {
-            if (parser.getBoolean(visit(expression)).getValue()) {
+            MSType condition = visit(expression);
+
+            if (!(condition instanceof MSBool))
+                throw new RuntimeException("If condition must be a boolean");
+
+            if (((MSBool) condition).getValue()) {
                 return visit(ctx.statements(ctx.expression().indexOf(expression)));
             }
         }
@@ -186,7 +193,13 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
 
     @Override
     public MSType visitNotExpr(MineScriptParser.NotExprContext ctx) {
-        return parser.getNegatedBoolean(visit(ctx.expression()));
+        MSType value = visit(ctx.expression());
+
+        if (!(value instanceof MSBool))
+            throw new RuntimeException("Cannot negate non-boolean value");
+
+        boolean bool = ((MSBool) value).getValue();
+        return new MSBool(!bool);
     }
 
     @Override
@@ -257,6 +270,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         MSType left = visit(ctx.expression(0));
         MSType right = visit(ctx.expression(1));
 
+        /*Check that both sides are numbers otherwise throw an error*/
         if (!(left instanceof MSNumber l) || !(right instanceof MSNumber r)) {
             throw new RuntimeException("Cannot use '" + ctx.op.getText() + "' operator on " + left.getTypeName() + " and " + right.getTypeName());
         }
@@ -312,32 +326,46 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         }
 
         return calculateArithmeticExpression(l, r, "^");
-
     }
 
     @Override
     public MSType visitAnd(MineScriptParser.AndContext ctx) {
         /*Handles and with short-circuit, that's why the left side is handled first*/
         MSType left = visit(ctx.expression(0));
-        /*If the left part is false, it returns without the need to evaluate the right side*/
-        if (!parser.getBoolean(left).getValue()) {
-            return new MSBool(false);
-        }
-        MSType right = visit(ctx.expression(1));
-        return new MSBool(parser.getBoolean(right).getValue());
 
+        if (left instanceof MSBool l) {/*If the left part is false, it returns without the need to evaluate the right side*/
+            if (!l.getValue()) {
+                return l;
+            }
+
+            MSType right = visit(ctx.expression(1));
+            if (!(right instanceof MSBool r)) {
+                throw new RuntimeException("Cannot use 'and' operator on " + left.getTypeName() + " and " + right.getTypeName());
+            }
+            return r;
+        } else {
+            throw new RuntimeException("Cannot use 'and' operator on " + left.getTypeName() + " and " + visit(ctx.expression(1)).getTypeName());
+        }
     }
 
     @Override
     public MSType visitOr(MineScriptParser.OrContext ctx) {
         /*Handles or with short-circuit, much like in the visitAnd method*/
         MSType left = visit(ctx.expression(0));
-        if (parser.getBoolean(left).getValue()) {
-            return new MSBool(true);
-        }
-        MSType right = visit(ctx.expression(1));
 
-        return new MSBool(parser.getBoolean(right).getValue());
+        if (left instanceof MSBool l) {
+            if (l.getValue()) {
+                return l;
+            }
+
+            MSType right = visit(ctx.expression(1));
+            if (!(right instanceof MSBool r)) {
+                throw new RuntimeException("Cannot use 'or' operator on " + left.getTypeName() + " and " + right.getTypeName());
+            }
+            return r;
+        } else {
+            throw new RuntimeException("Cannot use 'or' operator on " + left.getTypeName() + " and " + visit(ctx.expression(1)).getTypeName());
+        }
     }
 
     @Override
@@ -702,7 +730,6 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
             throw new RuntimeException("Result of '" + leftBig + " " + operator + " " + rightBig + "' is too small. Minimum number is " + Integer.MIN_VALUE);
         }
         return new MSNumber(result.intValue());
-
     }
 
     /**
