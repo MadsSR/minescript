@@ -190,7 +190,6 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         return new MSBool(Boolean.parseBoolean(ctx.getText()));
     }
 
-
     @Override
     public MSType visitNotExpr(MineScriptParser.NotExprContext ctx) {
         MSType value = visit(ctx.expression());

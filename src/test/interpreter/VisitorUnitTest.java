@@ -39,6 +39,7 @@ class VisitorUnitTest {
     @Mock private MineScriptParser.AddSubContext mockAddSubContext;
     @Mock private MineScriptParser.OrContext mockOrContext;
     @Mock private MineScriptParser.MultDivModContext mockMultDivModContext;
+    @Mock private MineScriptParser.IsIsNotContext mockIsIsNotContext;
 
     @ParameterizedTest
     @ValueSource(ints = {-1000, -10, 0, 10, 1000})
@@ -310,7 +311,71 @@ class VisitorUnitTest {
         MSType result = spyVisitor.visitOr(mockOrContext);
         Assertions.assertEquals(value1 || value2, ((MSBool) result).getValue());
     }
-  
+
+    @ParameterizedTest
+    @CsvSource({"0,0,is", "0,1,is not", "1,0,is not", "1,1,is"})
+    void visitIsIsNotNumberReturnsCorrectBool(int left, int right, String operator) {
+        mockIsIsNotContext.op = new MockToken(operator);
+        Mockito.when(mockIsIsNotContext.expression(0)).thenReturn(mockExpressionContext1);
+        Mockito.when(mockIsIsNotContext.expression(1)).thenReturn(mockExpressionContext2);
+        Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSNumber(left));
+        Mockito.when(spyVisitor.visit(mockExpressionContext2)).thenReturn(new MSNumber(right));
+
+        MSType result = spyVisitor.visitIsIsNot(mockIsIsNotContext);
+        switch (operator) {
+            case "is" -> Assertions.assertEquals(left == right, ((MSBool) result).getValue());
+            case "is not" -> Assertions.assertEquals(left != right, ((MSBool) result).getValue());
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource({"false,false,is", "false,true,is not", "true,false,is not", "true,true,is"})
+    void visitIsIsNotBoolReturnsCorrectBool(boolean left, boolean right, String operator) {
+        mockIsIsNotContext.op = new MockToken(operator);
+        Mockito.when(mockIsIsNotContext.expression(0)).thenReturn(mockExpressionContext1);
+        Mockito.when(mockIsIsNotContext.expression(1)).thenReturn(mockExpressionContext2);
+        Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSBool(left));
+        Mockito.when(spyVisitor.visit(mockExpressionContext2)).thenReturn(new MSBool(right));
+
+        MSType result = spyVisitor.visitIsIsNot(mockIsIsNotContext);
+        switch (operator) {
+            case "is" -> Assertions.assertEquals(left == right, ((MSBool) result).getValue());
+            case "is not" -> Assertions.assertEquals(left != right, ((MSBool) result).getValue());
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource({"north,south,is", "east,west,is not", "top,bottom,is not", "north,north,is"})
+    void visitIsIsNotAbsDirReturnsCorrectBool(String left, String right, String operator) {
+        mockIsIsNotContext.op = new MockToken(operator);
+        Mockito.when(mockIsIsNotContext.expression(0)).thenReturn(mockExpressionContext1);
+        Mockito.when(mockIsIsNotContext.expression(1)).thenReturn(mockExpressionContext2);
+        Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSAbsDir(left));
+        Mockito.when(spyVisitor.visit(mockExpressionContext2)).thenReturn(new MSAbsDir(right));
+
+        MSType result = spyVisitor.visitIsIsNot(mockIsIsNotContext);
+        switch (operator) {
+            case "is" -> Assertions.assertEquals(left.equals(right), ((MSBool) result).getValue());
+            case "is not" -> Assertions.assertEquals(!left.equals(right), ((MSBool) result).getValue());
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource({"left,right,is", "up,down,is not", "left,left,is not", "right,right,is"})
+    void visitIsIsNotRelDirReturnCorrectBool(String left, String right, String operator) {
+        mockIsIsNotContext.op = new MockToken(operator);
+        Mockito.when(mockIsIsNotContext.expression(0)).thenReturn(mockExpressionContext1);
+        Mockito.when(mockIsIsNotContext.expression(1)).thenReturn(mockExpressionContext2);
+        Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSRelDir(left));
+        Mockito.when(spyVisitor.visit(mockExpressionContext2)).thenReturn(new MSRelDir(right));
+
+        MSType result = spyVisitor.visitIsIsNot(mockIsIsNotContext);
+        switch (operator) {
+            case "is" -> Assertions.assertEquals(left.equals(right), ((MSBool) result).getValue());
+            case "is not" -> Assertions.assertEquals(!left.equals(right), ((MSBool) result).getValue());
+        }
+    }
+
     @ParameterizedTest
     @CsvSource ({"2,2,*", "2,2,/", "2,2,%"})
     void visitMultDivModValidInputReturnsNumber(int left, int right, String operator) {
