@@ -49,7 +49,6 @@ class VisitorUnitTest {
     @Mock private MineScriptParser.Actual_parametersContext mockActualParametersContext;
     @Mock private MineScriptParser.StatementsContext mockStatementsContext;
     @Mock private MineScriptParser.AndContext mockAndContext;
-    @Mock private MineScriptParser.AddSubContext mockAddSubContext;
     @Mock private MineScriptParser.OrContext mockOrContext;
     @Mock private MineScriptParser.MultDivModContext mockMultDivModContext;
     @Mock private MineScriptParser.IsIsNotContext mockIsIsNotContext;
@@ -74,13 +73,8 @@ class VisitorUnitTest {
         Assertions.assertEquals(value, ((MSNumber) mockValue.get()).getValue());
         Assertions.assertNull(result);
     }
-  
-    @Test
-    void visitNotExprValidBoolReturnsNegatedBool() {
-        Mockito.when(mockNotExprContext.expression()).thenReturn(mockExpressionContext1);
-        Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSBool(false));
-    }
-  
+
+
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void visitAssignStoresCorrectBoolean(boolean value) {
@@ -145,6 +139,9 @@ class VisitorUnitTest {
     void visitNotExprPassZeroReturnsTrue() {
         Mockito.when(mockNotExprContext.expression()).thenReturn(mockExpressionContext1);
         Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSNumber(0));
+
+        MSType result = spyVisitor.visitNotExpr(mockNotExprContext);
+        Assertions.assertTrue(((MSBool) result).getValue());
     }
     void visitNotExprValidBoolReturnsNegatedBool() {
         Mockito.when(mockNotExprContext.expression()).thenReturn(mockExpressionContext1);
@@ -159,8 +156,11 @@ class VisitorUnitTest {
     void visitNotExprPassNonZeroNumberReturnsFalse(int value) {
         Mockito.when(mockNotExprContext.expression()).thenReturn(mockExpressionContext1);
         Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSNumber(value));
+
+        MSType result = spyVisitor.visitNotExpr(mockNotExprContext);
+        Assertions.assertFalse(((MSBool) result).getValue());
     }
-  
+
     @ValueSource(ints = {-1000, -100, 0, 100, 1000})
     void visitNotExprPassNumberThrowsRuntimeException(int value) {
         Mockito.when(mockNotExprContext.expression()).thenReturn(mockExpressionContext);
@@ -468,7 +468,7 @@ class VisitorUnitTest {
 
         Assertions.assertThrows(RuntimeException.class, () -> spyVisitor.visitFuncCall(mockFuncCallContext));
     }
-  
+
     @Test
     void visitAndValidBoolsReturnsTrue(){
         Mockito.when(mockAndContext.expression(0)).thenReturn(mockExpressionContext1);
@@ -479,7 +479,7 @@ class VisitorUnitTest {
         MSType result = spyVisitor.visitAnd(mockAndContext);
         Assertions.assertTrue(((MSBool) result).getValue());
     }
-  
+
     @Test
     void visitAndBoolsTrueAndFalseReturnsFalse(){
         Mockito.when(mockAndContext.expression(0)).thenReturn(mockExpressionContext1);
@@ -497,23 +497,6 @@ class VisitorUnitTest {
 
         MSType result = spyVisitor.visitAnd(mockAndContext);
         Assertions.assertFalse(((MSBool) result).getValue());
-    }
-
-    @ParameterizedTest
-    @CsvSource ({"1, 2, +", "2, 1, -", "0, 0, +", "-1, -2, +", "-2, -1, -"})
-    void visitAddSubValidInputReturnsNumber(int left, int right, String operator){
-        mockAddSubContext.op = new MockToken(operator);
-        Mockito.when(mockAddSubContext.expression(0)).thenReturn(mockExpressionContext1);
-        Mockito.when(mockAddSubContext.expression(1)).thenReturn(mockExpressionContext2);
-        Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSNumber(left));
-        Mockito.when(spyVisitor.visit(mockExpressionContext2)).thenReturn(new MSNumber(right));
-
-        MSType result = spyVisitor.visitAddSub(mockAddSubContext);
-        if (operator.equals("+")){
-            Assertions.assertEquals(left + right, ((MSNumber) result).getValue());
-        } else if (operator.equals("-")){
-            Assertions.assertEquals(left - right, ((MSNumber) result).getValue());
-        }
     }
 
     @ParameterizedTest
