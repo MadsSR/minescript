@@ -41,7 +41,9 @@ class VisitorUnitTest {
     @Mock private MineScriptParser.ParenExprContext mockParenExprContext;
     @Mock private MineScriptParser.CompContext mockCompContext;
     @Mock private MineScriptParser.FuncCallContext mockFuncCallContext;
+    @Mock private MineScriptParser.FuncDeclContext mockFuncDeclContext;
     @Mock private MineScriptParser.Actual_parametersContext mockActualParametersContext;
+    @Mock private MineScriptParser.Formal_paramatersContext mockFormalParametersContext;
     @Mock private MineScriptParser.StatementsContext mockStatementsContext;
     @Mock private MineScriptParser.AndContext mockAndContext;
     @Mock private MineScriptParser.OrContext mockOrContext;
@@ -432,6 +434,52 @@ class VisitorUnitTest {
     }
 
     @Test
+    void visitFuncDeclNoParamsStoresCorrectFunction() {
+        Mockito.when(mockFuncDeclContext.ID()).thenReturn(new MockTerminalNode("testFunction"));
+        Mockito.when(mockFuncDeclContext.formal_paramaters()).thenReturn(mockFormalParametersContext);
+
+        spyVisitor.visitFuncDecl(mockFuncDeclContext);
+
+        AtomicReference<MSType> mockValue = new AtomicReference<>();
+        Assertions.assertDoesNotThrow(() -> mockValue.set(symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol("testFunction"))));
+        Assertions.assertTrue(mockValue.get() instanceof MSFunction);
+        Assertions.assertEquals("testFunction", ((MSFunction) mockValue.get()).getName());
+    }
+
+    @Test
+    void visitFuncDeclOneParamStoresCorrectFunction() {
+        Mockito.when(mockFuncDeclContext.ID()).thenReturn(new MockTerminalNode("testFunction"));
+        Mockito.when(mockFuncDeclContext.formal_paramaters()).thenReturn(mockFormalParametersContext);
+        Mockito.when(mockFormalParametersContext.ID()).thenReturn(new ArrayList<>() {{add(new MockTerminalNode("Param1"));}});
+
+        spyVisitor.visitFuncDecl(mockFuncDeclContext);
+
+        AtomicReference<MSType> mockValue = new AtomicReference<>();
+        Assertions.assertDoesNotThrow(() -> mockValue.set(symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol("testFunction"))));
+        Assertions.assertTrue(mockValue.get() instanceof MSFunction);
+        Assertions.assertEquals("testFunction", ((MSFunction) mockValue.get()).getName());
+        Assertions.assertEquals(1, ((MSFunction) mockValue.get()).getParameters().size());
+        Assertions.assertEquals("Param1", ((MSFunction) mockValue.get()).getParameters().get(0));
+    }
+
+    @Test
+    void visitFuncDeclTwoParamsStoresCorrectFunction() {
+        Mockito.when(mockFuncDeclContext.ID()).thenReturn(new MockTerminalNode("testFunction"));
+        Mockito.when(mockFuncDeclContext.formal_paramaters()).thenReturn(mockFormalParametersContext);
+        Mockito.when(mockFormalParametersContext.ID()).thenReturn(new ArrayList<>() {{add(new MockTerminalNode("Param1")); add(new MockTerminalNode("Param2"));}});
+
+        spyVisitor.visitFuncDecl(mockFuncDeclContext);
+
+        AtomicReference<MSType> mockValue = new AtomicReference<>();
+        Assertions.assertDoesNotThrow(() -> mockValue.set(symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol("testFunction"))));
+        Assertions.assertTrue(mockValue.get() instanceof MSFunction);
+        Assertions.assertEquals("testFunction", ((MSFunction) mockValue.get()).getName());
+        Assertions.assertEquals(2, ((MSFunction) mockValue.get()).getParameters().size());
+        Assertions.assertEquals("Param1", ((MSFunction) mockValue.get()).getParameters().get(0));
+        Assertions.assertEquals("Param2", ((MSFunction) mockValue.get()).getParameters().get(1));
+    }
+
+    @Test
     void visitFuncCallInvalidFunction(){
         Mockito.when(mockFuncCallContext.ID()).thenReturn(new MockTerminalNode("testFunctionFake"));
         Mockito.when(mockFuncCallContext.actual_parameters()).thenReturn(mockActualParametersContext);
@@ -487,9 +535,9 @@ class VisitorUnitTest {
 
     @ParameterizedTest
     @CsvSource({"num,0,0,is", "num,0,1,is not", "num,1,0,is not", "num,1,1,is", "num,-1,1,is not",
-            "rel,left,right,is", "rel,up,down,is not", "rel,left,left,is not", "rel,right,right,is",
-            "abs,north,south,is", "abs,east,west,is not", "abs,top,bottom,is not", "abs,north,north,is",
-            "bool,false,false,is", "bool,false,true,is not", "bool,true,false,is not", "bool,true,true,is"})
+                "rel,left,right,is", "rel,up,down,is not", "rel,left,left,is not", "rel,right,right,is",
+                "abs,north,south,is", "abs,east,west,is not", "abs,top,bottom,is not", "abs,north,north,is",
+                "bool,false,false,is", "bool,false,true,is not", "bool,true,false,is not", "bool,true,true,is"})
     void visitIsIsNotCorrectTypesReturnsCorrectBool(String type, String left, String right, String operator) {
         mockIsIsNotContext.op = new MockToken(operator);
         Mockito.when(mockIsIsNotContext.expression(0)).thenReturn(mockExpressionContext1);
@@ -563,10 +611,10 @@ class VisitorUnitTest {
     }
 
     @ParameterizedTest
-    @CsvSource ({"num,-10", "num,0", "num,10",
-            "rel,left", "rel,right", "rel,up", "rel,down",
-            "abs,north", "abs,south", "abs,east", "abs,west", "abs,top", "abs,bottom",
-            "bool,true", "bool,false"})
+    @CsvSource ({"bool,true", "bool,false",
+                "num,-10", "num,0", "num,10",
+                "rel,left", "rel,right", "rel,up", "rel,down",
+                "abs,north", "abs,south", "abs,east", "abs,west", "abs,top", "abs,bottom"})
     void visitReturnCorrectTypesReturnValue(String type, String value) {
         Field hasReturnedField;
         boolean hasReturned;
