@@ -661,16 +661,6 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         return null;
     }
 
-    @Override
-    public MSType visitActual_parameters(MineScriptParser.Actual_parametersContext ctx) {
-        return null;
-    }
-
-    @Override
-    public MSType visitFormal_paramaters(MineScriptParser.Formal_paramatersContext ctx) {
-        return null;
-    }
-
     /**
      * @param ctx Formal parameters context
      * @return List of formal parameters
