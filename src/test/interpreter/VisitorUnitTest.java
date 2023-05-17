@@ -37,6 +37,7 @@ class VisitorUnitTest {
     @Mock private MineScriptParser.NotExprContext mockNotExprContext;
     @Mock private MineScriptParser.AndContext mockAndContext;
     @Mock private MineScriptParser.AddSubContext mockAddSubContext;
+    @Mock private MineScriptParser.OrContext mockOrContext;
     @Mock private MineScriptParser.MultDivModContext mockMultDivModContext;
 
     @ParameterizedTest
@@ -247,6 +248,7 @@ class VisitorUnitTest {
         Mockito.when(mockNumberContext.NUMBER()).thenReturn(new MockTerminalNode("abc"));
         Assertions.assertThrows(RuntimeException.class, () -> spyVisitor.visitNumber(mockNumberContext));
     }
+  
     @Test
     void visitAndValidBoolsReturnsTrue(){
         Mockito.when(mockAndContext.expression(0)).thenReturn(mockExpressionContext1);
@@ -257,8 +259,9 @@ class VisitorUnitTest {
         MSType result = spyVisitor.visitAnd(mockAndContext);
         Assertions.assertTrue(((MSBool) result).getValue());
     }
-   @Test
-   void visitAndBoolsTrueAndFalseReturnsFalse(){
+  
+    @Test
+    void visitAndBoolsTrueAndFalseReturnsFalse(){
         Mockito.when(mockAndContext.expression(0)).thenReturn(mockExpressionContext1);
         Mockito.when(mockAndContext.expression(1)).thenReturn(mockExpressionContext2);
         Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSBool(true));
@@ -266,15 +269,15 @@ class VisitorUnitTest {
 
         MSType result = spyVisitor.visitAnd(mockAndContext);
         Assertions.assertFalse(((MSBool) result).getValue());
-   }
-   @Test
+    }
+    @Test
     void visitAndFalseWithShortCircuitReturnsFalse() {
-       Mockito.when(mockAndContext.expression(0)).thenReturn(mockExpressionContext1);
-       Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSBool(false));
+        Mockito.when(mockAndContext.expression(0)).thenReturn(mockExpressionContext1);
+        Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSBool(false));
 
-       MSType result = spyVisitor.visitAnd(mockAndContext);
-       Assertions.assertFalse(((MSBool) result).getValue());
-   }
+        MSType result = spyVisitor.visitAnd(mockAndContext);
+        Assertions.assertFalse(((MSBool) result).getValue());
+    }
 
     @ParameterizedTest
     @CsvSource ({"1, 2, +", "2, 1, -", "0, 0, +", "-1, -2, +", "-2, -1, -"})
@@ -291,6 +294,21 @@ class VisitorUnitTest {
         } else if (operator.equals("-")){
             Assertions.assertEquals(value1 - value2, ((MSNumber) result).getValue());
         }
+    }
+
+    @ParameterizedTest
+    @CsvSource({"false, false", "false, true", "true, false", "true, true"})
+    void visitOrValidInputReturnsOrValue(boolean value1, boolean value2) {
+        Mockito.when(mockOrContext.expression(0)).thenReturn(mockExpressionContext1);
+        Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSBool(value1));
+
+        if (!value1) {
+            Mockito.when(mockOrContext.expression(1)).thenReturn(mockExpressionContext2);
+            Mockito.when(spyVisitor.visit(mockExpressionContext2)).thenReturn(new MSBool(value2));
+        }
+
+        MSType result = spyVisitor.visitOr(mockOrContext);
+        Assertions.assertEquals(value1 || value2, ((MSBool) result).getValue());
     }
   
     @ParameterizedTest
