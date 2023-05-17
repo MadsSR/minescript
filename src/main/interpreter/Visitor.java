@@ -451,7 +451,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                 }
 
                 if (actualParams.size() != 1 || !(actualParams.get(0) instanceof MSBool b)) {
-                    throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{1}, "bool", actualParams));
+                    throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{0, 1}, "bool", actualParams));
                 }
 
                 shouldBreak = b.getValue();
@@ -706,8 +706,18 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
             case "+" -> leftBig.add(rightBig);
             case "-" -> leftBig.subtract(rightBig);
             case "*" -> leftBig.multiply(rightBig);
-            case "/" -> leftBig.divide(rightBig);
-            case "%" -> leftBig.mod(rightBig);
+            case "/" -> {
+                if (rightBig.equals(BigInteger.ZERO)) {
+                    throw new RuntimeException("Cannot divide by 0");
+                }
+                yield leftBig.divide(rightBig);
+            }
+            case "%" -> {
+                if (rightBig.compareTo(BigInteger.ZERO) <= 0) {
+                    throw new RuntimeException("Modulus must be positive");
+                }
+                yield leftBig.mod(rightBig);
+            }
             case "^" -> leftBig.pow(rightBig.intValue());
             default -> throw new RuntimeException("Unknown operator: " + operator);
         };
