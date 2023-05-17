@@ -4,8 +4,6 @@ import interpreter.antlr.MineScriptParser;
 import interpreter.types.*;
 import interpreter.utils.MockTerminalNode;
 import interpreter.utils.MockToken;
-import org.antlr.v4.runtime.Token;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +16,6 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,6 +37,8 @@ class VisitorUnitTest {
     @Mock private MineScriptParser.NotExprContext mockNotExprContext;
     @Mock private MineScriptParser.AndContext mockAndContext;
     @Mock private MineScriptParser.AddSubContext mockAddSubContext;
+    @Mock private MineScriptParser.MultDivModContext mockMultDivModContext;
+
     @ParameterizedTest
     @ValueSource(ints = {-1000, -10, 0, 10, 1000})
     void visitAssignStoresCorrectNumber(int value) {
@@ -292,5 +291,46 @@ class VisitorUnitTest {
         } else if (operator.equals("-")){
             Assertions.assertEquals(value1 - value2, ((MSNumber) result).getValue());
         }
+    }
+  
+    @ParameterizedTest
+    @CsvSource ({"2,2,*", "2,2,/", "2,2,%"})
+    void visitMultDivModValidInputReturnsNumber(int left, int right, String operator) {
+        mockMultDivModContext.op = new MockToken(operator);
+        Mockito.when(mockMultDivModContext.expression(0)).thenReturn(mockExpressionContext1);
+        Mockito.when(mockMultDivModContext.expression(1)).thenReturn(mockExpressionContext2);
+        Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSNumber(left));
+        Mockito.when(spyVisitor.visit(mockExpressionContext2)).thenReturn(new MSNumber(right));
+
+        MSType result = spyVisitor.visitMultDivMod(mockMultDivModContext);
+        switch (operator) {
+            case "*" -> Assertions.assertEquals(left * right, ((MSNumber) result).getValue());
+            case "/" -> Assertions.assertEquals(left / right, ((MSNumber) result).getValue());
+            case "%" -> Assertions.assertEquals(left % right, ((MSNumber) result).getValue());
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource ({"2,0,/", "2,0,%"})
+    void visitMultDivModDivByZeroThrowsRuntimeException(int left, int right, String operator) {
+        mockMultDivModContext.op = new MockToken(operator);
+        Mockito.when(mockMultDivModContext.expression(0)).thenReturn(mockExpressionContext1);
+        Mockito.when(mockMultDivModContext.expression(1)).thenReturn(mockExpressionContext2);
+        Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSNumber(left));
+        Mockito.when(spyVisitor.visit(mockExpressionContext2)).thenReturn(new MSNumber(right));
+
+        Assertions.assertThrows(RuntimeException.class, () -> spyVisitor.visitMultDivMod(mockMultDivModContext));
+    }
+
+    @ParameterizedTest
+    @CsvSource ({"2,true,/", "2,true,%", "2,false,/", "2,false,%", "true,2,/", "true,2,%", "false,2,/", "false,2,%"})
+    void visitMultDivModInvalidInputThrowsRuntimeException(String left, String right, String operator) {
+        mockMultDivModContext.op = new MockToken(operator);
+        Mockito.when(mockMultDivModContext.expression(0)).thenReturn(mockExpressionContext1);
+        Mockito.when(mockMultDivModContext.expression(1)).thenReturn(mockExpressionContext2);
+        Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSBool(Boolean.parseBoolean(left)));
+        Mockito.when(spyVisitor.visit(mockExpressionContext2)).thenReturn(new MSBool(Boolean.parseBoolean(right)));
+
+        Assertions.assertThrows(RuntimeException.class, () -> spyVisitor.visitMultDivMod(mockMultDivModContext));
     }
 }
