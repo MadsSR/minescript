@@ -38,6 +38,7 @@ class VisitorUnitTest {
     @Mock private MineScriptParser.AndContext mockAndContext;
     @Mock private MineScriptParser.AddSubContext mockAddSubContext;
     @Mock private MineScriptParser.OrContext mockOrContext;
+    @Mock private MineScriptParser.MultDivModContext mockMultDivModContext;
 
     @ParameterizedTest
     @ValueSource(ints = {-1000, -10, 0, 10, 1000})
@@ -247,6 +248,7 @@ class VisitorUnitTest {
         Mockito.when(mockNumberContext.NUMBER()).thenReturn(new MockTerminalNode("abc"));
         Assertions.assertThrows(RuntimeException.class, () -> spyVisitor.visitNumber(mockNumberContext));
     }
+  
     @Test
     void visitAndValidBoolsReturnsTrue(){
         Mockito.when(mockAndContext.expression(0)).thenReturn(mockExpressionContext1);
@@ -257,8 +259,9 @@ class VisitorUnitTest {
         MSType result = spyVisitor.visitAnd(mockAndContext);
         Assertions.assertTrue(((MSBool) result).getValue());
     }
-   @Test
-   void visitAndBoolsTrueAndFalseReturnsFalse(){
+  
+    @Test
+    void visitAndBoolsTrueAndFalseReturnsFalse(){
         Mockito.when(mockAndContext.expression(0)).thenReturn(mockExpressionContext1);
         Mockito.when(mockAndContext.expression(1)).thenReturn(mockExpressionContext2);
         Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSBool(true));
@@ -266,15 +269,15 @@ class VisitorUnitTest {
 
         MSType result = spyVisitor.visitAnd(mockAndContext);
         Assertions.assertFalse(((MSBool) result).getValue());
-   }
-   @Test
+    }
+    @Test
     void visitAndFalseWithShortCircuitReturnsFalse() {
-       Mockito.when(mockAndContext.expression(0)).thenReturn(mockExpressionContext1);
-       Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSBool(false));
+        Mockito.when(mockAndContext.expression(0)).thenReturn(mockExpressionContext1);
+        Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSBool(false));
 
-       MSType result = spyVisitor.visitAnd(mockAndContext);
-       Assertions.assertFalse(((MSBool) result).getValue());
-   }
+        MSType result = spyVisitor.visitAnd(mockAndContext);
+        Assertions.assertFalse(((MSBool) result).getValue());
+    }
 
     @ParameterizedTest
     @CsvSource ({"1, 2, +", "2, 1, -", "0, 0, +", "-1, -2, +", "-2, -1, -"})
@@ -306,5 +309,46 @@ class VisitorUnitTest {
 
         MSType result = spyVisitor.visitOr(mockOrContext);
         Assertions.assertEquals(value1 || value2, ((MSBool) result).getValue());
+    }
+  
+    @ParameterizedTest
+    @CsvSource ({"2,2,*", "2,2,/", "2,2,%"})
+    void visitMultDivModValidInputReturnsNumber(int left, int right, String operator) {
+        mockMultDivModContext.op = new MockToken(operator);
+        Mockito.when(mockMultDivModContext.expression(0)).thenReturn(mockExpressionContext1);
+        Mockito.when(mockMultDivModContext.expression(1)).thenReturn(mockExpressionContext2);
+        Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSNumber(left));
+        Mockito.when(spyVisitor.visit(mockExpressionContext2)).thenReturn(new MSNumber(right));
+
+        MSType result = spyVisitor.visitMultDivMod(mockMultDivModContext);
+        switch (operator) {
+            case "*" -> Assertions.assertEquals(left * right, ((MSNumber) result).getValue());
+            case "/" -> Assertions.assertEquals(left / right, ((MSNumber) result).getValue());
+            case "%" -> Assertions.assertEquals(left % right, ((MSNumber) result).getValue());
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource ({"2,0,/", "2,0,%"})
+    void visitMultDivModDivByZeroThrowsRuntimeException(int left, int right, String operator) {
+        mockMultDivModContext.op = new MockToken(operator);
+        Mockito.when(mockMultDivModContext.expression(0)).thenReturn(mockExpressionContext1);
+        Mockito.when(mockMultDivModContext.expression(1)).thenReturn(mockExpressionContext2);
+        Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSNumber(left));
+        Mockito.when(spyVisitor.visit(mockExpressionContext2)).thenReturn(new MSNumber(right));
+
+        Assertions.assertThrows(RuntimeException.class, () -> spyVisitor.visitMultDivMod(mockMultDivModContext));
+    }
+
+    @ParameterizedTest
+    @CsvSource ({"2,true,/", "2,true,%", "2,false,/", "2,false,%", "true,2,/", "true,2,%", "false,2,/", "false,2,%"})
+    void visitMultDivModInvalidInputThrowsRuntimeException(String left, String right, String operator) {
+        mockMultDivModContext.op = new MockToken(operator);
+        Mockito.when(mockMultDivModContext.expression(0)).thenReturn(mockExpressionContext1);
+        Mockito.when(mockMultDivModContext.expression(1)).thenReturn(mockExpressionContext2);
+        Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSBool(Boolean.parseBoolean(left)));
+        Mockito.when(spyVisitor.visit(mockExpressionContext2)).thenReturn(new MSBool(Boolean.parseBoolean(right)));
+
+        Assertions.assertThrows(RuntimeException.class, () -> spyVisitor.visitMultDivMod(mockMultDivModContext));
     }
 }
