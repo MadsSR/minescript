@@ -16,6 +16,7 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicReference;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,6 +41,7 @@ class VisitorUnitTest {
     @Mock private MineScriptParser.OrContext mockOrContext;
     @Mock private MineScriptParser.MultDivModContext mockMultDivModContext;
     @Mock private MineScriptParser.IsIsNotContext mockIsIsNotContext;
+    @Mock private MineScriptParser.ReturnContext mockReturnContext;
 
     @ParameterizedTest
     @ValueSource(ints = {-1000, -10, 0, 10, 1000})
@@ -387,5 +389,56 @@ class VisitorUnitTest {
         Mockito.when(spyVisitor.visit(mockExpressionContext2)).thenReturn(new MSBool(Boolean.parseBoolean(right)));
 
         Assertions.assertThrows(RuntimeException.class, () -> spyVisitor.visitMultDivMod(mockMultDivModContext));
+    }
+
+    @ParameterizedTest
+    @CsvSource ({"num,-10", "num,0", "num,10",
+            "rel,left", "rel,right", "rel,up", "rel,down",
+            "abs,north", "abs,south", "abs,east", "abs,west", "abs,top", "abs,bottom",
+            "bool,true", "bool,false"})
+    void visitReturnCorrectTypesReturnValue(String type, String value) {
+        Field hasReturnedField = null;
+        boolean hasReturned = false;
+
+        // Setup mocks for the context and visit method
+        Mockito.when(mockReturnContext.expression()).thenReturn(mockExpressionContext1);
+        switch (type) {
+            case "num" -> Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSNumber(Integer.parseInt(value)));
+            case "rel" -> Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSRelDir(value));
+            case "abs" -> Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSAbsDir(value));
+            case "bool" -> Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSBool(Boolean.parseBoolean(value)));
+        }
+
+        // Get the initial value of the hasReturned field of the visitor
+        try {
+            hasReturnedField = spyVisitor.getClass().getDeclaredField("hasReturned");
+            hasReturnedField.setAccessible(true);
+            hasReturned = hasReturnedField.getBoolean(spyVisitor);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        // Check that the hasReturned field is false before the visit method is called
+        Assertions.assertFalse(hasReturned);
+
+        // Call the visit method and check that the correct type and value is returned
+        MSType result = spyVisitor.visitReturn(mockReturnContext);
+        switch (type) {
+            case "num" -> Assertions.assertEquals(Integer.parseInt(value), ((MSNumber) result).getValue());
+            case "rel" -> Assertions.assertEquals(MSRelDir.Direction.valueOf(value.toUpperCase()), ((MSRelDir) result).getValue());
+            case "abs" -> Assertions.assertEquals(MSAbsDir.Direction.valueOf(value.toUpperCase()), ((MSAbsDir) result).getValue());
+            case "bool" -> Assertions.assertEquals(Boolean.parseBoolean(value), ((MSBool) result).getValue());
+        }
+
+        // Check that the hasReturned field is true after the visit method is called
+        try { hasReturned = hasReturnedField.getBoolean(spyVisitor); }
+        catch (Exception e) { throw new RuntimeException(e); }
+        Assertions.assertTrue(hasReturned);
+    }
+
+    @Test
+    void visitReturnNullExpressionThrowsRuntimeException() {
+        Mockito.when(mockReturnContext.expression()).thenReturn(null);
+        Assertions.assertThrows(RuntimeException.class, () -> spyVisitor.visitReturn(mockReturnContext));
     }
 }
