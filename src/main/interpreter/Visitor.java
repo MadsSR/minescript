@@ -583,6 +583,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                     } else {
                         TurtleCommands.print(server, expressionId + " is: " + text, messageType);
                     }
+                    timeout(1);
                 });
             }
             default -> {
