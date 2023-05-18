@@ -28,8 +28,8 @@ public class Interpreter implements Runnable {
 
     @Override
     public void run() {
+        System.out.println("Thread started");
         try {
-            System.out.println("Thread started");
             // Create a CharStream that reads from standard input
             CharStream input = CharStreams.fromString(program + System.lineSeparator());
             // Create a lexer that feeds off of input CharStream
@@ -50,5 +50,6 @@ public class Interpreter implements Runnable {
         } catch (Exception e) {
             TurtleCommands.print(server, e.getMessage(), MSMessageType.ERROR);
         }
+        System.out.println("Thread finished");
     }
 }

@@ -35,12 +35,13 @@ public class SymbolTable {
         Symbol newSymbol = new Symbol(name, value);
         checkRestrictedKeyWords(newSymbol);
 
-        /*If the variable is already in the current scope, update it*/
-        if (isVarInNewScope(name)) {
-            Symbol oldSymbol = hashMap.get(getPrefixName(name));
+        /*If a prefixed version of the variable already exists, update it*/
+        String shadowedSymbolName = getShadowedSymbolName(name);
+        if (shadowedSymbolName != null) {
+            Symbol oldSymbol = hashMap.get(shadowedSymbolName);
             delete(oldSymbol.name);
-            Symbol prefixSymbol = new Symbol(oldSymbol.name, value);
-            add(prefixSymbol);
+            Symbol newShadowedSymbol = new Symbol(oldSymbol.name, value);
+            add(newShadowedSymbol);
             return;
         }
 
@@ -77,8 +78,9 @@ public class SymbolTable {
      * @return symbol from the hash table
      */
     public Symbol retrieveSymbol(String name) {
-        if (isVarInNewScope(name)) {
-            return hashMap.get(getPrefixName(name));
+        String shadowedSymbolName = getShadowedSymbolName(name);
+        if (shadowedSymbolName != null) {
+            return hashMap.get(shadowedSymbolName);
         } else if (hashMap.containsKey(name)) {
             return hashMap.get(name);
         } else {
@@ -109,19 +111,22 @@ public class SymbolTable {
     }
 
     /**
-     * @param name name of the variable
-     * @return true if the variable is in the current scope
-     */
-    private boolean isVarInNewScope(String name) {
-        return scopeStack.peek().stream().anyMatch(s -> s.endsWith("." + name));
-    }
-
-    /**
      * @param name id of the variable
-     * @return prefix of the variable
+     * @return name of the symbol if a prefixed version of it exists in any of the scopes, otherwise null
      */
-    private String getPrefixName(String name) {
-        return scopeStack.peek().stream().filter(s -> s.contains("." + name)).findFirst().orElseThrow();
+    private String getShadowedSymbolName(String name) {
+        if (scopeStack.empty()) return null;
+
+        ArrayList<String> currentScope = scopeStack.peek();
+        if (currentScope.stream().anyMatch(s -> s.endsWith("." + name))) {
+            return currentScope.stream().filter(s -> s.endsWith("." + name)).findFirst().orElseThrow();
+        }
+        else {
+            scopeStack.pop();
+            String res = getShadowedSymbolName(name);
+            scopeStack.push(currentScope);
+            return res;
+        }
     }
 
     private record Symbol(String name, MSType value) {
