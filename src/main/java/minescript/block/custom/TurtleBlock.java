@@ -69,10 +69,9 @@ public class TurtleBlock extends BlockWithEntity implements BlockEntityProvider 
             BlockEntity blockEntity = world.getBlockEntity(pos);
 
             if (blockEntity instanceof TurtleBlockEntity entity) {
-                PacketByteBuf buf = PacketByteBufs.create();
-                buf.writeBlockPos(entity.getPos());
-
-                ClientPlayNetworking.send(MineScriptPackets.STOP_INTERPRETER_ID, buf);
+                if (entity.interpreterThread != null && entity.interpreterThread.isAlive()) {
+                    entity.interpreterThread.interrupt();
+                }
             }
         }
         super.onStateReplaced(state, world, pos, newState, moved);

@@ -3,6 +3,7 @@ package interpreter;
 import interpreter.antlr.MineScriptBaseVisitor;
 import interpreter.antlr.MineScriptParser;
 import interpreter.exceptions.SymbolNotFoundException;
+import interpreter.exceptions.ThreadInterruptedException;
 import interpreter.types.*;
 import minescript.network.TurtleCommands;
 import net.minecraft.block.Block;
@@ -764,7 +765,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         try {
             Thread.sleep(millis);
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            throw new ThreadInterruptedException("Thread was interrupted while waiting");
         }
     }
 }

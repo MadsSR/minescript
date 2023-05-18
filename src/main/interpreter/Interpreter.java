@@ -2,6 +2,7 @@ package interpreter;
 
 import interpreter.antlr.MineScriptLexer;
 import interpreter.antlr.MineScriptParser;
+import interpreter.exceptions.ThreadInterruptedException;
 import interpreter.types.MSMessageType;
 import minescript.network.TurtleCommands;
 import net.minecraft.server.MinecraftServer;
@@ -28,6 +29,7 @@ public class Interpreter implements Runnable {
     @Override
     public void run() {
         try {
+            System.out.println("Thread started");
             // Create a CharStream that reads from standard input
             CharStream input = CharStreams.fromString(program + System.lineSeparator());
             // Create a lexer that feeds off of input CharStream
@@ -43,6 +45,8 @@ public class Interpreter implements Runnable {
             ParseTree tree = parser.program(); // Begin parsing at init rule
             Visitor visitor = new Visitor(server, world, turtlePos, new SymbolTable());
             visitor.visit(tree);
+        } catch (ThreadInterruptedException e) {
+            System.out.println(e.getMessage());
         } catch (Exception e) {
             TurtleCommands.print(server, e.getMessage(), MSMessageType.ERROR);
         }
