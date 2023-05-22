@@ -3,6 +3,7 @@ package interpreter;
 import interpreter.antlr.MineScriptBaseVisitor;
 import interpreter.antlr.MineScriptParser;
 import interpreter.exceptions.SymbolNotFoundException;
+import interpreter.exceptions.ThreadInterruptedException;
 import interpreter.types.*;
 import minescript.network.TurtleCommands;
 import net.minecraft.block.Block;
@@ -446,7 +447,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                     throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{1}, "number", actualParams));
                 }
 
-                retVal = new MSNumber((int) Math.round(Math.sqrt(n.getValue())));
+                retVal = new MSNumber((int) Math.floor(Math.sqrt(n.getValue())));
             }
             case "Random" -> {
                 /*If no parameter is used returns a random unbounded int*/
@@ -477,21 +478,21 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
 
                 this.turtleDelay = 200 - n.getValue() * 20;
             }
-            case "GetXPosition" -> {
+            case "GetXCoordinate" -> {
                 if (actualParams.size() != 0) {
                     throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{0}, "", actualParams));
                 }
 
                 retVal = new MSNumber(pos.getX());
             }
-            case "GetYPosition" -> {
+            case "GetYCoordinate" -> {
                 if (actualParams.size() != 0) {
                     throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{0}, "", actualParams));
                 }
 
                 retVal = new MSNumber(pos.getY());
             }
-            case "GetZPosition" -> {
+            case "GetZCoordinate" -> {
                 if (actualParams.size() != 0) {
                     throw new RuntimeException(getFuncCallErrorMessage(id, new int[]{0}, "", actualParams));
                 }
@@ -583,6 +584,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
                     } else {
                         TurtleCommands.print(server, expressionId + " is: " + text, messageType);
                     }
+                    timeout(1);
                 });
             }
             default -> {
@@ -763,7 +765,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
         try {
             Thread.sleep(millis);
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            throw new ThreadInterruptedException("Thread was interrupted while waiting");
         }
     }
 }

@@ -23,7 +23,7 @@ public class TextEditorScreenHandler extends ScreenHandler {
 
     public TextEditorScreenHandler(int syncId, PlayerInventory inventory, PacketByteBuf buf) {
         this(syncId, inventory, (TurtleBlockEntity) null);
-        inputText = buf.readString();
+        inputText = buf.readString(buf.readInt());
     }
 
     public TextEditorScreenHandler(int syncId, PlayerInventory inventory, @Nullable TurtleBlockEntity entity) {

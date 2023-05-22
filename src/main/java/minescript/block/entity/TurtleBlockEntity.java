@@ -33,19 +33,37 @@ public class TurtleBlockEntity extends SyncedBlockEntity implements ExtendedScre
 
     @Override
     public void writeNbt(NbtCompound nbt) {
-        nbt.putString("input", this.input.getString());
+        String text = input.getString();
+        int length = text.length();
+
+        int splits = (int) Math.ceil((double) length / 50000);
+        for (int i = 0; i < splits; i++) {
+            if (i == splits - 1)
+                nbt.putString("input" + i, text.substring(i * 50000));
+            else
+                nbt.putString("input" + i, text.substring(i * 50000, (i + 1) * 50000));
+        }
+
         super.writeNbt(nbt);
     }
 
     @Override
     public void readNbt(NbtCompound nbt) {
+        StringBuilder text = new StringBuilder();
+        int split = 0;
+        while (nbt.contains("input" + split)) {
+            text.append(nbt.getString("input" + split));
+            split++;
+        }
+        this.input = Text.of(text.toString());
         super.readNbt(nbt);
-        this.input = Text.of(nbt.getString("input"));
     }
 
     @Override
     public void writeScreenOpeningData(ServerPlayerEntity player, PacketByteBuf buf) {
-        buf.writeString(this.input.getString());
+        String text = this.input.getString();
+        buf.writeInt(text.length());
+        buf.writeString(text, text.length());
     }
 
     @Override
