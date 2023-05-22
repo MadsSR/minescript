@@ -1,6 +1,6 @@
 package interpreter.antlr;
 
-// Generated from MineScript.g4 by ANTLR 4.12.0
+// Generated from MineScript.g4 by ANTLR 4.13.0
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast", "CheckReturnValue"})
 public class MineScriptParser extends Parser {
-	static { RuntimeMetaData.checkVersion("4.12.0", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.13.0", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
@@ -39,7 +39,7 @@ public class MineScriptParser extends Parser {
 		return new String[] {
 			null, "'do'", "'='", "'if'", "'('", "')'", "'else'", "'endif'", "'while'", 
 			"'endwhile'", "'repeat'", "'endrepeat'", "'define'", "'enddefine'", "'return'", 
-			"'-'", "'not'", "'^'", "'*'", "'/'", "'%'", "'+'", "'<'", "'>'", "'<='", 
+			"'not'", "'^'", "'-'", "'*'", "'/'", "'%'", "'+'", "'<'", "'>'", "'<='", 
 			"'>='", "'is'", "'is not'", "'and'", "'or'", "','"
 		};
 	}
@@ -133,7 +133,7 @@ public class MineScriptParser extends Parser {
 			setState(15);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 545460966680L) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 545461032216L) != 0)) {
 				{
 				{
 				setState(12);
@@ -193,7 +193,7 @@ public class MineScriptParser extends Parser {
 			setState(25);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 545460966680L) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 545461032216L) != 0)) {
 				{
 				{
 				setState(22);
@@ -808,7 +808,7 @@ public class MineScriptParser extends Parser {
 				setState(98);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 270583037968L) != 0)) {
+				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 270583103504L) != 0)) {
 					{
 					setState(97);
 					actual_parameters();
@@ -821,13 +821,15 @@ public class MineScriptParser extends Parser {
 				break;
 			case 2:
 				{
-				_localctx = new NegContext(_localctx);
+				_localctx = new ParenExprContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
 				setState(101);
-				match(T__14);
+				match(T__3);
 				setState(102);
-				expression(16);
+				expression(0);
+				setState(103);
+				match(T__4);
 				}
 				break;
 			case 3:
@@ -835,23 +837,21 @@ public class MineScriptParser extends Parser {
 				_localctx = new NotExprContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
-				setState(103);
-				match(T__15);
-				setState(104);
+				setState(105);
+				match(T__14);
+				setState(106);
 				expression(15);
 				}
 				break;
 			case 4:
 				{
-				_localctx = new ParenExprContext(_localctx);
+				_localctx = new NegContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
-				setState(105);
-				match(T__3);
-				setState(106);
-				expression(0);
 				setState(107);
-				match(T__4);
+				match(T__16);
+				setState(108);
+				expression(13);
 				}
 				break;
 			case 5:
@@ -926,11 +926,11 @@ public class MineScriptParser extends Parser {
 						_localctx = new PowContext(new ExpressionContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(117);
-						if (!(precpred(_ctx, 13))) throw new FailedPredicateException(this, "precpred(_ctx, 13)");
+						if (!(precpred(_ctx, 14))) throw new FailedPredicateException(this, "precpred(_ctx, 14)");
 						setState(118);
-						match(T__16);
+						match(T__15);
 						setState(119);
-						expression(13);
+						expression(14);
 						}
 						break;
 					case 2:
@@ -963,7 +963,7 @@ public class MineScriptParser extends Parser {
 						setState(124);
 						((AddSubContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
-						if ( !(_la==T__14 || _la==T__20) ) {
+						if ( !(_la==T__16 || _la==T__20) ) {
 							((AddSubContext)_localctx).op = (Token)_errHandler.recoverInline(this);
 						}
 						else {
@@ -1183,7 +1183,7 @@ public class MineScriptParser extends Parser {
 	private boolean expression_sempred(ExpressionContext _localctx, int predIndex) {
 		switch (predIndex) {
 		case 0:
-			return precpred(_ctx, 13);
+			return precpred(_ctx, 14);
 		case 1:
 			return precpred(_ctx, 12);
 		case 2:
@@ -1228,7 +1228,7 @@ public class MineScriptParser extends Parser {
 		"\u0001\u0004\u0005\u0004\u0093\b\u0004\n\u0004\f\u0004\u0096\t\u0004\u0001"+
 		"\u0005\u0001\u0005\u0001\u0005\u0005\u0005\u009b\b\u0005\n\u0005\f\u0005"+
 		"\u009e\t\u0005\u0001\u0005\u0000\u0001\u0006\u0006\u0000\u0002\u0004\u0006"+
-		"\b\n\u0000\u0004\u0001\u0000\u0012\u0014\u0002\u0000\u000f\u000f\u0015"+
+		"\b\n\u0000\u0004\u0001\u0000\u0012\u0014\u0002\u0000\u0011\u0011\u0015"+
 		"\u0015\u0001\u0000\u0016\u0019\u0001\u0000\u001a\u001b\u00b8\u0000\u000f"+
 		"\u0001\u0000\u0000\u0000\u0002\u0014\u0001\u0000\u0000\u0000\u0004\\\u0001"+
 		"\u0000\u0000\u0000\u0006s\u0001\u0000\u0000\u0000\b\u008f\u0001\u0000"+
@@ -1271,39 +1271,40 @@ public class MineScriptParser extends Parser {
 		"\u0001\u0000\u0000\u0000]\u0005\u0001\u0000\u0000\u0000^_\u0006\u0003"+
 		"\uffff\uffff\u0000_`\u0005%\u0000\u0000`b\u0005\u0004\u0000\u0000ac\u0003"+
 		"\n\u0005\u0000ba\u0001\u0000\u0000\u0000bc\u0001\u0000\u0000\u0000cd\u0001"+
-		"\u0000\u0000\u0000dt\u0005\u0005\u0000\u0000ef\u0005\u000f\u0000\u0000"+
-		"ft\u0003\u0006\u0003\u0010gh\u0005\u0010\u0000\u0000ht\u0003\u0006\u0003"+
-		"\u000fij\u0005\u0004\u0000\u0000jk\u0003\u0006\u0003\u0000kl\u0005\u0005"+
-		"\u0000\u0000lt\u0001\u0000\u0000\u0000mt\u0005%\u0000\u0000nt\u0005#\u0000"+
+		"\u0000\u0000\u0000dt\u0005\u0005\u0000\u0000ef\u0005\u0004\u0000\u0000"+
+		"fg\u0003\u0006\u0003\u0000gh\u0005\u0005\u0000\u0000ht\u0001\u0000\u0000"+
+		"\u0000ij\u0005\u000f\u0000\u0000jt\u0003\u0006\u0003\u000fkl\u0005\u0011"+
+		"\u0000\u0000lt\u0003\u0006\u0003\rmt\u0005%\u0000\u0000nt\u0005#\u0000"+
 		"\u0000ot\u0005 \u0000\u0000pt\u0005!\u0000\u0000qt\u0005$\u0000\u0000"+
 		"rt\u0005\"\u0000\u0000s^\u0001\u0000\u0000\u0000se\u0001\u0000\u0000\u0000"+
-		"sg\u0001\u0000\u0000\u0000si\u0001\u0000\u0000\u0000sm\u0001\u0000\u0000"+
+		"si\u0001\u0000\u0000\u0000sk\u0001\u0000\u0000\u0000sm\u0001\u0000\u0000"+
 		"\u0000sn\u0001\u0000\u0000\u0000so\u0001\u0000\u0000\u0000sp\u0001\u0000"+
 		"\u0000\u0000sq\u0001\u0000\u0000\u0000sr\u0001\u0000\u0000\u0000t\u008c"+
-		"\u0001\u0000\u0000\u0000uv\n\r\u0000\u0000vw\u0005\u0011\u0000\u0000w"+
-		"\u008b\u0003\u0006\u0003\rxy\n\f\u0000\u0000yz\u0007\u0000\u0000\u0000"+
-		"z\u008b\u0003\u0006\u0003\r{|\n\u000b\u0000\u0000|}\u0007\u0001\u0000"+
-		"\u0000}\u008b\u0003\u0006\u0003\f~\u007f\n\n\u0000\u0000\u007f\u0080\u0007"+
-		"\u0002\u0000\u0000\u0080\u008b\u0003\u0006\u0003\u000b\u0081\u0082\n\t"+
-		"\u0000\u0000\u0082\u0083\u0007\u0003\u0000\u0000\u0083\u008b\u0003\u0006"+
-		"\u0003\n\u0084\u0085\n\b\u0000\u0000\u0085\u0086\u0005\u001c\u0000\u0000"+
-		"\u0086\u008b\u0003\u0006\u0003\t\u0087\u0088\n\u0007\u0000\u0000\u0088"+
-		"\u0089\u0005\u001d\u0000\u0000\u0089\u008b\u0003\u0006\u0003\b\u008au"+
-		"\u0001\u0000\u0000\u0000\u008ax\u0001\u0000\u0000\u0000\u008a{\u0001\u0000"+
-		"\u0000\u0000\u008a~\u0001\u0000\u0000\u0000\u008a\u0081\u0001\u0000\u0000"+
-		"\u0000\u008a\u0084\u0001\u0000\u0000\u0000\u008a\u0087\u0001\u0000\u0000"+
-		"\u0000\u008b\u008e\u0001\u0000\u0000\u0000\u008c\u008a\u0001\u0000\u0000"+
-		"\u0000\u008c\u008d\u0001\u0000\u0000\u0000\u008d\u0007\u0001\u0000\u0000"+
-		"\u0000\u008e\u008c\u0001\u0000\u0000\u0000\u008f\u0094\u0005%\u0000\u0000"+
-		"\u0090\u0091\u0005\u001e\u0000\u0000\u0091\u0093\u0005%\u0000\u0000\u0092"+
-		"\u0090\u0001\u0000\u0000\u0000\u0093\u0096\u0001\u0000\u0000\u0000\u0094"+
-		"\u0092\u0001\u0000\u0000\u0000\u0094\u0095\u0001\u0000\u0000\u0000\u0095"+
-		"\t\u0001\u0000\u0000\u0000\u0096\u0094\u0001\u0000\u0000\u0000\u0097\u009c"+
-		"\u0003\u0006\u0003\u0000\u0098\u0099\u0005\u001e\u0000\u0000\u0099\u009b"+
-		"\u0003\u0006\u0003\u0000\u009a\u0098\u0001\u0000\u0000\u0000\u009b\u009e"+
-		"\u0001\u0000\u0000\u0000\u009c\u009a\u0001\u0000\u0000\u0000\u009c\u009d"+
-		"\u0001\u0000\u0000\u0000\u009d\u000b\u0001\u0000\u0000\u0000\u009e\u009c"+
-		"\u0001\u0000\u0000\u0000\f\u000f\u001927P\\bs\u008a\u008c\u0094\u009c";
+		"\u0001\u0000\u0000\u0000uv\n\u000e\u0000\u0000vw\u0005\u0010\u0000\u0000"+
+		"w\u008b\u0003\u0006\u0003\u000exy\n\f\u0000\u0000yz\u0007\u0000\u0000"+
+		"\u0000z\u008b\u0003\u0006\u0003\r{|\n\u000b\u0000\u0000|}\u0007\u0001"+
+		"\u0000\u0000}\u008b\u0003\u0006\u0003\f~\u007f\n\n\u0000\u0000\u007f\u0080"+
+		"\u0007\u0002\u0000\u0000\u0080\u008b\u0003\u0006\u0003\u000b\u0081\u0082"+
+		"\n\t\u0000\u0000\u0082\u0083\u0007\u0003\u0000\u0000\u0083\u008b\u0003"+
+		"\u0006\u0003\n\u0084\u0085\n\b\u0000\u0000\u0085\u0086\u0005\u001c\u0000"+
+		"\u0000\u0086\u008b\u0003\u0006\u0003\t\u0087\u0088\n\u0007\u0000\u0000"+
+		"\u0088\u0089\u0005\u001d\u0000\u0000\u0089\u008b\u0003\u0006\u0003\b\u008a"+
+		"u\u0001\u0000\u0000\u0000\u008ax\u0001\u0000\u0000\u0000\u008a{\u0001"+
+		"\u0000\u0000\u0000\u008a~\u0001\u0000\u0000\u0000\u008a\u0081\u0001\u0000"+
+		"\u0000\u0000\u008a\u0084\u0001\u0000\u0000\u0000\u008a\u0087\u0001\u0000"+
+		"\u0000\u0000\u008b\u008e\u0001\u0000\u0000\u0000\u008c\u008a\u0001\u0000"+
+		"\u0000\u0000\u008c\u008d\u0001\u0000\u0000\u0000\u008d\u0007\u0001\u0000"+
+		"\u0000\u0000\u008e\u008c\u0001\u0000\u0000\u0000\u008f\u0094\u0005%\u0000"+
+		"\u0000\u0090\u0091\u0005\u001e\u0000\u0000\u0091\u0093\u0005%\u0000\u0000"+
+		"\u0092\u0090\u0001\u0000\u0000\u0000\u0093\u0096\u0001\u0000\u0000\u0000"+
+		"\u0094\u0092\u0001\u0000\u0000\u0000\u0094\u0095\u0001\u0000\u0000\u0000"+
+		"\u0095\t\u0001\u0000\u0000\u0000\u0096\u0094\u0001\u0000\u0000\u0000\u0097"+
+		"\u009c\u0003\u0006\u0003\u0000\u0098\u0099\u0005\u001e\u0000\u0000\u0099"+
+		"\u009b\u0003\u0006\u0003\u0000\u009a\u0098\u0001\u0000\u0000\u0000\u009b"+
+		"\u009e\u0001\u0000\u0000\u0000\u009c\u009a\u0001\u0000\u0000\u0000\u009c"+
+		"\u009d\u0001\u0000\u0000\u0000\u009d\u000b\u0001\u0000\u0000\u0000\u009e"+
+		"\u009c\u0001\u0000\u0000\u0000\f\u000f\u001927P\\bs\u008a\u008c\u0094"+
+		"\u009c";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

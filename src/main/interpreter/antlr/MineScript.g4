@@ -36,10 +36,10 @@ statement
 
 expression
     : ID '(' actual_parameters? ')'                                                                                                           #FuncCall
-    | '-' expression                                                                                                                          #Neg
-    | 'not' expression                                                                                                                        #NotExpr
     | '(' expression ')'                                                                                                                      #ParenExpr
+    | 'not' expression                                                                                                                        #NotExpr
     | <assoc=right> expression '^' expression                                                                                                 #Pow
+    | '-' expression                                                                                                                          #Neg
     | expression op=('*' | '/' | '%') expression                                                                                              #MultDivMod
     | expression op=('+' | '-') expression                                                                                                    #AddSub
     | expression op=('<' | '>' | '<=' | '>=') expression                                                                                      #Comp
