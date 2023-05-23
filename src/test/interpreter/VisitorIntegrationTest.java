@@ -208,7 +208,7 @@ class VisitorIntegrationTest {
     @ParameterizedTest
     @ValueSource(ints = {-1, -10, -100})
     void visitRepeatNegTimesThrowsException(int value) {
-        String input =  """
+        String input = """
                 repeat (%d) do
                     x = x + 1
                 endrepeat
@@ -257,7 +257,7 @@ class VisitorIntegrationTest {
     @ParameterizedTest
     @ValueSource(ints = {0, 4, 8, 12})
     void visitAddSub(int value) {
-        Assertions.assertEquals(2*value, ((MSNumber) visitor.visitAddSub((MineScriptParser.AddSubContext) getExprTreeFromString(String.format("%d + %d", value, value)))).getValue());
+        Assertions.assertEquals(2 * value, ((MSNumber) visitor.visitAddSub((MineScriptParser.AddSubContext) getExprTreeFromString(String.format("%d + %d", value, value)))).getValue());
         Assertions.assertEquals(0, ((MSNumber) visitor.visitAddSub((MineScriptParser.AddSubContext) getExprTreeFromString(String.format("%d - %d", value, value)))).getValue());
     }
 
@@ -272,7 +272,7 @@ class VisitorIntegrationTest {
     void visitMultDivMod(int value) {
         Assertions.assertEquals(value * value, ((MSNumber) visitor.visitMultDivMod((MineScriptParser.MultDivModContext) getExprTreeFromString(String.format("%d * %d", value, value)))).getValue());
         Assertions.assertEquals(1, ((MSNumber) visitor.visitMultDivMod((MineScriptParser.MultDivModContext) getExprTreeFromString(String.format("%d / %d", value, value)))).getValue());
-        Assertions.assertEquals(0, ((MSNumber) visitor.visitMultDivMod((MineScriptParser.MultDivModContext) getExprTreeFromString(String.format("%d %% %d", value,value)))).getValue());
+        Assertions.assertEquals(0, ((MSNumber) visitor.visitMultDivMod((MineScriptParser.MultDivModContext) getExprTreeFromString(String.format("%d %% %d", value, value)))).getValue());
     }
 
     @Test
@@ -307,7 +307,7 @@ class VisitorIntegrationTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4, 8, 12})
     void visitNegExpr(int value) {
-        Assertions.assertEquals(-(2*value), ((MSNumber) visitor.visitNeg((MineScriptParser.NegContext) getExprTreeFromString(String.format("-(%d + %d)", value, value)))).getValue());
+        Assertions.assertEquals(-(2 * value), ((MSNumber) visitor.visitNeg((MineScriptParser.NegContext) getExprTreeFromString(String.format("-(%d + %d)", value, value)))).getValue());
         Assertions.assertEquals(-1, ((MSNumber) visitor.visitNeg((MineScriptParser.NegContext) getExprTreeFromString(String.format("-(%d / %d)", value, value)))).getValue());
     }
 
@@ -439,7 +439,7 @@ class VisitorIntegrationTest {
                     a = a + 1
                     return a
                 enddefine
-                
+                                
                 b = test(%d)
                 """.formatted(value1, value2);
 
@@ -453,7 +453,7 @@ class VisitorIntegrationTest {
                 define test() do
                     x = 123
                 enddefine
-                
+                                
                 test()
                 a = x
                 """;
@@ -470,7 +470,7 @@ class VisitorIntegrationTest {
                     x = %d
                     a = x + 1
                 enddefine
-                
+                                
                 test()
                 """.formatted(value);
 
@@ -566,7 +566,7 @@ class VisitorIntegrationTest {
     }
 
     @Test
-    void integrationTestParserDoesNotThrowErrors(){
+    void integrationTestParserDoesNotThrowErrors() {
         String program = """
                 a = 0
                 x = 0
@@ -576,7 +576,7 @@ class VisitorIntegrationTest {
                 a = x
                 """;
 
-        CharStream input = CharStreams.fromString(program + System.lineSeparator());
+        CharStream input = CharStreams.fromString(program + "\n");
         MineScriptLexer lexer = new MineScriptLexer(input);
         lexer.removeErrorListeners();
         lexer.addErrorListener(InterpreterErrorListener.INSTANCE);
@@ -593,7 +593,7 @@ class VisitorIntegrationTest {
     }
 
     @Test
-    void integrationTestVisitorThrowsTreeError(){
+    void integrationTestVisitorThrowsTreeError() {
         String program = """
                 a = 0
                 if (true) do
@@ -602,7 +602,7 @@ class VisitorIntegrationTest {
                 a = x
                 """;
 
-        CharStream input = CharStreams.fromString(program + System.lineSeparator());
+        CharStream input = CharStreams.fromString(program + "\n");
         MineScriptLexer lexer = new MineScriptLexer(input);
         lexer.removeErrorListeners();
         lexer.addErrorListener(InterpreterErrorListener.INSTANCE);
@@ -619,7 +619,7 @@ class VisitorIntegrationTest {
     }
 
     @Test
-    void integrationTestParserThrowsTreeError(){
+    void integrationTestParserThrowsTreeError() {
         String program = """
                 a = 0
                 x = 0
