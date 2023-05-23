@@ -65,9 +65,6 @@ public class TurtleBlockEntity extends SyncedBlockEntity implements ExtendedScre
 
     @Override
     public void writeScreenOpeningData(ServerPlayerEntity player, PacketByteBuf buf) {
-//        String text = this.input.getString();
-//        buf.writeInt(text.length());
-//        buf.writeString(text, text.length());
     }
 
     @Override

@@ -1,6 +1,6 @@
 package interpreter.antlr;
 
-// Generated from MineScript.g4 by ANTLR 4.12.0
+// Generated from MineScript.g4 by ANTLR 4.13.0
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**
