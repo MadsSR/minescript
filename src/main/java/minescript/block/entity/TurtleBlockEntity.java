@@ -31,6 +31,10 @@ public class TurtleBlockEntity extends SyncedBlockEntity implements ExtendedScre
         this.markDirty();
     }
 
+    public String getTurtleInput () {
+        return this.input.getString();
+    }
+
     @Override
     public void writeNbt(NbtCompound nbt) {
         String text = input.getString();
@@ -61,9 +65,9 @@ public class TurtleBlockEntity extends SyncedBlockEntity implements ExtendedScre
 
     @Override
     public void writeScreenOpeningData(ServerPlayerEntity player, PacketByteBuf buf) {
-        String text = this.input.getString();
-        buf.writeInt(text.length());
-        buf.writeString(text, text.length());
+//        String text = this.input.getString();
+//        buf.writeInt(text.length());
+//        buf.writeString(text, text.length());
     }
 
     @Override

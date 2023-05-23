@@ -1,25 +1,23 @@
 package minescript.screen;
 
-import io.netty.buffer.ByteBuf;
-import io.wispforest.owo.client.screens.ScreenInternals;
 import io.wispforest.owo.ui.base.BaseUIModelHandledScreen;
 import io.wispforest.owo.ui.base.BaseUIModelScreen;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.container.FlowLayout;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.gui.widget.EditBoxWidget;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 
 public class TextEditorScreen extends BaseUIModelHandledScreen<FlowLayout, TextEditorScreenHandler> {
+    private EditBoxWidget editor;
+    private boolean isTriggerSent = false;
+    private boolean isTextSet = false;
 
     public TextEditorScreen(TextEditorScreenHandler handler, PlayerInventory inventory, Text title) {
 //        super(handler, inventory, title, FlowLayout.class, BaseUIModelScreen.DataSource.file("../src/main/resources/assets/minescript/owo_ui/editor.xml")); // For development
@@ -29,11 +27,11 @@ public class TextEditorScreen extends BaseUIModelHandledScreen<FlowLayout, TextE
 
     @Override
     protected void build(FlowLayout rootComponent) {
-        var editor = rootComponent.childById(EditBoxWidget.class, "edit-box");
+        editor = rootComponent.childById(EditBoxWidget.class, "edit-box");
 
         if (editor == null) throw new NullPointerException("editor is null");
         editor.active = true;
-        editor.setText(handler.getInputText());
+
 
         editor.mouseDown().subscribe((mouseX, mouseY, button) -> {
             editor.setFocused(true);
@@ -69,6 +67,21 @@ public class TextEditorScreen extends BaseUIModelHandledScreen<FlowLayout, TextE
             handler.sendMessage(new TextEditorScreenHandler.StartInterpreterMessage(text.length(), buf));
             this.close();
         });
+
+    }
+
+    @Override
+    public void render (MatrixStack matrices, int mouseX, int mouseY, float delta) {
+        if (!isTextSet && handler.isClientTextUpdated()) {
+            editor.setText(handler.getInputText());
+            isTextSet = true;
+        }
+
+        if (!isTriggerSent) {
+            handler.sendMessage(new TextEditorScreenHandler.TriggerSendInputMessage());
+            isTriggerSent = true;
+        }
+        super.render(matrices, mouseX, mouseY, delta);
     }
 
     @Override
