@@ -104,7 +104,7 @@ public class Visitor extends MineScriptBaseVisitor<MSType> {
 
             if (hasReturned) {
                 if (!(ctx.getParent() instanceof MineScriptParser.FuncDeclContext)) {
-                    symbolTable.enterScope();
+                    symbolTable.exitScope();
                 }
                 return val;
             }
