@@ -593,7 +593,7 @@ class VisitorIntegrationTest {
     }
 
     @Test
-    void integrationTestVisitorThrowsTreeError(){
+    void integrationTestVisitorError(){
         String program = """
                 a = 0
                 if (true) do
