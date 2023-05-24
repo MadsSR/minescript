@@ -566,7 +566,7 @@ class VisitorIntegrationTest {
     }
 
     @Test
-    void integrationTestParserDoesNotThrowErrors() {
+    void integrationTestParserDoesNotThrowErrors(){
         String program = """
                 a = 0
                 x = 0
@@ -576,7 +576,7 @@ class VisitorIntegrationTest {
                 a = x
                 """;
 
-        CharStream input = CharStreams.fromString(program + "\n");
+        CharStream input = CharStreams.fromString(program + System.lineSeparator());
         MineScriptLexer lexer = new MineScriptLexer(input);
         lexer.removeErrorListeners();
         lexer.addErrorListener(InterpreterErrorListener.INSTANCE);
@@ -590,6 +590,32 @@ class VisitorIntegrationTest {
 
         Assertions.assertEquals(expectedOutput, tree.toStringTree(parser));
         Assertions.assertDoesNotThrow(() -> visitor.visit(tree));
+    }
+
+    @Test
+    void integrationTestVisitorError(){
+        String program = """
+                a = 0
+                if (true) do
+                    x = 123
+                endif
+                a = x
+                """;
+
+        CharStream input = CharStreams.fromString(program + System.lineSeparator());
+        MineScriptLexer lexer = new MineScriptLexer(input);
+        lexer.removeErrorListeners();
+        lexer.addErrorListener(InterpreterErrorListener.INSTANCE);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        MineScriptParser parser = new MineScriptParser(tokens);
+        parser.removeErrorListeners();
+        parser.addErrorListener(InterpreterErrorListener.INSTANCE);
+        ParseTree tree = parser.program();
+
+        String expectedOutput = "(program (statement a = (expression 0) \\n) (statement if ( (expression true) ) (statements do \\n (statement x = (expression 123) \\n)) endif \\n) (statement a = (expression x) \\n\\n) <EOF>)";
+
+        Assertions.assertEquals(expectedOutput, tree.toStringTree(parser));
+        Assertions.assertThrows(RuntimeException.class, () -> visitor.visit(tree));
     }
 
     @Test
@@ -638,8 +664,6 @@ class VisitorIntegrationTest {
         MineScriptParser parser = new MineScriptParser(tokens);
         parser.removeErrorListeners();
         parser.addErrorListener(InterpreterErrorListener.INSTANCE);
-        Assertions.assertThrows(ParseCancellationException.class, () -> parser.program());
-
+        Assertions.assertThrows(ParseCancellationException.class, parser::program);
     }
-
 }

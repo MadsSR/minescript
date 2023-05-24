@@ -4,7 +4,6 @@ import interpreter.antlr.MineScriptParser;
 import interpreter.types.*;
 import interpreter.utils.MockTerminalNode;
 import interpreter.utils.MockToken;
-import org.antlr.v4.runtime.tree.TerminalNode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +27,6 @@ class VisitorUnitTest {
 
     @Spy private final Visitor spyVisitor = visitor;
     @Mock private MineScriptParser.AssignContext mockAssignContext;
-    @Mock private MineScriptParser.ExpressionContext mockExpressionContext;
     @Mock private MineScriptParser.ExpressionContext mockExpressionContext1;
     @Mock private MineScriptParser.ExpressionContext mockExpressionContext2;
     @Mock private MineScriptParser.BoolContext mockBoolContext;
@@ -46,17 +44,14 @@ class VisitorUnitTest {
     @Mock private MineScriptParser.FuncDeclContext mockFuncDeclContext;
     @Mock private MineScriptParser.Actual_parametersContext mockActualParametersContext;
     @Mock private MineScriptParser.Formal_paramatersContext mockFormalParametersContext;
-    @Mock private MineScriptParser.StatementsContext mockStatementsContext;
     @Mock private MineScriptParser.StatementsContext mockStatementsContext1;
     @Mock private MineScriptParser.StatementsContext mockStatementsContext2;
-    @Mock private MineScriptParser.StatementsContext mockStatementsContext3;
     @Mock private MineScriptParser.AndContext mockAndContext;
     @Mock private MineScriptParser.OrContext mockOrContext;
     @Mock private MineScriptParser.MultDivModContext mockMultDivModContext;
     @Mock private MineScriptParser.IsIsNotContext mockIsIsNotContext;
     @Mock private MineScriptParser.ReturnContext mockReturnContext;
     @Mock private MineScriptParser.IfContext mockIfContext;
-    @Mock private MineScriptParser.StatementContext mockStatementContext;
     @Mock private MineScriptParser.WhileContext mockWhileContext;
     @Mock private MineScriptParser.RepeatContext mockRepeatContext;
 
@@ -138,6 +133,29 @@ class VisitorUnitTest {
 
         // Assert that the symbol value is equal to the initial assign value, and assert that result is null
         Assertions.assertEquals(value, ((MSAbsDir) mockValue.get()).getValue());
+        Assertions.assertNull(result);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {-1000, -10, 0, 10, 1000})
+    void visitAssignOverwritesVariable(int value){
+        // Mock functions ID(), expression(), and visit()
+        Mockito.when(mockAssignContext.ID()).thenReturn(new MockTerminalNode("varName"));
+        Mockito.when(mockAssignContext.expression()).thenReturn(mockExpressionContext1);
+        Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSNumber(value));
+
+        symbolTable.enterSymbol("varName", new MSNumber(0));
+        Assertions.assertEquals(0,((MSNumber) symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol("varName"))).getValue());
+
+        // Call the visitAssign method on the spy
+        MSType result = spyVisitor.visitAssign(mockAssignContext);
+
+        // Initialize mock value and assert that no exceptions are thrown when value is retrieved
+        AtomicReference<MSType> mockValue = new AtomicReference<>();
+        Assertions.assertDoesNotThrow(() -> mockValue.set(symbolTable.retrieveSymbolValue(symbolTable.retrieveSymbol("varName"))));
+
+        // Assert that the symbol value is equal to the initial assign value, and assert that result is null
+        Assertions.assertEquals(value, ((MSNumber) mockValue.get()).getValue());
         Assertions.assertNull(result);
     }
 
@@ -383,13 +401,14 @@ class VisitorUnitTest {
         Assertions.assertFalse(((MSBool) result).getValue());
     }
 
-    @Test
-    void visitCompInvalidTypeThrowsException(){
-        mockCompContext.op = new MockToken(">");
+    @ParameterizedTest
+    @CsvSource ({"true, 4, >", "false, 4, >=", "true, 4, <=", "false, 4, <"})
+    void visitCompInvalidTypeThrowsException(boolean value1, int value2, String operator){
+        mockCompContext.op = new MockToken(operator);
         Mockito.when(mockCompContext.expression(0)).thenReturn(mockExpressionContext1);
         Mockito.when(mockCompContext.expression(1)).thenReturn(mockExpressionContext2);
-        Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSBool(true));
-        Mockito.when(spyVisitor.visit(mockExpressionContext2)).thenReturn(new MSNumber(14));
+        Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSBool(value1));
+        Mockito.when(spyVisitor.visit(mockExpressionContext2)).thenReturn(new MSNumber(value2));
 
         Assertions.assertThrows(RuntimeException.class, () -> spyVisitor.visitComp(mockCompContext));
     }
@@ -398,7 +417,7 @@ class VisitorUnitTest {
     void visitFuncCallValidInputNoParamsReturnsNumber(){
         Mockito.when(mockFuncCallContext.actual_parameters()).thenReturn(mockActualParametersContext);
         Mockito.when(mockFuncCallContext.ID()).thenReturn(new MockTerminalNode("testFunction"));
-        symbolTable.enterSymbol("testFunction", new MSFunction("testFunction", new ArrayList<String>(), mockStatementsContext1));
+        symbolTable.enterSymbol("testFunction", new MSFunction("testFunction", new ArrayList<>(), mockStatementsContext1));
 
         Mockito.when(spyVisitor.visit(mockStatementsContext1)).thenReturn(new MSNumber(1));
 
@@ -411,10 +430,14 @@ class VisitorUnitTest {
 
         Mockito.when(mockFuncCallContext.ID()).thenReturn(new MockTerminalNode("testFunction"));
         Mockito.when(mockFuncCallContext.actual_parameters()).thenReturn(mockActualParametersContext);
-        Mockito.when(mockFuncCallContext.actual_parameters().expression()).thenReturn(new ArrayList<MineScriptParser.ExpressionContext>(){{add(mockExpressionContext1);}});
+        Mockito.when(mockFuncCallContext.actual_parameters().expression()).thenReturn(new ArrayList<>() {{
+            add(mockExpressionContext1);
+        }});
         Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSNumber(value));
 
-        symbolTable.enterSymbol("testFunction", new MSFunction("testFunction", new ArrayList<String>(){{add("Param1");}}, mockStatementsContext1));
+        symbolTable.enterSymbol("testFunction", new MSFunction("testFunction", new ArrayList<>() {{
+            add("Param1");
+        }}, mockStatementsContext1));
 
         Mockito.when(spyVisitor.visit(mockStatementsContext1)).thenReturn(new MSNumber(value));
 
@@ -428,11 +451,17 @@ class VisitorUnitTest {
 
         Mockito.when(mockFuncCallContext.ID()).thenReturn(new MockTerminalNode("testFunction"));
         Mockito.when(mockFuncCallContext.actual_parameters()).thenReturn(mockActualParametersContext);
-        Mockito.when(mockFuncCallContext.actual_parameters().expression()).thenReturn(new ArrayList<MineScriptParser.ExpressionContext>(){{add(mockExpressionContext1); add(mockExpressionContext2);}});
+        Mockito.when(mockFuncCallContext.actual_parameters().expression()).thenReturn(new ArrayList<>() {{
+            add(mockExpressionContext1);
+            add(mockExpressionContext2);
+        }});
         Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSNumber(value1));
         Mockito.when(spyVisitor.visit(mockExpressionContext2)).thenReturn(new MSNumber(value2));
 
-        symbolTable.enterSymbol("testFunction", new MSFunction("testFunction", new ArrayList<String>(){{add("Param1"); add("Param2");}}, mockStatementsContext1));
+        symbolTable.enterSymbol("testFunction", new MSFunction("testFunction", new ArrayList<>() {{
+            add("Param1");
+            add("Param2");
+        }}, mockStatementsContext1));
 
         Mockito.when(spyVisitor.visit(mockStatementsContext1)).thenReturn(new MSNumber(value1+value2));
 
@@ -446,11 +475,16 @@ class VisitorUnitTest {
 
         Mockito.when(mockFuncCallContext.ID()).thenReturn(new MockTerminalNode("testFunction"));
         Mockito.when(mockFuncCallContext.actual_parameters()).thenReturn(mockActualParametersContext);
-        Mockito.when(mockFuncCallContext.actual_parameters().expression()).thenReturn(new ArrayList<MineScriptParser.ExpressionContext>(){{add(mockExpressionContext1); add(mockExpressionContext2);}});
+        Mockito.when(mockFuncCallContext.actual_parameters().expression()).thenReturn(new ArrayList<>() {{
+            add(mockExpressionContext1);
+            add(mockExpressionContext2);
+        }});
         Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSNumber(value1));
         Mockito.when(spyVisitor.visit(mockExpressionContext2)).thenReturn(new MSNumber(value2));
 
-        symbolTable.enterSymbol("testFunction", new MSFunction("testFunction", new ArrayList<String>(){{add("Param1");}}, mockStatementsContext1));
+        symbolTable.enterSymbol("testFunction", new MSFunction("testFunction", new ArrayList<>() {{
+            add("Param1");
+        }}, mockStatementsContext1));
 
         Assertions.assertThrows(RuntimeException.class, () -> spyVisitor.visitFuncCall(mockFuncCallContext));
     }
@@ -505,7 +539,9 @@ class VisitorUnitTest {
     void visitFuncCallInvalidFunction(){
         Mockito.when(mockFuncCallContext.ID()).thenReturn(new MockTerminalNode("testFunctionFake"));
         Mockito.when(mockFuncCallContext.actual_parameters()).thenReturn(mockActualParametersContext);
-        symbolTable.enterSymbol("testFunction", new MSFunction("testFunction", new ArrayList<String>(){{add("Param1"); }}, mockStatementsContext1));
+        symbolTable.enterSymbol("testFunction", new MSFunction("testFunction", new ArrayList<>() {{
+            add("Param1");
+        }}, mockStatementsContext1));
 
         Assertions.assertThrows(RuntimeException.class, () -> spyVisitor.visitFuncCall(mockFuncCallContext));
     }
@@ -515,11 +551,13 @@ class VisitorUnitTest {
         Mockito.when(mockFuncCallContext.ID()).thenReturn(new MockTerminalNode("Break"));
         Mockito.when(mockFuncCallContext.actual_parameters()).thenReturn(mockActualParametersContext);
 
-        Mockito.when(mockFuncCallContext.actual_parameters().expression()).thenReturn(new ArrayList<MineScriptParser.ExpressionContext>(){{add(mockExpressionContext1);}});
+        Mockito.when(mockFuncCallContext.actual_parameters().expression()).thenReturn(new ArrayList<>() {{
+            add(mockExpressionContext1);
+        }});
         Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSBool(true));
 
         MSType result = spyVisitor.visitFuncCall(mockFuncCallContext);
-        Assertions.assertEquals(true, ((MSBool) result).getValue());
+        Assertions.assertTrue(((MSBool) result).getValue());
     }
 
     @Test
@@ -553,6 +591,30 @@ class VisitorUnitTest {
     }
 
     @ParameterizedTest
+    @CsvSource({"12, false", "11, true", "124, false", "132, true"})
+    void visitAndNonBooleanLeftInputThrowsError(int left, boolean right) {
+        Mockito.when(mockAndContext.expression(0)).thenReturn(mockExpressionContext1);
+        Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSNumber(left));
+
+        Mockito.when(mockAndContext.expression(1)).thenReturn(mockExpressionContext2);
+        Mockito.when(spyVisitor.visit(mockExpressionContext2)).thenReturn(new MSBool(right));
+
+        Assertions.assertThrows(RuntimeException.class, () -> spyVisitor.visitAnd(mockAndContext));
+    }
+
+    @ParameterizedTest
+    @CsvSource({"true, 12", "true, 11", "true, 124", "true, 132"})
+    void visitAndNonBooleanRightInputThrowsError(boolean left, int right) {
+        Mockito.when(mockAndContext.expression(0)).thenReturn(mockExpressionContext1);
+        Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSBool(left));
+
+        Mockito.when(mockAndContext.expression(1)).thenReturn(mockExpressionContext2);
+        Mockito.when(spyVisitor.visit(mockExpressionContext2)).thenReturn(new MSNumber(right));
+
+        Assertions.assertThrows(RuntimeException.class, () -> spyVisitor.visitAnd(mockAndContext));
+    }
+
+    @ParameterizedTest
     @CsvSource({"false, false", "false, true", "true, false", "true, true"})
     void visitOrValidInputReturnsOrValue(boolean left, boolean right) {
         Mockito.when(mockOrContext.expression(0)).thenReturn(mockExpressionContext1);
@@ -565,6 +627,30 @@ class VisitorUnitTest {
 
         MSType result = spyVisitor.visitOr(mockOrContext);
         Assertions.assertEquals(left || right, ((MSBool) result).getValue());
+    }
+
+    @ParameterizedTest
+    @CsvSource({"12, false", "11, true", "124, false", "132, true"})
+    void visitOrInvalidLeftInputThrowsError(int left, boolean right) {
+        Mockito.when(mockOrContext.expression(0)).thenReturn(mockExpressionContext1);
+        Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSNumber(left));
+
+        Mockito.when(mockOrContext.expression(1)).thenReturn(mockExpressionContext2);
+        Mockito.when(spyVisitor.visit(mockExpressionContext2)).thenReturn(new MSBool(right));
+
+        Assertions.assertThrows(RuntimeException.class, () -> spyVisitor.visitOr(mockOrContext));
+    }
+
+    @ParameterizedTest
+    @CsvSource({"false, 12", "false, 11", "false, 124", "false, 132"})
+    void visitOrInvalidRightInputThrowsError(boolean left, int right) {
+        Mockito.when(mockOrContext.expression(0)).thenReturn(mockExpressionContext1);
+        Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSBool(left));
+
+        Mockito.when(mockOrContext.expression(1)).thenReturn(mockExpressionContext2);
+        Mockito.when(spyVisitor.visit(mockExpressionContext2)).thenReturn(new MSNumber(right));
+
+        Assertions.assertThrows(RuntimeException.class, () -> spyVisitor.visitOr(mockOrContext));
     }
 
     @ParameterizedTest
@@ -600,6 +686,36 @@ class VisitorUnitTest {
         switch (operator) {
             case "is" -> Assertions.assertEquals(left.equals(right), ((MSBool) result).getValue());
             case "is not" -> Assertions.assertEquals(!left.equals(right), ((MSBool) result).getValue());
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource({"num, bool, 10, true, is", "num, bool, 10, false, is not", "rel, abs, left, north, is", "rel, abs, left, south, is not",
+                "abs, bool, north, true, is", "abs, bool, north, false, is not", "bool, num, true, 10, is", "bool, num, true, 10, is not"})
+    void visitIsIsNotDifferentTypesReturnsFalse(String typeLeft, String typeRight, String left, String right, String operator){
+        mockIsIsNotContext.op = new MockToken(operator);
+        Mockito.when(mockIsIsNotContext.expression(0)).thenReturn(mockExpressionContext1);
+        Mockito.when(mockIsIsNotContext.expression(1)).thenReturn(mockExpressionContext2);
+
+        switch (typeLeft) {
+            case "num" -> Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSNumber(Integer.parseInt(left)));
+            case "rel" -> Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSRelDir(left));
+            case "abs" -> Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSAbsDir(left));
+            case "bool" -> Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSBool(Boolean.parseBoolean(left)));
+
+        }
+
+        switch (typeRight) {
+            case "num" -> Mockito.when(spyVisitor.visit(mockExpressionContext2)).thenReturn(new MSNumber(Integer.parseInt(right)));
+            case "rel" -> Mockito.when(spyVisitor.visit(mockExpressionContext2)).thenReturn(new MSRelDir(right));
+            case "abs" -> Mockito.when(spyVisitor.visit(mockExpressionContext2)).thenReturn(new MSAbsDir(right));
+            case "bool" -> Mockito.when(spyVisitor.visit(mockExpressionContext2)).thenReturn(new MSBool(Boolean.parseBoolean(right)));
+        }
+
+        MSType result = spyVisitor.visitIsIsNot(mockIsIsNotContext);
+        switch (operator) {
+            case "is" -> Assertions.assertFalse(((MSBool) result).getValue());
+            case "is not" -> Assertions.assertTrue(((MSBool) result).getValue());
         }
     }
 
@@ -696,8 +812,8 @@ class VisitorUnitTest {
     }
 
     @Test
-    void visitIfStatements() {
-        Mockito.when(mockIfContext.expression()).thenReturn(new ArrayList<MineScriptParser.ExpressionContext>(){{add(mockExpressionContext1);}});
+    void visitIfStatementsInIfCase() {
+        Mockito.when(mockIfContext.expression()).thenReturn(new ArrayList<>(){{add(mockExpressionContext1);}});
         Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSBool(true));
         Mockito.when(mockIfContext.statements(0)).thenReturn(mockStatementsContext1);
         Mockito.when(spyVisitor.visit(mockStatementsContext1)).thenReturn(new MSNumber(1));
@@ -709,10 +825,10 @@ class VisitorUnitTest {
     }
 
     @Test
-    void visitElseStatementsInIfElseCase() {
-        Mockito.when(mockIfContext.expression()).thenReturn(new ArrayList<MineScriptParser.ExpressionContext>(){{add(mockExpressionContext1);}});
+    void visitElseStatementsInElseCase() {
+        Mockito.when(mockIfContext.expression()).thenReturn(new ArrayList<>(){{add(mockExpressionContext1);}});
         Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSBool(false));
-        Mockito.when(mockIfContext.statements()).thenReturn(new ArrayList<MineScriptParser.StatementsContext>(){{add(mockStatementsContext1);add(mockStatementsContext2);}});
+        Mockito.when(mockIfContext.statements()).thenReturn(new ArrayList<>(){{add(mockStatementsContext1);add(mockStatementsContext2);}});
         Mockito.when(mockIfContext.statements(1)).thenReturn(mockStatementsContext2);
         Mockito.when(spyVisitor.visit(mockStatementsContext2)).thenReturn(new MSNumber(2));
 
@@ -723,7 +839,7 @@ class VisitorUnitTest {
 
     @Test
     void visitElseIfStatements() {
-        Mockito.when(mockIfContext.expression()).thenReturn(new ArrayList<MineScriptParser.ExpressionContext>(){{add(mockExpressionContext1);add(mockExpressionContext2);}});
+        Mockito.when(mockIfContext.expression()).thenReturn(new ArrayList<>(){{add(mockExpressionContext1);add(mockExpressionContext2);}});
         Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSBool(false));
         Mockito.when(spyVisitor.visit(mockExpressionContext2)).thenReturn(new MSBool(true));
 
@@ -737,7 +853,7 @@ class VisitorUnitTest {
 
     @Test
     void visitIfNonBooleanCondition() {
-        Mockito.when(mockIfContext.expression()).thenReturn(new ArrayList<MineScriptParser.ExpressionContext>(){{add(mockExpressionContext1);}});
+        Mockito.when(mockIfContext.expression()).thenReturn(new ArrayList<>(){{add(mockExpressionContext1);}});
         Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSNumber(1));
 
         Assertions.assertThrows(RuntimeException.class, () -> spyVisitor.visitIf(mockIfContext));
@@ -780,7 +896,7 @@ class VisitorUnitTest {
         Mockito.when(spyVisitor.visit(mockExpressionContext1)).thenReturn(new MSNumber(value));
         Mockito.when(mockRepeatContext.statements()).thenReturn(mockStatementsContext1);
 
-        OngoingStubbing stubbing = Mockito.when(spyVisitor.visit(mockStatementsContext1));
+        OngoingStubbing<MSType> stubbing = Mockito.when(spyVisitor.visit(mockStatementsContext1));
         for (int i = 1; i <= value; i++) {
             stubbing = stubbing.thenReturn(new MSNumber(i));
         }
