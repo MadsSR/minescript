@@ -664,8 +664,6 @@ class VisitorIntegrationTest {
         MineScriptParser parser = new MineScriptParser(tokens);
         parser.removeErrorListeners();
         parser.addErrorListener(InterpreterErrorListener.INSTANCE);
-        Assertions.assertThrows(ParseCancellationException.class, () -> parser.program());
-
+        Assertions.assertThrows(ParseCancellationException.class, parser::program);
     }
-
 }
